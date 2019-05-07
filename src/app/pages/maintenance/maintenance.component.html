@@ -1,0 +1,40 @@
+<div class="overlay"></div>
+<div class="error-content flexbox">
+    <span class="error-icon"></span>
+    <div class="flex-1">
+        <h3 class="font-strong mb-3 text-primary">MAINTENANCE MODE</h3>
+        <h5 class="font-strong mb-4">We'll be back in a few minutes.</h5>
+        <p class="mb-4">Please wait for a few minutes. Sorry for the inconvenience but we're performing some maintenance at the moment.</p>
+    </div>
+</div>
+
+<style>
+    .overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        background-repeat: no-repeat;
+        background-image: url(./assets/img/icons/tools-2.svg);
+        background-position: 80% 10px;
+    }
+    .error-content {
+        position: relative;
+        max-width: 620px;
+        margin: 200px auto 0;
+    }
+
+    .error-icon {
+        height: 160px;
+        width: 160px;
+        background-image: url(./assets/img/icons/tools.svg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        margin-right: 80px;
+    }
+    body.empty-layout .theme-config, body.empty-layout .to-top{
+        display: none !important;
+    }
+</style>

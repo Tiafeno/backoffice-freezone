@@ -1,0 +1,32 @@
+<ul class="side-menu metismenu scroller">
+  <li routerLinkActive="active">
+    <a routerLinkActive="active" routerLink="/dashboard">
+      <i class="sidebar-item-icon ti-view-grid"></i><span class="nav-label">Dashboards</span>
+    </a>
+  </li>
+  <li routerLinkActive="active">
+    <a href="href=&quot;javascript:;&quot;">
+      <i class="sidebar-item-icon ti-layout-tab-window"></i>
+      <span class="nav-label">Fournisseurs</span>
+      <i class="fa fa-angle-left arrow"></i>
+    </a>
+    <ul class="nav-2-level collapse" routerLinkActive="in">
+      <li><a routerLink="/supplier/lists" routerLinkActive="active">Tous les fournisseurs</a></li>
+      <li><a routerLink="/supplier/articles" routerLinkActive="active">Les articles</a></li>
+      <li><a routerLink="/supplier/new" routerLinkActive="active">Ajouter</a></li>
+    </ul>
+  </li>
+  <li routerLinkActive="active">
+      <a href="href=&quot;javascript:;&quot;">
+          <i class="sidebar-item-icon ti-layers-alt"></i>
+        <span class="nav-label">Produits</span>
+        <i class="fa fa-angle-left arrow"></i>
+      </a>
+      <ul class="nav-2-level collapse" routerLinkActive="in">
+        <li><a routerLink="/product/lists" routerLinkActive="active">Tous les produits</a>
+        </li>
+        <li><a routerLink="/product/new" routerLinkActive="active">Ajouter</a>
+        </li>
+      </ul>
+    </li>
+</ul>

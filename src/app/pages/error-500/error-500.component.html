@@ -1,0 +1,48 @@
+<div class="overlay"></div>
+<div class="error-content flexbox">
+    <span class="error-icon"></span>
+    <div class="flex-1">
+        <h1 class="error-code">500</h1>
+        <h3 class="font-strong">Internal Server Error</h3>
+        <p class="mb-4">There is a problem with server.</p>
+        <div>
+            <a class="text-primary" routerLink="/index">Go Homepage</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        background-repeat: no-repeat;
+        background-image: url(./assets/img/icons/server-error-2.svg);
+        background-position: 80% 10px;
+    }
+    .error-content {
+        position: relative;
+        max-width: 620px;
+        margin: 200px auto 0;
+    }
+
+    .error-icon {
+        height: 160px;
+        width: 160px;
+        background-image: url(./assets/img/icons/server-error.svg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        margin-right: 80px;
+    }
+
+    .error-code {
+        font-size: 120px;
+        color: #5c6bc0;
+    }
+    body.empty-layout .theme-config, body.empty-layout .to-top{
+        display: none !important;
+    }
+</style>
