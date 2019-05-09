@@ -1,0 +1,15 @@
+<form id="filter-form" (ngSubmit)="onSubmit()">
+    <h4 class="font-strong text-center mb-5">Trouver une article</h4>
+    <div class="form-group mb-4">
+        <ng-select name="supplier" (change)="onAdd($event)" placeholder="Selectionner un fournisseur" [(ngModel)]="filterForm.supplier" bindLabel="name" bindValue="id"
+                  [searchFn]="customSearchFn" [hideSelected]="true" [multiple]="false" [items]="Suppliers" required>
+                </ng-select>
+        
+    </div>
+    <div class="form-group mb-4">
+        <ng-select name="category" (change)="onAdd($event)" placeholder="Selectionner une categorie" [(ngModel)]="filterForm.categorie" bindLabel="name" bindValue="id"
+                  [searchFn]="customSearchFn" [hideSelected]="true" [multiple]="false" [items]="Categories" required>
+                </ng-select>
+        
+    </div>
+</form>

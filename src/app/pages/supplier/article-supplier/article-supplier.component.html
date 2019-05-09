@@ -1,3 +1,76 @@
-<p>
-  article-supplier works!
-</p>
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="ibox">
+        <div class="ibox-body">
+          <app-filter-article [word]="findWord" (search)="onSubmit($event)"></app-filter-article>
+        </div>
+
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <app-filter-search-article (findword)="onSearchWord($event)"></app-filter-search-article>
+      <div class="mb-3">
+        <span>
+          <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-article-supplier-modal">Ajouter une article</button>
+        </span>
+      </div>
+      <div class="ibox">
+        <div class="ibox-body" *ngIf="Products">
+          <div class="mb-4">
+            <h3 class="mt-1">{{Products.length}} results found
+              <span *ngIf="findWord"> for: <span class="text-primary">“{{findWord}}”</span></span>
+            </h3>
+          </div>
+          <ul class="list-group list-group-full list-group-divider">
+            <li class="list-group-item py-3" *ngFor="let article of Products">
+              <h5 class="font-strong">
+                <a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
+              </h5>
+              <p class="text-light">{{article.excerpt.rendered}}</p>
+              <div class="text-muted font-13">
+                <span class="badge badge-default">{{article.price}} MGA</span>
+                <span class="mx-2">•</span>
+                <span class="badge badge-success">F{{article.user_id}}</span>
+                <span class="mx-2">•</span>
+                <span>{{article.date}}</span>
+              </div>
+            </li>
+          </ul>
+
+          <ul class="pagination justify-content-center mt-4" *ngIf="Paging">
+            <li class="page-item">
+              <a class="page-link page-link-solid" href="javascript:;" (click)="onPrevious($event)"
+                aria-label="Previous">
+                <span aria-hidden="true"><i class="la la-angle-left"></i></span>
+              </a>
+            </li>
+            <li class="page-item" [ngClass]="{'active': (page + 1) === currentPage}"
+              *ngFor="let page of Paging._totalPages">
+              <a class="page-link" href="javascript:;" (click)="onChangePage(page+1)">{{page + 1}}</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link page-link-solid" href="javascript:;" (click)="onNext($event)" aria-label="Next"><i
+                  class="la la-angle-right"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal fade" id="add-article-supplier-modal">
+        <div class="modal-dialog" role="document">
+          <app-add-article></app-add-article>
+        </div>
+      </div>
+
+      
+      <div class="modal fade" id="edit-article-supplier-modal">
+        <div class="modal-dialog" role="document">
+          <app-edit-article [Article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

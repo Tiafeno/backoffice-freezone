@@ -1,5 +1,6 @@
 import { NgModule, Component } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 import { LayoutComponent } from './/layouts/layout.component';
 import { Dashboard7Component } from './pages/dashboard-7/dashboard-7.component';
@@ -29,6 +30,11 @@ import { QuotationEditComponent } from './pages/quotation/quotation-edit/quotati
 import { ArticleSupplierComponent } from './pages/supplier/article-supplier/article-supplier.component';
 import { ProductListsComponent } from './pages/products/product-lists/product-lists.component';
 import { ProductNewComponent } from './pages/products/product-new/product-new.component';
+import { FilterArticleComponent } from './components/filter-article/filter-article.component';
+import { FilterSearchArticleComponent } from './components/filter-search-article/filter-search-article.component';
+import { AddArticleComponent } from './pages/supplier/add-article/add-article.component';
+import { FzServicesService } from './_services/fz-services.service';
+import { EditArticleComponent } from './pages/supplier/edit-article/edit-article.component';
 
 
 const routes: Routes = [
@@ -153,7 +159,11 @@ const routes: Routes = [
         EditSupplierComponent,
         ArticleSupplierComponent,
         ProductListsComponent,
-        ProductNewComponent
+        ProductNewComponent,
+        FilterArticleComponent,
+        FilterSearchArticleComponent,
+        AddArticleComponent,
+        EditArticleComponent
     ],
     imports: [
         CommonModule,
@@ -161,15 +171,17 @@ const routes: Routes = [
         HttpClientModule,
         BrowserModule,
         ReactiveFormsModule,
+        NgSelectModule,
         RouterModule.forRoot(routes)
     ],
     providers: [
         AuthorizationService,
         ApiWordpressService,
         ApiWoocommerceService,
+        FzServicesService,
         AuthGuard,
         LoginGuard,
-        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true }
         // { provide: LocationStrategy, useClass: HashLocationStrategy}
     ],
     exports: [

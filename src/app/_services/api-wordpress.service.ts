@@ -21,7 +21,7 @@ export class ApiWordpressService {
 
     let routeArticles = '/fz_product/(?P<id>\\d+)';
     this.wpEndPoint.fz_product = this.wpEndPoint.registerRoute(namespace, routeArticles, {
-      params: ['filter']
+      params: ['filter', 'per_page', 'page', 'offset', 'search', 'context', 'head']
     });
 
     let routeUsers = '/users/(?P<id>\\d+)';
@@ -30,7 +30,9 @@ export class ApiWordpressService {
     });
 
     let routeProducts = '/products/(?P<id>\\d+)';
-    this.wpEndPoint.products = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeProducts);
+    this.wpEndPoint.products = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeProducts, {
+      params: ['search']
+    });
 
     let routeOrders = '/orders/(?P<id>\\d+)';
     this.wpEndPoint.orders = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeOrders);
