@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FzServicesService } from '../../../_services/fz-services.service';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import * as _ from 'lodash';
@@ -18,7 +18,7 @@ export class ProductEditComponent implements OnInit {
   private WC: any;
   private ID: number;
   public Form: FormGroup;
-  public Categories: Array<any>;
+  public Categories: Array<any> = [];
   public tinyMCESettings: any = {
     language_url : '/assets/js/langs/fr_FR.js',
     menubar: false,
@@ -39,9 +39,7 @@ export class ProductEditComponent implements OnInit {
   constructor(
     private fzServices: FzServicesService,
     private route: ActivatedRoute,
-    private router: Router,
     private apiWC: ApiWoocommerceService
-
   ) {
     this.WC = this.apiWC.getWoocommerce();
     this.Form = new FormGroup({
@@ -66,7 +64,8 @@ export class ProductEditComponent implements OnInit {
           return false;
         }
         Observable.zip(Categories).subscribe(results => {
-          this.Categories= _.filter(results[0], result => result);
+          this.Categories = _.isEmpty(this.Categories) ? _.filter(results[0], ctg => ctg) : this.Categories; // TODO: Ne pas afficher les categories parents
+          console.log(results);
           let inputCtg: Array<number> = _.map(response.categories, ctg => { return ctg.id });
           this.Form.patchValue({
             name: response.name,

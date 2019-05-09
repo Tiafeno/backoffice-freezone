@@ -57,7 +57,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
       return of(postCache);
     }
     const response = this.http.get<any>(URL);
-    response.subscribe(posts => this.postResponseCache.set(URL, type));
+    response.subscribe(posts => this.postResponseCache.set(URL, posts));
 
     return response
   }
@@ -69,7 +69,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
       return of(postCache);
     }
     const response = this.http.get<any>(URL);
-    response.subscribe(posts => this.postResponseCache.set(URL, 'suppliers'));
+    response.subscribe(suppliers => this.postResponseCache.set(URL, suppliers));
 
     return response
   }
@@ -81,7 +81,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
       return of(postCache);
     }
     const response = this.http.get<any>(URL);
-    response.subscribe(posts => this.postResponseCache.set(URL, 'product_cat'));
+    response.subscribe(categories => this.postResponseCache.set(URL, categories));
 
     return response
   }
@@ -155,7 +155,6 @@ export class EditArticleComponent implements OnInit, OnChanges {
       });
       $('#edit-article-supplier-modal').modal('show');
     }, error => {}, () => {
-      this.refresh.emit();
       Helpers.setLoading(false);
     } );
   }

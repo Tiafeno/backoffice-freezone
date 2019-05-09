@@ -62,7 +62,7 @@ export class FzServicesService {
       return of(postCache);
     }
     const response = this.Http.get<any>(URL);
-    response.subscribe(posts => this.postResponseCache.set(URL, 'product_cat'));
+    response.subscribe(posts => this.postResponseCache.set(URL, posts));
 
     return response
   }
