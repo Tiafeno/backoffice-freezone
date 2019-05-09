@@ -22,21 +22,30 @@
               <span *ngIf="findWord"> for: <span class="text-primary">“{{findWord}}”</span></span>
             </h3>
           </div>
-          <ul class="list-group list-group-full list-group-divider">
-            <li class="list-group-item py-3" *ngFor="let article of Products">
-              <h5 class="font-strong">
-                <a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
-              </h5>
-              <p class="text-light">{{article.excerpt.rendered}}</p>
-              <div class="text-muted font-13">
-                <span class="badge badge-default">{{article.price}} MGA</span>
-                <span class="mx-2">•</span>
-                <span class="badge badge-success">F{{article.user_id}}</span>
-                <span class="mx-2">•</span>
-                <span>{{article.date}}</span>
-              </div>
-            </li>
-          </ul>
+          <div class="table-responsive" *ngIf="Products.length > 0">
+              <table class="table">
+                  <thead>
+                      <tr>
+                          <th>Id</th>
+                          <th>Titre</th>
+                          <th>Prix</th>
+                          <th>Fournisseur</th>
+                          <th>Produit</th>
+                          <th>Date de revision</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr *ngFor="let article of Products">
+                          <td>{{article.id}}</td>
+                          <td><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a></td>
+                          <td><span class="badge badge-default">{{article.price}} MGA</span></td>
+                          <td><span class="badge badge-success">F{{article.user_id}}</span></td>
+                          <td><span class="badge badge-default">{{article.product_id}}</span></td>
+                          <td><span>{{article.date_review}}</span></td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
 
           <ul class="pagination justify-content-center mt-4" *ngIf="Paging">
             <li class="page-item">

@@ -123,7 +123,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
       product_cat: [parseInt(Values.product_cat)],
       product_id: parseInt(Values.product_id),
       user_id: parseInt(Values.user_id),
-      stock: parseInt(Values.stock),
+      total_sales: parseInt(Values.stock),
       date_review: moment().format('YYYY-MM-DD HH:mm:ss')
     }).then(article => {
       $('#edit-article-supplier-modal').modal('hide');

@@ -43,7 +43,8 @@
         "../node_modules/@ng-select/ng-select/themes/default.theme.css",
         "../node_modules/clockpicker/dist/bootstrap-clockpicker.min.css",
         "../node_modules/jquery-minicolors/jquery.minicolors.css",
-        "./assets/css/main.css"
+        "./assets/css/main.css",
+        "./assets/css/freezone.css"
       ],
       "scripts": [
         "../node_modules/jquery/dist/jquery.min.js",

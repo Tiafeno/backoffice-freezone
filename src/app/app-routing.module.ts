@@ -1,6 +1,7 @@
 import { NgModule, Component } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { EditorModule } from '@tinymce/tinymce-angular';
 
 import { LayoutComponent } from './/layouts/layout.component';
 import { Dashboard7Component } from './pages/dashboard-7/dashboard-7.component';
@@ -35,6 +36,7 @@ import { FilterSearchArticleComponent } from './components/filter-search-article
 import { AddArticleComponent } from './pages/supplier/add-article/add-article.component';
 import { FzServicesService } from './_services/fz-services.service';
 import { EditArticleComponent } from './pages/supplier/edit-article/edit-article.component';
+import { ProductEditComponent } from './pages/products/product-edit/product-edit.component';
 
 
 const routes: Routes = [
@@ -104,6 +106,13 @@ const routes: Routes = [
                     {
                         path: "new",
                         component: ProductNewComponent
+                    },
+                    {
+                        path: ':id',
+                        children: [
+                            { path: "", redirectTo: 'edit', pathMatch: 'full'},
+                            { path: 'edit', component: ProductEditComponent }
+                        ]
                     }
                 ]
             }
@@ -163,7 +172,8 @@ const routes: Routes = [
         FilterArticleComponent,
         FilterSearchArticleComponent,
         AddArticleComponent,
-        EditArticleComponent
+        EditArticleComponent,
+        ProductEditComponent
     ],
     imports: [
         CommonModule,
@@ -172,6 +182,7 @@ const routes: Routes = [
         BrowserModule,
         ReactiveFormsModule,
         NgSelectModule,
+        EditorModule,
         RouterModule.forRoot(routes)
     ],
     providers: [

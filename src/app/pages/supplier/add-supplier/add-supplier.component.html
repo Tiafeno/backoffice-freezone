@@ -10,7 +10,7 @@
               <div class="form-group mb-4">
                 <label>Nom de la société</label>
                 <input class="form-control" formControlName="company_name" type="text" id="company_name"
-                  name="company_name" placeholder="Nom de la société">
+                  name="company_name" placeholder="">
                 <div *ngIf="f.company_name.errors && f.company_name.dirty">
                   <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>
@@ -22,7 +22,7 @@
               <div class="form-group mb-4">
                 <label>Numéro de téléphone</label>
                 <input class="form-control" formControlName="phone" type="text" id="phone" name="phone"
-                  placeholder="Numero de téléphone">
+                  placeholder="">
 
                 <div *ngIf="f.phone.errors && f.phone.dirty">
                   <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
@@ -36,7 +36,7 @@
               <div class="form-group mb-4">
                 <label>Nom du responsable</label>
                 <input class="form-control" autocomplete="off" formControlName="last_name" id="last_name" name="last_name" type="text"
-                  placeholder="Nom">
+                  placeholder="">
                 <div *ngIf="f.last_name.errors && f.last_name.dirty">
                   <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>
@@ -46,7 +46,7 @@
               <div class="form-group mb-4">
                 <label>Prénom du responsable</label>
                 <input class="form-control" autocomplete="off" formControlName="first_name" id="first_name" name="first_name" type="text"
-                  placeholder="Prénom">
+                  placeholder="">
                 <div *ngIf="f.first_name.errors && f.first_name.dirty">
                   <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>
@@ -58,7 +58,7 @@
               <div class="form-group mb-4">
                 <label>Adresse physique</label>
                 <input class="form-control" autocomplete="off" formControlName="address" id="address" name="address" type="text"
-                  placeholder="Adresse physique">
+                  placeholder="">
                 <div *ngIf="f.address.errors && f.address.dirty">
                   <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>
@@ -99,7 +99,7 @@
               <div class="form-group mb-4">
                 <label>Adresse email</label>
                 <input class="form-control" autocomplete="off" formControlName="email" id="email" name="email" type="text"
-                  placeholder="Email">
+                  placeholder="">
                 <div *ngIf="f.email.errors && f.email.dirty">
                   <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>

@@ -218,14 +218,12 @@ export class QuotationEditComponent implements OnInit {
       // Rechercher les modifications pour ce produit
       let metas: any = _.filter(this.objectMeta, { product_id: currentItem.product_id });
       if (_.isEmpty(metas)) return currentItem;
-      metas = _.map(metas, (meta) => { return { supplier: meta.supplier, get: meta.get }; });
       let status: Array<number> = _.map(metas, meta => { return parseInt(meta.get); });
       let collectQts = _.sum(status);
 
       currentMetaData = _.map(currentMetaData, meta => {
         if (meta.key === 'suppliers') {
           meta.value = JSON.stringify(metas);
-          // TODO: Modifier le statut
         } else if (meta.key === 'status') {
           meta.value = collectQts < currentItem.quantity ? 0 : 1;
         }

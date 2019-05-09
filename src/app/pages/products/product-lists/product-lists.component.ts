@@ -6,6 +6,7 @@ import { config } from '../../../../environments/environment';
 import * as _ from 'lodash';
 import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 declare var $:any;
 
 @Component({
@@ -20,7 +21,8 @@ export class ProductListsComponent implements OnInit {
 
   constructor(
     private apiWc: ApiWoocommerceService,
-    private apiWp: ApiWordpressService
+    private apiWp: ApiWordpressService,
+    private router: Router
   ) {
     this.WCAPI = this.apiWc.getWoocommerce();
     this.WPAPI = this.apiWp.getWPAPI();
@@ -51,11 +53,11 @@ export class ProductListsComponent implements OnInit {
       serverSide: true,
       columns: [
         { data: 'ID', render: (data) => { 
-            return data; 
+            return `<span>${data}</span>`; 
           }
         },
         { data: 'name', render: (data, type, row) => {
-            return `<span>${data}</span>`;
+            return `<span class="edit-product font-strong">${data}</span>`;
           }
         },
         { data: 'sku', render: (data, type, row) => {
@@ -109,8 +111,14 @@ export class ProductListsComponent implements OnInit {
               });
             }
           })
-          
         });
+
+        $('#products-table tbody').on('click', '.edit-product', e => {
+          e.preventDefault();
+          let __product: any = getElementData(e);
+          this.router.navigate(['/product', __product.ID]);
+        });
+
       },
       ajax: {
         url: `${config.apiUrl}/product/`,

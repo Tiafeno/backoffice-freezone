@@ -7,7 +7,6 @@ import { LayoutModule } from './layouts/layout.module';
 import { ScriptLoaderService } from './_services/script-loader.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { JwtInterceptorService } from './_services/jwt-interceptor.service';
-import { EditArticleComponent } from './pages/supplier/edit-article/edit-article.component';
 
 @NgModule({
   declarations: [
