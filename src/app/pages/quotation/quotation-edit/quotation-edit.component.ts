@@ -166,19 +166,25 @@ export class QuotationEditComponent implements OnInit {
                       $('.input-increment').on('change', ev => {
                         ev.preventDefault();
                         let element = $(ev.currentTarget);
+                        let currentValue = element.val();
                         let id = element.data('supplier');
                         let productID = element.data('product');
                         let articleID = element.data('article');
                         productID = parseInt(productID);
 
+                        let countInputSet = 0;
+
                         // Vérifier la quantité et la quantité ajouter pour les fournisseurs
                         $('input.input-increment').each((index, value) => {
                           let inputVal: any = $(value).val();
                           inputVal = parseInt(inputVal);
-                          if (parseInt(this.Item.quantity) < inputVal) {
-                            $(value).val(this.Item.quantity);
-                          }
+                          countInputSet += inputVal;
                         });
+
+                        if (this.Item.quantity < countInputSet) {
+                          element.val(Math.abs(parseInt(currentValue) - 1));
+                          return false;
+                        };
 
                         if (_.isEmpty(this.objectMeta)) {
                           this.objectMeta.push({ supplier: id, get: element.val(), product_id: productID, article_id: articleID });
@@ -232,6 +238,7 @@ export class QuotationEditComponent implements OnInit {
    */
   onSaveQuotationPdt() {
     if (_.isEmpty(this.objectMeta)) return false;
+    this.objectMeta = _.filter(this.objectMeta, (meta) => meta.get !== "0" || !_.isEmpty(meta.get));
     Helpers.setLoading(true);
     this.loading = true;
     let lineItems: Array<any>;
@@ -252,7 +259,7 @@ export class QuotationEditComponent implements OnInit {
           meta.value = collectQts < currentItem.quantity ? 0 : 1;
           delete meta.id;
           if (!meta.value) return meta;
-          // TODO: Verifier si l'article est en review
+          // Verifier si l'article est en review
           let aIds: Array<any> = _.map(metas, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
           let collectFZProducts: Array<any> = _.filter(this.__FZPRODUCTS__, (fz) => { return _.indexOf(aIds, fz.id) >= 0; });
           let cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {

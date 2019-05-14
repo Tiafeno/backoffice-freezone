@@ -97,7 +97,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             let totalArray: Array<number> = [];
             _.map(schemas, schema => {
                 let pourcentage: number = (schema.price * schema.commission) / 100;
-                let x: number = (schema.price * parseInt(schema.get)) + pourcentage;
+                let x: number = (schema.price + pourcentage) * parseInt(schema.get);
                 totalArray.push(Math.round(x));
             });
             let total: number = _.sum(totalArray);
