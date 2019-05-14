@@ -14,7 +14,7 @@ import { Error500Component } from './pages/error-500/error-500.component';
 import { MaintenanceComponent } from './pages/maintenance/maintenance.component';
 import { AuthGuard } from './guards/auth.guard';
 import { LoginGuard } from './guards/login.guard';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
@@ -37,6 +37,14 @@ import { AddArticleComponent } from './pages/supplier/add-article/add-article.co
 import { FzServicesService } from './_services/fz-services.service';
 import { EditArticleComponent } from './pages/supplier/edit-article/edit-article.component';
 import { ProductEditComponent } from './pages/products/product-edit/product-edit.component';
+import { QuotationViewComponent } from './pages/quotation/quotation-view/quotation-view.component';
+import { MomentsPipe } from './pipes/moments.pipe';
+import { StatusQuotationSwitcherComponent } from './components/status-quotation-switcher/status-quotation-switcher.component';
+import { QuotationArticleReviewComponent } from './pages/quotation/quotation-article-review/quotation-article-review.component';
+import { CustomerEditComponent } from './pages/customer/customer-edit/customer-edit.component';
+import { QuotationMailComponent } from './pages/quotation/quotation-mail/quotation-mail.component';
+import { ReviewArticlesComponent } from './pages/supplier/review-articles/review-articles.component';
+import { ReviewSupplierComponent } from './pages/supplier/review-supplier/review-supplier.component';
 
 
 const routes: Routes = [
@@ -49,13 +57,13 @@ const routes: Routes = [
             {
                 path: "dashboard",
                 children: [
-                    { path: "", redirectTo: 'home', pathMatch: 'full' },
-                    { 
+                    { path: "", redirectTo: 'quotation', pathMatch: 'full' },
+                    {
                         path: '', 
                         component: Dashboard7Component,
                         children: [
                             {
-                                path: 'home',
+                                path: 'quotation',
                                 component: QuotationDatatableComponent
                             },
                             {
@@ -83,8 +91,16 @@ const routes: Routes = [
                         component: AddSupplierComponent
                     },
                     {
+                        path: 'review',
+                        component: ReviewSupplierComponent
+                    },
+                    {
                         path: 'articles',
                         component: ArticleSupplierComponent
+                    },
+                    {
+                        path: 'article/review',
+                        component: ReviewArticlesComponent
                     },
                     {
                         path: ":id",
@@ -93,6 +109,7 @@ const routes: Routes = [
                             { path: 'edit', component: EditSupplierComponent }
                         ]
                     },
+                    
                 ]
             },
             {
@@ -173,7 +190,15 @@ const routes: Routes = [
         FilterSearchArticleComponent,
         AddArticleComponent,
         EditArticleComponent,
-        ProductEditComponent
+        ProductEditComponent,
+        QuotationViewComponent,
+        StatusQuotationSwitcherComponent,
+        QuotationArticleReviewComponent,
+        CustomerEditComponent,
+        QuotationMailComponent,
+        ReviewArticlesComponent,
+        ReviewSupplierComponent,
+        MomentsPipe
     ],
     imports: [
         CommonModule,
@@ -200,4 +225,6 @@ const routes: Routes = [
     ]
 })
 
-export class AppRoutingModule { }
+export class AppRoutingModule {
+
+ }

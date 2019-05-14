@@ -1,6 +1,8 @@
 import { Component, OnInit, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import {Router, NavigationStart, NavigationEnd} from '@angular/router';
 import {Helpers} from "./helpers";
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 
 @Component({
   selector: 'body',
@@ -26,8 +28,9 @@ export class AppComponent implements OnInit, AfterViewInit {
 				// Initialize page: handlers ...
 				Helpers.initPage();
 			}
-
 		});
+
+		registerLocaleData(localeFr, 'fr');
   }
 
   ngAfterViewInit() {}

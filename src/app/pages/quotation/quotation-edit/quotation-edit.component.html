@@ -1,56 +1,91 @@
 <div class="ibox-head">
-  <div class="ibox-title">MODIFICATION</div>
+  <div class="flexbox-b mb-5 mt-5">
+    <span class="mr-4 static-badge badge-pink"><i class="la la-shopping-cart font-36"></i></span>
+    <div>
+      <h5 class="font-strong">Devis #{{ID}}</h5>
+      <div class="text-light" *ngIf="Author">Par {{Author.nickname}}, {{__ORDER__.date_created}}</div>
+    </div>
+  </div>
 </div>
+<!-- Affiche les produits dans le devis -->
 <div class="ibox-body">
   <div class="">
-      <table class="table table-hover" id="quotation-edit-table">
-          <thead class="thead-default thead-lg">
-              <tr>
-                  <th class="pl-4">ID</th>
-                  <th>Designation</th>
-                  <th>Nbr</th>
-                  <th>État</th>
-                  <th>Fournisseurs</th>
-                  <th class="pr-4" style="width:91px;">Action</th>
-              </tr>
-          </thead>
-      </table>
+    <table class="table table-hover" id="quotation-edit-table">
+      <thead class="thead-default thead-lg">
+        <tr>
+          <th class="pl-4">Designation</th>
+          <th>Nbr</th>
+          <th>État</th>
+          <th>Fournisseurs</th>
+          <th class="pr-4" style="width:91px;">Action</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</div>
+<div class="ibox-footer">
+  <div>
+    <div class="btn-group mb-3">
+      <button class="btn btn-info mr-3" data-toggle="modal" data-target="#quotation-view-modal">Afficher le devis</button>
+      <a class="btn btn-secondary" [routerLink]="['/dashboard']" routerLinkActive="active" >Retour</a>
+    </div>
   </div>
 </div>
 
+<!--  Affiche les fournisseurs pour un produit selectionner -->
 <div class="modal fade" id="quotation-view-supplier-modal">
   <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content" *ngIf="Item">
-          <div class="modal-header px-4 py-3 bg-primary-400">
-              <div>
-                  <h5 class="modal-title text-white">Liste fournisseur pour</h5><small>
-                    <a class="text-white" href="javascript:;">{{Item.name}}</a></small></div>
-              <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">×</span>
-              </button>
-          </div>
-          <div class="modal-body p-4">
-              <div>
-                  <table class="table table-hover" id="quotation-supplier-table">
-                      <thead class="thead-default thead-lg">
-                          <tr>
-                              <th class="pl-4">#</th>
-                              <th>Fournisseurs</th>
-                              <th>Stock</th>
-                              <th>État</th>
-                              <th>Prix</th>
-                              <th>Pourcentage</th>
-                              <th class="pr-4" style="width:91px;">Action</th>
-                          </tr>
-                      </thead>
-                  </table>
-              </div>
-          </div>
-          <div class="modal-footer justify-content-between bg-primary-50">
-              <div>
-                  <button class="btn btn-primary btn-rounded mr-3" [disabled]="loading" (click)="onSaveQuotationPdt()">Enregistrer</button>
-              </div>
-          </div>
+    <div class="modal-content" *ngIf="Item">
+      <div class="modal-header px-4 py-3 bg-primary-400">
+        <div>
+          <h5 class="modal-title text-white">Liste fournisseur pour</h5><small>
+            <a class="text-white" href="javascript:;">{{Item.name}}</a></small>
+        </div>
+        <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
       </div>
+      <div class="modal-body p-4">
+        <div>
+          <table class="table table-hover" id="quotation-supplier-table">
+            <thead class="thead-default thead-lg">
+              <tr>
+                <th class="pl-4">#</th>
+                <th>Fournisseurs</th>
+                <th>Stock</th>
+                <th>État</th>
+                <th>Prix</th>
+                <th>Pourcentage</th>
+                <th class="pr-4" style="width:91px;">Action</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between bg-primary-50">
+        <div>
+          <button class="btn btn-primary btn-rounded mr-3" [disabled]="loading"
+            (click)="onSaveQuotationPdt()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Affiche le devis en complet -->
+<div class="modal fade" id="quotation-view-modal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <app-quotation-view [order]="__ORDER__"></app-quotation-view>
+    </div>
+  </div>
+</div>
+
+<!-- Afficher une boite de dialogue pour le mail -->
+<div class="modal fade" id="quotation-mail-modal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <app-quotation-mail [order]="__ORDER__"></app-quotation-mail>
+    </div>
   </div>
 </div>

@@ -13,6 +13,7 @@ declare var $:any;
 export class NewCustomerComponent implements OnInit, AfterViewInit {
   public WPAPI: any;
   public users: any[];
+  public customer: any = 0;
   constructor(
     private apiWordpress: ApiWordpressService
   ) {
@@ -20,7 +21,9 @@ export class NewCustomerComponent implements OnInit, AfterViewInit {
    }
 
   ngOnInit() {
-
+    $('#customer-edit-modal').on('hide.bs.modal', e => {
+      this.customer = 0;
+    });
   }
 
   ngAfterViewInit() {
@@ -34,6 +37,11 @@ export class NewCustomerComponent implements OnInit, AfterViewInit {
       Helpers.setLoading(false);
       Swal.fire("Désolé", err.message, 'error');
     });
+  }
+
+  onView(customerId: number) {
+    this.customer = customerId;
+    $('#customer-edit-modal').modal('show');
   }
 
 }

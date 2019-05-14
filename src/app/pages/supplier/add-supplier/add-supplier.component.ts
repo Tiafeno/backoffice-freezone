@@ -41,6 +41,16 @@ export class AddSupplierComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
   }
 
+  public generatePassword(): void {
+    const length = 8;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let password = "";
+    for (var i = 0, n = charset.length; i < length; ++i) {
+      password += charset.charAt(Math.floor(Math.random() * n));
+    }
+    this.formSupplier.patchValue({ pwd: password});
+  }
+
   public onSubmit(): void | boolean {
     if (this.formSupplier.invalid) {
       swal.fire('Désolé', "Veuillez remplire correctement le formulaire", "error");

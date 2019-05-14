@@ -1,0 +1,71 @@
+<div class="mb-4">
+  <div class="row">
+      <div class="col-6" *ngIf="Client">
+          <h5 class="font-strong text-success mb-3">{{Client.first_name}} {{Client.last_name}} 
+            </h5>
+          <div class="text-light"> {{Client.email}} </div>
+          <div class="text-light"> {{Client.date_created}} </div>
+      </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-6">
+      <div class="ibox-body" *ngIf="Client.billing">
+          <h5 class="font-strong mb-4">BILLING</h5>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">First Name:</div>
+              <div class="col-6">{{Client.billing.first_name}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">Last Name:</div>
+              <div class="col-6">{{Client.billing.last_name}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">Company:</div>
+              <div class="col-6">{{Client.billing.company}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">City:</div>
+              <div class="col-6">{{Client.billing.postcode}} {{Client.billing.city}}, {{Client.billing.country}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">Address:</div>
+              <div class="col-6">{{Client.billing.address_1}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">Phone:</div>
+              <div class="col-6">{{Client.billing.phone}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">Email:</div>
+              <div class="col-6">{{Client.billing.email}}</div>
+          </div>
+      </div>
+  </div>
+
+  <div class="col-6">
+      <div class="ibox-body" *ngIf="Client.shipping">
+          <h5 class="font-strong mb-4">SHIPPING</h5>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">First Name:</div>
+              <div class="col-6">{{Client.shipping.first_name}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">Last Name:</div>
+              <div class="col-6">{{Client.shipping.last_name}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">Company:</div>
+              <div class="col-6">{{Client.shipping.company}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">City:</div>
+              <div class="col-6">{{Client.shipping.postcode}} {{Client.shipping.city}}, {{Client.shipping.country}}</div>
+          </div>
+          <div class="row mb-2">
+              <div class="col-6 text-muted">Address:</div>
+              <div class="col-6">{{Client.shipping.address_1}}</div>
+          </div>
+      </div>
+  </div>
+</div>

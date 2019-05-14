@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
-import moment = require('moment');
+import * as moment from 'moment'
 import { config } from '../../../../environments/environment';
 import * as _ from 'lodash';
 import { Helpers } from '../../../helpers';

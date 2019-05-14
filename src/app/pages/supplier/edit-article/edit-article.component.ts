@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/zip';
 import Swal from 'sweetalert2';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
-import moment = require('moment');
+import * as moment from 'moment'
 declare var $: any;
 
 @Component({
@@ -44,6 +44,9 @@ export class EditArticleComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    $('#edit-article-supplier-modal').on('hide.bs.modal', e => {
+      Helpers.setLoading(false);
+    });
   }
 
   onSelectProduct($event) {
@@ -90,7 +93,9 @@ export class EditArticleComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void | boolean {
     if ( ! _.isUndefined(changes.Article.currentValue) && ! _.isEmpty(changes.Article.currentValue)) {
-      this.ID = parseInt(changes.Article.currentValue.id);
+      let cV: any = changes.Article.currentValue;
+      this.ID = _.isUndefined(cV.id) ? (_.isUndefined(cV.ID) ? 0 : cV.ID) : cV.id;
+      if (this.ID === 0) return false;
       this.initValues();
       return true;
     }

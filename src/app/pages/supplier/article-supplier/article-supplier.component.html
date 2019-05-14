@@ -26,7 +26,6 @@
               <table class="table">
                   <thead>
                       <tr>
-                          <th>Id</th>
                           <th>Titre</th>
                           <th>Prix</th>
                           <th>Fournisseur</th>
@@ -36,11 +35,14 @@
                   </thead>
                   <tbody>
                       <tr *ngFor="let article of Products">
-                          <td>{{article.id}}</td>
                           <td><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a></td>
                           <td><span class="badge badge-default">{{article.price}} MGA</span></td>
-                          <td><span class="badge badge-success">F{{article.user_id}}</span></td>
-                          <td><span class="badge badge-default">{{article.product_id}}</span></td>
+                          <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']" routerLinkActive="active"  class="badge badge-success">
+                            {{article.supplier.company_name}}
+                          </a></td>
+                          <td>
+                            <a target="_blank" [routerLink]="['/product', article.product_id, 'edit']" routerLinkActive="active" class="badge badge-info">Voir</a>
+                          </td>
                           <td><span>{{article.date_review}}</span></td>
                       </tr>
                   </tbody>
