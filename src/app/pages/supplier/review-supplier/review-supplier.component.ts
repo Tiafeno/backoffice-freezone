@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { config } from '../../../../environments/environment';
 import * as moment from 'moment';
+import { ReviewMailSupplierComponent } from '../review-mail-supplier/review-mail-supplier.component';
 declare var $: any;
 
 @Component({
@@ -10,7 +11,9 @@ declare var $: any;
 })
 export class ReviewSupplierComponent implements OnInit {
   public Table: any;
-  public selectedId: number = 0;
+  public selectedSupplier: any = {};
+
+  @ViewChild(ReviewMailSupplierComponent) Mail: ReviewMailSupplierComponent;
   constructor() { }
 
   public reload() {
@@ -79,7 +82,8 @@ export class ReviewSupplierComponent implements OnInit {
       initComplete: (setting, json) => {
         $('#supplier-review-table tbody').on('click', '.send-mail', ev => {
           ev.preventDefault();
-          
+          this.selectedSupplier = getElementData(ev);
+          this.Mail.openDialog();
         });
       },
       ajax: {

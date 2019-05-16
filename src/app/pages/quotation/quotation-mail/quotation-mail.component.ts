@@ -70,7 +70,7 @@ export class QuotationMailComponent implements OnInit, OnChanges {
     fData.append('subject', Value.subject);
     fData.append('message', Value.content);
     this.Woocommerce.put(`orders/${this.Order.id}`, {position: 1} , (err, data, res) => {
-      this.Http.post<any>(`${config.apiUrl}/mail/${this.Order.id}`, fData)
+      this.Http.post<any>(`${config.apiUrl}/mail/client/${this.Order.id}`, fData)
       .subscribe(resp => {
         Helpers.setLoading(false);
         $('.modal').modal('hide');

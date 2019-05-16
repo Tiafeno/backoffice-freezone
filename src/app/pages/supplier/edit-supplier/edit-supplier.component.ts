@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
@@ -11,7 +11,7 @@ import Swal from 'sweetalert2';
   templateUrl: './edit-supplier.component.html',
   styleUrls: ['./edit-supplier.component.css']
 })
-export class EditSupplierComponent implements OnInit {
+export class EditSupplierComponent implements OnInit, AfterViewInit {
   public ID: number;
   public supplierForm: FormGroup;
   public pwdForm: FormGroup;
@@ -42,6 +42,9 @@ export class EditSupplierComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  ngAfterViewInit() {
     Helpers.setLoading(true);
     this.route.parent.params.subscribe(params => {
       this.ID = params.id;

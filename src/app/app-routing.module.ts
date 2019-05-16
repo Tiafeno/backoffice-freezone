@@ -45,6 +45,7 @@ import { CustomerEditComponent } from './pages/customer/customer-edit/customer-e
 import { QuotationMailComponent } from './pages/quotation/quotation-mail/quotation-mail.component';
 import { ReviewArticlesComponent } from './pages/supplier/review-articles/review-articles.component';
 import { ReviewSupplierComponent } from './pages/supplier/review-supplier/review-supplier.component';
+import { ReviewMailSupplierComponent } from './pages/supplier/review-mail-supplier/review-mail-supplier.component';
 
 
 const routes: Routes = [
@@ -198,6 +199,7 @@ const routes: Routes = [
         QuotationMailComponent,
         ReviewArticlesComponent,
         ReviewSupplierComponent,
+        ReviewMailSupplierComponent,
         MomentsPipe
     ],
     imports: [

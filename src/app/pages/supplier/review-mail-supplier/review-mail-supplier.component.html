@@ -1,0 +1,60 @@
+<form [formGroup]="Form">
+  <div class="modal-header px-4 py-3 bg-primary-400" *ngIf="Fournisseur">
+    <div>
+      <h5 class="modal-title text-white">ENVOYER PAR E-MAIL
+      </h5>
+      <small class="text-white">à {{Fournisseur.data.user_email}} pour {{Fournisseur.company_name}}</small>
+      
+    </div>
+    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="modal-body p-4">
+    <div class="">
+      <div class="ibox-body">
+        <div class="d-flex justify-content-between">
+            <div class="flexbox mb-4">
+                <span class="btn-icon-only btn-circle bg-primary-50 text-primary mr-3"><i class="ti-envelope"></i></span>
+                <div class="flex-1 d-flex">
+                  <div class="flex-1">
+                    <span class="text-muted mr-2">De:</span>
+                    <div>no-reply@freezone.com</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flexbox mb-4">
+                  <span class="btn-icon-only btn-circle bg-primary-50 text-danger mr-3">{{pendingArticle.length}}</span>
+                  <div class="flex-1 d-flex">
+                    <div class="flex-1">
+                      <span class="mr-2">Article(s) en attente</span>
+                    </div>
+                  </div>
+                </div>
+        </div>
+        
+
+        <div class="form-group mb-4">
+          <label>Sujet</label>
+          <input class="form-control" formControlName="subject" type="text" placeholder="Objet de votre mail">
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="font-light">Message</label>
+            <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="message"
+                name="projet" [init]="tinyMCESettings"></editor>
+          </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer justify-content-between bg-primary-50">
+    <div></div>
+    <div>
+        <button class="btn btn-success mr-3" [disabled]="loading" (click)="onSend()">Envoyer</button>
+        <button class="btn btn-secondary mr-3" [disabled]="loading" data-dismiss="modal">Annuler</button>
+    </div>
+      
+  </div>
+</form>

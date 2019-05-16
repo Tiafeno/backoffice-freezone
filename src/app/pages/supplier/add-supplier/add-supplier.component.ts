@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
@@ -17,7 +17,9 @@ export class AddSupplierComponent implements OnInit, AfterViewInit {
   private WPAPI: any;
   constructor(
     private api: ApiWordpressService,
-    private router: Router
+    private router: Router,
+    private cd: ChangeDetectorRef,
+    private zone: NgZone
   ) {
     this.formSupplier = new FormGroup({
       company_name: new FormControl('', Validators.required),
@@ -72,7 +74,8 @@ export class AddSupplierComponent implements OnInit, AfterViewInit {
       this.WPAPI.users().id(resp.id).update({ roles: ['fz-supplier'] })
         .then(user => {
           Helpers.setLoading(false);
-          this.router.navigate(["supplier", user.id]);
+          this.cd.detectChanges();
+          this.zone.run(() => this.router.navigate(["/supplier", "lists"]));
         })
     }).catch(err => {
       swal.fire('Désolé', err.message, "error");

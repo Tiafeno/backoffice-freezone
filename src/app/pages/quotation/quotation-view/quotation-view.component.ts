@@ -21,9 +21,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public Billing: any = {};
     public billingAdress: any = {}; // adresse de facturation
     public shippingAdress: any = {}; // adresse de facturation
+    public loading: boolean = false;
     private Woocommerce: any;
     private Wordpress: any;
-    public loading: boolean = false;
     private supplierSchema: Array<any> = [];
     @Input() order: any;
     constructor(
