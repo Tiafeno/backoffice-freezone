@@ -1,0 +1,78 @@
+<style type="text/css">
+</style>
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-lg-8">
+
+      <div class="ibox ibox-fullheight">
+        <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
+          <p class="lead mb-4">Ajouter un produit</p>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label class="font-light">Titre du produit</label>
+                <input class="form-control" autocomplete="off" formControlName="name" type="text" id="name" name="name" placeholder="">
+                <div *ngIf="f.name.errors && f.name.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label class="font-light">Description</label>
+                <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="description"
+                    name="projet" [init]="tinyMCESettings"></editor>
+                <div *ngIf="f.description.errors && f.description.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Reference</label>
+                <input class="form-control" autocomplete="off" formControlName="sku" id="sku" name="sku" type="text"
+                  placeholder="">
+                <div *ngIf="f.sku.errors && f.sku.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label class="font-light">Categorie(s)</label>
+                <ng-select name="categorie" placeholder="Selectionner un categorie" formControlName="categorie"
+                  bindLabel="name" bindValue="id" [hideSelected]="true" [multiple]="true" [items]="Categories" required>
+                  <ng-template ng-option-tmp let-item="item">
+                    {{item.name}}
+                  </ng-template>
+                </ng-select>
+                <div *ngIf="f.categorie.errors && f.categorie.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mb-4">
+            <div class="row">
+              <button class="btn btn-primary  col-4"  type="submit">AJOUTER</button>
+              <a class="btn btn-secondary ml-3 col-4" [routerLink]="['/product', 'lists']"
+                routerLinkActive="active">RETOUR</a>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <div class="col-lg-4">
+    </div>
+  </div>
+</div>

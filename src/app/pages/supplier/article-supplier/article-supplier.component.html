@@ -1,0 +1,87 @@
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="ibox">
+        <div class="ibox-body">
+          <app-filter-article [word]="findWord" (search)="onSubmit($event)"></app-filter-article>
+        </div>
+
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <app-filter-search-article (findword)="onSearchWord($event)"></app-filter-search-article>
+      <div class="mb-3">
+        <span>
+          <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-article-supplier-modal">Ajouter une article</button>
+        </span>
+      </div>
+      <div class="ibox">
+        <div class="ibox-body" *ngIf="Products">
+          <div class="mb-4">
+            <h3 class="mt-1">{{Products.length}} results found
+              <span *ngIf="findWord"> for: <span class="text-primary">“{{findWord}}”</span></span>
+            </h3>
+          </div>
+          <div class="table-responsive" *ngIf="Products.length > 0">
+              <table class="table">
+                  <thead>
+                      <tr>
+                          <th>Titre</th>
+                          <th>Prix</th>
+                          <th>Fournisseur</th>
+                          <th>Produit</th>
+                          <th>Date de revision</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr *ngFor="let article of Products">
+                          <td><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a></td>
+                          <td><span class="badge badge-default">{{article.price}} MGA</span></td>
+                          <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']" routerLinkActive="active"  class="badge badge-success">
+                            {{article.supplier.company_name}}
+                          </a></td>
+                          <td>
+                            <a target="_blank" [routerLink]="['/product', article.product_id, 'edit']" routerLinkActive="active" class="badge badge-info">Voir</a>
+                          </td>
+                          <td><span>{{article.date_review}}</span></td>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+
+          <ul class="pagination justify-content-center mt-4" *ngIf="Paging">
+            <li class="page-item">
+              <a class="page-link page-link-solid" href="javascript:;" (click)="onPrevious($event)"
+                aria-label="Previous">
+                <span aria-hidden="true"><i class="la la-angle-left"></i></span>
+              </a>
+            </li>
+            <li class="page-item" [ngClass]="{'active': (page + 1) === currentPage}"
+              *ngFor="let page of Paging._totalPages">
+              <a class="page-link" href="javascript:;" (click)="onChangePage(page+1)">{{page + 1}}</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link page-link-solid" href="javascript:;" (click)="onNext($event)" aria-label="Next"><i
+                  class="la la-angle-right"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal fade" id="add-article-supplier-modal">
+        <div class="modal-dialog" role="document">
+          <app-add-article></app-add-article>
+        </div>
+      </div>
+
+      
+      <div class="modal fade" id="edit-article-supplier-modal">
+        <div class="modal-dialog" role="document">
+          <app-edit-article [Article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

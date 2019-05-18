@@ -1,0 +1,151 @@
+<style type="text/css">
+.form-control {
+  font-family: inherit;
+}
+</style>
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-lg-8">
+
+      <div class="ibox ibox-fullheight">
+        <form class="ibox-body" [formGroup]="supplierForm" id="supplier-form" (ngSubmit)="onSubmitEdit()">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Nom de la société</label>
+                <input class="form-control" formControlName="company_name" type="text" id="company_name"
+                  name="company_name" placeholder="Nom de la société">
+                <div *ngIf="f.company_name.errors && f.company_name.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Adresse email</label>
+                <input class="form-control" autocomplete="off" formControlName="email" id="email"
+                  name="email" type="text" placeholder="Email">
+                <div *ngIf="f.email.errors && f.email.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Numéro de téléphone</label>
+                <input class="form-control" formControlName="phone" type="text" id="phone" name="phone"
+                  placeholder="Numero de téléphone">
+
+                <div *ngIf="f.phone.errors && f.phone.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Nom du responsable</label>
+                <input class="form-control" autocomplete="off" formControlName="last_name" id="last_name"
+                  name="last_name" type="text" placeholder="Nom">
+                <div *ngIf="f.last_name.errors && f.last_name.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Prénom du responsable</label>
+                <input class="form-control" autocomplete="off" formControlName="first_name" id="first_name"
+                  name="first_name" type="text" placeholder="Prénom">
+                <div *ngIf="f.first_name.errors && f.first_name.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Adresse physique</label>
+                <input class="form-control" autocomplete="off" formControlName="address" id="address" name="address"
+                  type="text" placeholder="Adresse physique">
+                <div *ngIf="f.address.errors && f.address.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Reference</label>
+                <input class="form-control" formControlName="reference" type="text" id="reference" name="reference"
+                  placeholder="">
+
+                <div *ngIf="f.reference.errors && f.reference.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Commission (en %)</label>
+                <input class="form-control" formControlName="commission" type="number" id="commision" name="commission"
+                  placeholder="">
+
+                <div *ngIf="f.commission.errors && f.commission.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mb-4">
+            <div class="row">
+              <button class="btn btn-primary  col-4" type="submit">METTRE A JOUR</button>
+              <a class="btn btn-secondary ml-3 col-4" [routerLink]="['/supplier/lists']"
+                routerLinkActive="active">RETOUR</a>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <div class="col-lg-4">
+      <div class="ibox">
+        <div class="ibox-body">
+            <form class="ibox-body" [formGroup]="pwdForm" id="pwd-form" (ngSubmit)="onChangePwd()">
+                <div class="row">
+                  <div class="col-md-12">
+                    <h4>Changer le mot de passe</h4>
+                    <div class="form-group mb-4">
+                      <label>Nouveau mot de passe</label>
+                      <input class="form-control" autocomplete="off" formControlName="pwd" type="password" id="pwd"
+                        name="pwd" placeholder="">
+                    </div>
+                  </div>
+                </div>
+        
+                <div class="row">
+                  <div class="col-md-6">
+                    <button type="submit" class="btn btn-sm btn-primary">MODIFIFER</button>
+                  </div>
+                </div>
+              </form>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>

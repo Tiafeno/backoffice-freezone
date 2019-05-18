@@ -1,0 +1,53 @@
+<div class="overlay"></div>
+<div class="error-content">
+    <div class="flexbox">
+        <span class="error-icon"></span>
+        <div class="flex-1">
+            <h1 class="error-code">404</h1>
+            <h3 class="font-strong">NOT FOUND</h3>
+            <p>Sorry, the page you were looking for could not found.</p>
+        </div>
+    </div>
+    <div class="text-center mb-3 mt-5">
+        <a class="text-primary" routerLink="/dashboard">Go Homepage</a> or search</div>
+    <form class="input-group-icon input-group-icon-left mb-4" action="javascript:;" method="POST">
+        <span class="input-icon font-16"><i class="ti-search"></i></span>
+        <input class="form-control form-control-rounded form-control-solid" id="key-search" type="text" placeholder="Search ...">
+    </form>
+</div>
+
+<style>
+    .overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        background-repeat: no-repeat;
+        background-image: url(./assets/img/icons/search-document-3.svg);
+        background-position: 80% 0;
+    }
+    .error-content {
+        position: relative;
+        max-width: 620px;
+        margin: 200px auto 0;
+    }
+
+    .error-icon {
+        height: 160px;
+        width: 160px;
+        background-image: url(./assets/img/icons/search-document.svg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        margin-right: 80px;
+    }
+
+    .error-code {
+        font-size: 120px;
+        color: #5c6bc0;
+    }
+    body.empty-layout .theme-config, body.empty-layout .to-top{
+        display: none !important;
+    }
+</style>

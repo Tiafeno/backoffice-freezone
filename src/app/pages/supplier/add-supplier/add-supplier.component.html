@@ -1,0 +1,152 @@
+<style type="text/css">
+  .form-control {
+    font-family: inherit;
+    height: auto;
+  }
+</style>
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-lg-8">
+
+      <div class="ibox ibox-fullheight">
+        <form class="ibox-body" [formGroup]="formSupplier" id="supplier-form" (ngSubmit)="onSubmit()">
+          <h5 class="font-strong">Ajouter un fournisseur</h5>
+          <p class="mb-5 text-muted">Tous les champs sont obligatoire</p>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Nom de la société</label>
+                <input class="form-control" formControlName="company_name" type="text" id="company_name"
+                  name="company_name" placeholder="">
+                <div *ngIf="f.company_name.errors && f.company_name.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Numéro de téléphone</label>
+                <input class="form-control" formControlName="phone" type="text" id="phone" name="phone" placeholder="">
+
+                <div *ngIf="f.phone.errors && f.phone.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Nom du responsable</label>
+                <input class="form-control" autocomplete="off" formControlName="last_name" id="last_name"
+                  name="last_name" type="text" placeholder="">
+                <div *ngIf="f.last_name.errors && f.last_name.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Prénom du responsable</label>
+                <input class="form-control" autocomplete="off" formControlName="first_name" id="first_name"
+                  name="first_name" type="text" placeholder="">
+                <div *ngIf="f.first_name.errors && f.first_name.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Adresse physique</label>
+                <input class="form-control" autocomplete="off" formControlName="address" id="address" name="address"
+                  type="text" placeholder="">
+                <div *ngIf="f.address.errors && f.address.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Reference</label>
+                <input class="form-control" formControlName="reference" type="text" id="reference" name="reference"
+                  placeholder="">
+
+                <div *ngIf="f.reference.errors && f.reference.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Commission</label>
+                <input class="form-control" formControlName="commission" type="number" id="reference" name="commission"
+                  placeholder="">
+
+                <div *ngIf="f.commission.errors && f.commission.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Adresse email</label>
+                <input class="form-control" autocomplete="off" formControlName="email" id="email" name="email"
+                  type="text" placeholder="">
+                <div *ngIf="f.email.errors && f.email.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Mot de passe</label>
+                <div class="input-group">
+                  <input class="form-control" autocomplete="off" formControlName="pwd" id="pwd" name="pwd" type="text"
+                    placeholder="">
+                  <span class="input-group-btn">
+                    <button class="btn btn-outline-secondary" type="button" (click)="generatePassword()">Générer un mot de passe</button>
+                  </span>
+                  <div *ngIf="f.pwd.errors && f.pwd.dirty">
+                    <label id="pwd-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="text-center mb-4">
+            <div class="text-muted font-11 mb-3">
+                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </div>
+            <div class="row">
+              <button class="btn btn-primary col-4 uppercase" [disabled]="loading" type="submit">Crée un compte</button>
+              <a class="btn btn-secondary ml-3 col-4" [routerLink]="['/supplier', 'lists']"
+                routerLinkActive="active">RETOUR</a>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <div class="col-lg-4">
+    </div>
+  </div>
+</div>

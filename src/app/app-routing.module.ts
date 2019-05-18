@@ -1,0 +1,232 @@
+import { NgModule, Component } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { EditorModule } from '@tinymce/tinymce-angular';
+
+import { LayoutComponent } from './/layouts/layout.component';
+import { Dashboard7Component } from './pages/dashboard-7/dashboard-7.component';
+
+import { LoginComponent } from './pages/login/login.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { Error404Component } from './pages/error-404/error-404.component';
+import { Error403Component } from './pages/error-403/error-403.component';
+import { Error500Component } from './pages/error-500/error-500.component';
+import { MaintenanceComponent } from './pages/maintenance/maintenance.component';
+import { AuthGuard } from './guards/auth.guard';
+import { LoginGuard } from './guards/login.guard';
+import { CommonModule, CurrencyPipe } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { BrowserModule } from '@angular/platform-browser';
+import { AuthorizationService } from './_services/authorization.service';
+import { SupplierDatatableComponent } from './pages/supplier/supplier-datatable/supplier-datatable.component';
+import { QuotationDatatableComponent } from './pages/quotation/quotation--datatable/quotation--datatable.component';
+import { JwtInterceptorService } from './_services/jwt-interceptor.service';
+import { NewCustomerComponent } from './components/new-customer/new-customer.component';
+import { ApiWordpressService } from './_services/api-wordpress.service';
+import { AddSupplierComponent } from './pages/supplier/add-supplier/add-supplier.component';
+import { EditSupplierComponent } from './pages/supplier/edit-supplier/edit-supplier.component';
+import { ApiWoocommerceService } from './_services/api-woocommerce.service';
+import { QuotationEditComponent } from './pages/quotation/quotation-edit/quotation-edit.component';
+import { ArticleSupplierComponent } from './pages/supplier/article-supplier/article-supplier.component';
+import { ProductListsComponent } from './pages/products/product-lists/product-lists.component';
+import { ProductNewComponent } from './pages/products/product-new/product-new.component';
+import { FilterArticleComponent } from './components/filter-article/filter-article.component';
+import { FilterSearchArticleComponent } from './components/filter-search-article/filter-search-article.component';
+import { AddArticleComponent } from './pages/supplier/add-article/add-article.component';
+import { FzServicesService } from './_services/fz-services.service';
+import { EditArticleComponent } from './pages/supplier/edit-article/edit-article.component';
+import { ProductEditComponent } from './pages/products/product-edit/product-edit.component';
+import { QuotationViewComponent } from './pages/quotation/quotation-view/quotation-view.component';
+import { MomentsPipe } from './pipes/moments.pipe';
+import { StatusQuotationSwitcherComponent } from './components/status-quotation-switcher/status-quotation-switcher.component';
+import { QuotationArticleReviewComponent } from './pages/quotation/quotation-article-review/quotation-article-review.component';
+import { CustomerEditComponent } from './pages/customer/customer-edit/customer-edit.component';
+import { QuotationMailComponent } from './pages/quotation/quotation-mail/quotation-mail.component';
+import { ReviewArticlesComponent } from './pages/supplier/review-articles/review-articles.component';
+import { ReviewSupplierComponent } from './pages/supplier/review-supplier/review-supplier.component';
+import { ReviewMailSupplierComponent } from './pages/supplier/review-mail-supplier/review-mail-supplier.component';
+
+
+const routes: Routes = [
+    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    {
+        path: "",
+        component: LayoutComponent,
+        canActivate: [AuthGuard],
+        children: [
+            {
+                path: "dashboard",
+                children: [
+                    { path: "", redirectTo: 'quotation', pathMatch: 'full' },
+                    {
+                        path: '', 
+                        component: Dashboard7Component,
+                        children: [
+                            {
+                                path: 'quotation',
+                                component: QuotationDatatableComponent
+                            },
+                            {
+                                path: 'quotation/:id',
+                                children: [
+                                    { path: "", redirectTo: 'edit', pathMatch: 'full' },
+                                    { path: "edit", component: QuotationEditComponent }
+                                ]
+                            }
+                            
+                        ]
+                    }
+                ]
+            },
+            {
+                path: "supplier",
+                children: [
+                    { path: "", redirectTo: 'lists', pathMatch: "full" },
+                    {
+                        path: 'lists',
+                        component: SupplierDatatableComponent
+                    },
+                    {
+                        path: 'new',
+                        component: AddSupplierComponent
+                    },
+                    {
+                        path: 'review',
+                        component: ReviewSupplierComponent
+                    },
+                    {
+                        path: 'articles',
+                        component: ArticleSupplierComponent
+                    },
+                    {
+                        path: 'article/review',
+                        component: ReviewArticlesComponent
+                    },
+                    {
+                        path: ":id",
+                        children: [
+                            { path: "", redirectTo: 'edit', pathMatch: 'full' },
+                            { path: 'edit', component: EditSupplierComponent }
+                        ]
+                    },
+                    
+                ]
+            },
+            {
+                path: "product",
+                children: [
+                    { path: "", redirectTo: "lists", pathMatch: "full" },
+                    {
+                        path: 'lists',
+                        component: ProductListsComponent
+                    },
+                    {
+                        path: "new",
+                        component: ProductNewComponent
+                    },
+                    {
+                        path: ':id',
+                        children: [
+                            { path: "", redirectTo: 'edit', pathMatch: 'full'},
+                            { path: 'edit', component: ProductEditComponent }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        path: "login",
+        canActivate: [LoginGuard],
+        component: LoginComponent
+    },
+    {
+        "path": "forgot_password",
+        canActivate: [LoginGuard],
+        "component": ForgotPasswordComponent
+    },
+    {
+        "path": "error_404",
+        "component": Error404Component
+    },
+    {
+        "path": "error_403",
+        "component": Error403Component
+    },
+    {
+        "path": "error_500",
+        "component": Error500Component
+    },
+    {
+        "path": "maintenance",
+        "component": MaintenanceComponent
+    },
+    {
+        "path": "**",
+        "redirectTo": "error_404",
+        "pathMatch": "full"
+    },
+];
+
+@NgModule({
+    declarations: [
+        Dashboard7Component,
+        LoginComponent,
+        ForgotPasswordComponent,
+        Error404Component,
+        Error403Component,
+        Error500Component,
+        MaintenanceComponent,
+        SupplierDatatableComponent,
+        QuotationDatatableComponent,
+        QuotationEditComponent,
+        NewCustomerComponent,
+        AddSupplierComponent,
+        EditSupplierComponent,
+        ArticleSupplierComponent,
+        ProductListsComponent,
+        ProductNewComponent,
+        FilterArticleComponent,
+        FilterSearchArticleComponent,
+        AddArticleComponent,
+        EditArticleComponent,
+        ProductEditComponent,
+        QuotationViewComponent,
+        StatusQuotationSwitcherComponent,
+        QuotationArticleReviewComponent,
+        CustomerEditComponent,
+        QuotationMailComponent,
+        ReviewArticlesComponent,
+        ReviewSupplierComponent,
+        ReviewMailSupplierComponent,
+        MomentsPipe
+    ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        HttpClientModule,
+        BrowserModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        EditorModule,
+        RouterModule.forRoot(routes)
+    ],
+    providers: [
+        AuthorizationService,
+        ApiWordpressService,
+        ApiWoocommerceService,
+        FzServicesService,
+        AuthGuard,
+        LoginGuard,
+        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true }
+        // { provide: LocationStrategy, useClass: HashLocationStrategy}
+    ],
+    exports: [
+        RouterModule,
+    ]
+})
+
+export class AppRoutingModule {
+
+ }

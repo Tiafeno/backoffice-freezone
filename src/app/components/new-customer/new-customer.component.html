@@ -1,0 +1,50 @@
+<div class="ibox">
+  <div class="ibox-head">
+    <div class="ibox-title">NOUVEAUX CLIENTS</div>
+  </div>
+  <div class="ibox-body">
+    <ul class="media-list media-list-divider mr-2 scroller" data-height="550px">
+
+      <li class="media align-items-center" *ngFor="let user of users">
+        <a class="media-img" href="javascript:;">
+          <img class="img-circle" [src]="user.avatar_urls['96']" alt="image" width="54" />
+        </a>
+        <div class="media-body d-flex align-items-center">
+          <div class="flex-1">
+            <div class="media-heading">{{user.last_name}} {{user.first_name}}</div>
+            <small class="text-muted">{{user.email}}</small>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary btn-rounded" (click)="onView(user.id)">Voir</button>
+        </div>
+      </li>
+
+    </ul>
+  </div>
+</div>
+
+<!-- Affiche les informations du client -->
+<div class="modal fade" id="customer-edit-modal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header px-4 py-3 bg-primary-400">
+        <div>
+          <h5 class="modal-title text-white">Details d'un client</h5>
+        </div>
+        <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body p-4">
+        <div>
+            <app-customer-edit [customer]="customer"></app-customer-edit>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between bg-primary-50">
+        <div>
+          <button class="btn btn-primary mr-3" data-dismiss="modal">Fermer</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
