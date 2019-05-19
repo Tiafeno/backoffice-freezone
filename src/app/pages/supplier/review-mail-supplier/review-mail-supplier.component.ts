@@ -19,7 +19,23 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
   @Input() supplier: any = {};
 
   public Form: FormGroup;
-
+  public tinyMCESettings: any = {
+    language_url: '/assets/js/langs/fr_FR.js',
+    menubar: false,
+    content_css: [
+      '//fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
+      '//www.tinymce.com/css/codepen.min.css'
+    ],
+    content_style: ".mce-content-body p { margin: 5px 0; }",
+    inline: false,
+    statusbar: true,
+    resize: true,
+    browser_spellcheck: true,
+    min_height: 320,
+    height: 320,
+    toolbar: 'undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',
+    plugins: ['lists'],
+  };
   constructor(
     private Http: HttpClient
   ) {

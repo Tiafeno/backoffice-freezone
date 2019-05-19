@@ -109,9 +109,11 @@ export class QuotationEditComponent implements OnInit {
                     data: __USERS__,
                     columns: [
                       { data: 'id' }, // user_id
-                      { data: 'company_name', render: (data, type, row) => {
-                        return data;
-                      } },
+                      {
+                        data: 'company_name', render: (data, type, row) => {
+                          return data;
+                        }
+                      },
                       {
                         data: 'id', render: (data, type, row) => { // stock
                           let userId: any = data;
@@ -165,6 +167,7 @@ export class QuotationEditComponent implements OnInit {
                       $('#quotation-view-supplier-modal').modal('show');
                       $('.input-increment').on('change', ev => {
                         ev.preventDefault();
+
                         let element = $(ev.currentTarget);
                         let currentValue = element.val();
                         let id = element.data('supplier');
@@ -185,20 +188,8 @@ export class QuotationEditComponent implements OnInit {
                           element.val(Math.abs(parseInt(currentValue) - 1));
                           return false;
                         };
-
-                        if (_.isEmpty(this.objectMeta)) {
-                          this.objectMeta.push({ supplier: id, get: element.val(), product_id: productID, article_id: articleID });
-                        } else {
-                          let Inc: any = _.find(this.objectMeta, { supplier: id });
-                          if (_.isEmpty(Inc)) {
-                            this.objectMeta.push({ supplier: id, get: element.val(), product_id: productID, article_id: articleID });
-                          } else {
-                            this.objectMeta = _.map(this.objectMeta, (Inc) => {
-                              Inc.get = Inc.supplier === id ? element.val() : Inc.get;
-                              return Inc;
-                            });
-                          }
-                        }
+                        this.objectMeta = _.reject(this.objectMeta, {supplier: id});
+                        this.objectMeta.push({ supplier: id, get: parseInt(element.val()), product_id: productID, article_id: articleID });
                       });
 
                       this.cd.detectChanges();
@@ -225,7 +216,7 @@ export class QuotationEditComponent implements OnInit {
 
                 this.cd.detectChanges();
               });
-              
+
             });
           }
         })
@@ -238,7 +229,8 @@ export class QuotationEditComponent implements OnInit {
    */
   onSaveQuotationPdt() {
     if (_.isEmpty(this.objectMeta)) return false;
-    this.objectMeta = _.filter(this.objectMeta, (meta) => meta.get !== "0" || !_.isEmpty(meta.get));
+    this.objectMeta = _.filter(this.objectMeta, (meta) => meta.get !== 0);
+    console.log(this.objectMeta);
     Helpers.setLoading(true);
     this.loading = true;
     let lineItems: Array<any>;
@@ -247,17 +239,20 @@ export class QuotationEditComponent implements OnInit {
       let currentMetaData: Array<any> = _.cloneDeep(currentItem.meta_data); // Product meta
       // Rechercher les modifications pour ce produit
       let metas: any = _.filter(this.objectMeta, { product_id: currentItem.product_id });
-      if (_.isEmpty(metas)) return currentItem;
-      let qts: Array<number> = _.map(metas, meta => { return parseInt(meta.get); });
-      let collectQts = _.sum(qts);
-
+      console.log(metas);
+      
       currentMetaData = _.map(currentMetaData, meta => {
         if (meta.key === 'suppliers') {
-          delete meta.id;
           meta.value = JSON.stringify(metas);
         } else if (meta.key === 'status') {
-          meta.value = collectQts < currentItem.quantity ? 0 : 1;
-          delete meta.id;
+          if (_.isEmpty(metas)) {
+            meta.value = 0;
+          } else {
+            let qts: Array<number> = _.map(metas, meta => { return parseInt(meta.get); });
+            let collectQts = _.sum(qts);
+            meta.value = collectQts < currentItem.quantity ? 0 : 1;
+          }
+
           if (!meta.value) return meta;
           // Verifier si l'article est en review
           let aIds: Array<any> = _.map(metas, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
