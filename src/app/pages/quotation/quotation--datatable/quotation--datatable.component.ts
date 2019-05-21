@@ -2,8 +2,6 @@ import { Component, OnInit, ViewEncapsulation, ViewChild, ChangeDetectorRef } fr
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { Router } from '@angular/router';
-import { AuthorizationService } from '../../../_services/authorization.service';
-import { HttpClient } from '@angular/common/http';
 import { config } from '../../../../environments/environment';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import Swal from 'sweetalert2';
@@ -28,14 +26,12 @@ export class QuotationDatatableComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private auth: AuthorizationService,
     private apiWP: ApiWordpressService,
     private apiWC: ApiWoocommerceService,
-    private Http: HttpClient,
     private cd: ChangeDetectorRef
   ) {
-    this.WPAPI = apiWP.getWPAPI();
-    this.WCAPI = apiWC.getWoocommerce();
+    this.WPAPI = this.apiWP.getWPAPI();
+    this.WCAPI = this.apiWC.getWoocommerce();
    }
 
   public reload(): void {

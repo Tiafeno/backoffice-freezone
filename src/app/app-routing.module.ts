@@ -46,6 +46,7 @@ import { QuotationMailComponent } from './pages/quotation/quotation-mail/quotati
 import { ReviewArticlesComponent } from './pages/supplier/review-articles/review-articles.component';
 import { ReviewSupplierComponent } from './pages/supplier/review-supplier/review-supplier.component';
 import { ReviewMailSupplierComponent } from './pages/supplier/review-mail-supplier/review-mail-supplier.component';
+import { SavComponent } from './pages/sav/sav/sav.component';
 
 
 const routes: Routes = [
@@ -78,6 +79,10 @@ const routes: Routes = [
                         ]
                     }
                 ]
+            },
+            {
+                path: "sav",
+                component: SavComponent
             },
             {
                 path: "supplier",
@@ -200,6 +205,7 @@ const routes: Routes = [
         ReviewArticlesComponent,
         ReviewSupplierComponent,
         ReviewMailSupplierComponent,
+        SavComponent,
         MomentsPipe
     ],
     imports: [

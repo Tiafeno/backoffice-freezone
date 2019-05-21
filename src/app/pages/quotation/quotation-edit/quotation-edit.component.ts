@@ -230,7 +230,6 @@ export class QuotationEditComponent implements OnInit {
   onSaveQuotationPdt() {
     if (_.isEmpty(this.objectMeta)) return false;
     this.objectMeta = _.filter(this.objectMeta, (meta) => meta.get !== 0);
-    console.log(this.objectMeta);
     Helpers.setLoading(true);
     this.loading = true;
     let lineItems: Array<any>;
@@ -239,12 +238,9 @@ export class QuotationEditComponent implements OnInit {
       let currentMetaData: Array<any> = _.cloneDeep(currentItem.meta_data); // Product meta
       // Rechercher les modifications pour ce produit
       let metas: any = _.filter(this.objectMeta, { product_id: currentItem.product_id });
-      console.log(metas);
       
       currentMetaData = _.map(currentMetaData, meta => {
-        if (meta.key === 'suppliers') {
-          meta.value = JSON.stringify(metas);
-        } else if (meta.key === 'status') {
+        if (meta.key === 'status') {
           if (_.isEmpty(metas)) {
             meta.value = 0;
           } else {
@@ -264,9 +260,14 @@ export class QuotationEditComponent implements OnInit {
           });
 
           meta.value = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
+          
+        } else {
+          meta.value = JSON.stringify(metas);
         }
         return meta;
       });
+      let filterMetaSuppliers = _.filter(currentMetaData, {key: 'suppliers'} as any);
+      if (_.isEmpty(filterMetaSuppliers)) currentMetaData.push({key: 'suppliers', value: JSON.stringify(metas)});
       currentItem.meta_data = _.clone(currentMetaData);
       return currentItem;
     });

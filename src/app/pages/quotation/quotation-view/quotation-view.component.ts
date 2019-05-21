@@ -5,6 +5,7 @@ import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
 import { HttpClient } from '@angular/common/http';
 import { config } from '../../../../environments/environment';
+import { Scheduler } from 'rxjs/Scheduler';
 declare var $: any;
 
 @Component({
@@ -93,16 +94,24 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         //TODO: Vérifier la quantité des articles
 
         this.QtItems = _.map(this.Items, item => {
-            let schemas: any = _.filter(this.supplierSchema, { product_id: item.product_id });
-            let totalArray: Array<number> = [];
-            _.map(schemas, schema => {
-                let pourcentage: number = (schema.price * schema.commission) / 100;
-                let x: number = (schema.price + pourcentage) * parseInt(schema.get);
-                totalArray.push(Math.round(x));
-            });
-            let total: number = _.sum(totalArray);
-            let stock: Array<number> = _.map(schemas, schema => { return parseInt(schema.get); })
-            item.stock = _.sum(stock);
+            // Récuperer tous les meta utiliser pour le produit
+            let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: item.product_id });
+
+            let allPriceForItem = _.map(SCHEMAS, (schema) => schema.price);
+            let allTakeForItem = _.map(SCHEMAS, (schema) => parseInt(schema.get));
+
+            // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
+            let take = _.sum(allTakeForItem);
+
+            // Récuperer le prix le plus grand pour chaque fournisseur ajouter
+            let price = _.max(allPriceForItem);
+            if (_.isUndefined(price)) { console.warn("Aucun prix n'est definie"); return item; }
+            let commission = _.find(SCHEMAS, schema => { return schema.price === price; }).commission;
+            let poucentage: number = (price * commission) / 100;
+            let total: number = (price + poucentage) * take;
+            total = Math.round(total);
+
+            item.stock = _.clone(take);
             item.total = total.toString();
             item.subtotal = total.toString();
             item.price = Math.round(total / item.quantity);
@@ -152,11 +161,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     private getMeta(property: string): Array<any> {
         return _.map(this.Items, item => {
             let metas = item.meta_data;
-            let supplier: any = _.filter(metas, { key: 'suppliers' });
-            supplier = _.isArray(supplier) && !_.isEmpty(supplier) ? supplier[0] : supplier;
-            if (!_.isObject(supplier)) return 0;
+            let supplier: any = _.find(metas, { key: 'suppliers' });
+            if (_.isUndefined(supplier)) return [];
             let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
-            if (_.isNull(Value) || !_.isArray(Value)) return 0;
+            if (_.isNull(Value) || !_.isArray(Value)) return [];
             return _.map(Value, data => data[property]);
         });
     }
@@ -164,9 +172,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     private getSchema() {
         _.map(this.Items, item => {
             let metas = item.meta_data;
-            let supplier: any = _.filter(metas, { key: 'suppliers' });
-            supplier = _.isArray(supplier) && !_.isEmpty(supplier) ? supplier[0] : supplier;
-            if (!_.isObject(supplier)) return;
+            let supplier: any = _.find(metas, { key: 'suppliers' });
+            if (_.isUndefined(supplier)) return;
             let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
             if (_.isNull(Value) || !_.isArray(Value)) return;
 
