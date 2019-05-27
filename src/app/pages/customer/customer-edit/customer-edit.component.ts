@@ -11,12 +11,12 @@ import { Helpers } from '../../../helpers';
 })
 export class CustomerEditComponent implements OnInit, OnChanges {
   public ID: number = 0;
+  public hasAddress: boolean = false;
   public Client: any = {};
   private Woocommerce: any;
   @Input() customer;
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private apiWC: ApiWoocommerceService
   ) {
     this.Woocommerce = this.apiWC.getWoocommerce();
@@ -42,6 +42,9 @@ export class CustomerEditComponent implements OnInit, OnChanges {
     this.Woocommerce.get(`customers/${this.ID}?context=edit`, (err, data, res) => {
       let response: any = JSON.parse(res);
       this.Client = _.clone(response);
+      if ( ! _.isEmpty(this.Client.billing.email) ) {
+        this.hasAddress = true;
+      }
       Helpers.setLoading(false);
     });
   }

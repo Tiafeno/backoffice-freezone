@@ -26,10 +26,9 @@
                 <table class="table mb-4" *ngIf="!loading">
                     <thead class="thead-default thead-lg">
                         <tr>
-                            <th class="pl-4">Item Description</th>
-                            <th>Quantity</th>
-                            <th>Available</th>
-                            <th>Unit Cost</th>
+                            <th class="pl-4">Désignation</th>
+                            <th>Quantité</th>
+                            <th>Unit HT</th>
                             <th class="text-right pr-4">Total</th>
                         </tr>
                     </thead>
@@ -39,7 +38,6 @@
                                 <div><strong>{{item.name}}</strong></div>
                             </td>
                             <td class="text-center">{{item.quantity}}</td>
-                            <td class="text-center">{{item.stock}}</td>
                             <td>{{item.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                             <td class="text-right pr-4">{{item.total | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                         </tr>
@@ -54,13 +52,17 @@
             <div class="d-flex justify-content-end" *ngIf="Billing">
                 <div class="text-right" style="width:450px;">
                     <div class="row mb-2">
-                        <div class="col-6">Subtotal Price</div>
+                        <div class="col-6">Sous-total HT:</div>
                         <div class="col-6">{{Billing.subtotal | currency:'MGA':'symbole':'4.2-2':'fr'}}</div>
                     </div>
+                    <div class="row mb-2">
+                        <div class="col-6">Taxe:</div>
+                        <div class="col-6" style="font-weight: bold">{{Tax}} %</div>
+                    </div>
                     <div class="row font-strong font-20 align-items-center">
-                        <div class="col-6">Total Price:</div>
+                        <div class="col-6">Total TTC:</div>
                         <div class="col-6">
-                            <div class="h3 font-strong mb-0">{{Billing.total | currency:'MGA':'symbole':'4.2-2':'fr'}}</div>
+                            <div class="h3 font-strong mb-0">{{Billing.total_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</div>
                         </div>
                     </div>
                 </div>

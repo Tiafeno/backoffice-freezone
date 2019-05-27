@@ -55,6 +55,8 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         data => {
           if (data) {
             this.router.navigate(['dashboard']);
+          } else {
+            this.formLogin.patchValue({email: "", pwd: ""});
           }
           this.loading = false;
         },

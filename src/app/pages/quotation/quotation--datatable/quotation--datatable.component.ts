@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import { Helpers } from '../../../helpers';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { StatusQuotationSwitcherComponent } from '../../../components/status-quotation-switcher/status-quotation-switcher.component';
+import { AuthorizationService } from '../../../_services/authorization.service';
 declare var $: any;
 @Component({
   selector: 'app-quotation--datatable',
@@ -28,7 +29,8 @@ export class QuotationDatatableComponent implements OnInit {
     private router: Router,
     private apiWP: ApiWordpressService,
     private apiWC: ApiWoocommerceService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private auth: AuthorizationService
   ) {
     this.WPAPI = this.apiWP.getWPAPI();
     this.WCAPI = this.apiWC.getWoocommerce();
@@ -62,6 +64,9 @@ export class QuotationDatatableComponent implements OnInit {
       "sDom": 'rtip',
       processing: true,
       serverSide: true,
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/French.json"
+      },
       columns: [
         { data: 'ID', render: (data) => { return `n°${data}`} },
         {
@@ -152,6 +157,13 @@ export class QuotationDatatableComponent implements OnInit {
           if (__fzCurrentUser && __fzCurrentUser.token) {
             xhr.setRequestHeader("Authorization",
               `Bearer ${__fzCurrentUser.token}`);
+          }
+        },
+        error: (jqXHR, textStatus, errorThrow) => {
+          let response: any = jqXHR.responseJSON;
+          if (response.code === "jwt_auth_invalid_token") {
+            this.auth.logout();
+            location.reload();
           }
         },
         type: 'POST',

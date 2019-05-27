@@ -25,19 +25,6 @@
       <div class="row">
           <div class="col-md-12">
             <div class="form-group mb-4">
-              <label>Catégorie</label>
-              <ng-select name="categorie" placeholder="Tapez une categorie" formControlName="product_cat"
-                bindValue="id" bindLabel="name" [hideSelected]="true" [typeahead]="typeaheadCategories" [multiple]="false" [items]="Categories" required>
-                <ng-template ng-option-tmp let-item="item">
-                    {{item.name}}
-                </ng-template>
-              </ng-select>
-            </div>
-          </div>
-        </div>
-      <div class="row">
-          <div class="col-md-12">
-            <div class="form-group mb-4">
               <label>Réference du produit</label>
               <ng-select name="product" placeholder="Tapez un produit" formControlName="product_id" (change)="onSelectProduct($event)"
                 bindValue="id" bindLabel="title.rendered" [hideSelected]="true" [typeahead]="typeaheadProducts" [multiple]="false" [items]="Products" required>

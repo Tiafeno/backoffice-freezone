@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as _ from 'lodash';
@@ -29,7 +29,8 @@ export class ArticleSupplierComponent implements OnInit {
 
   constructor(
     private apiWC: ApiWoocommerceService,
-    private apiWP: ApiWordpressService
+    private apiWP: ApiWordpressService,
+    private cd: ChangeDetectorRef
   ) {
     this.WP = apiWP.getWPAPI();
     this.WC = apiWC.getWoocommerce();
@@ -47,6 +48,7 @@ export class ArticleSupplierComponent implements OnInit {
     Helpers.setLoading(true);
     this.WP.fz_product().id(id).then(article => {
       this.Editor = _.clone(article);
+      this.cd.detectChanges();
       Helpers.setLoading(false);
     });
   }
@@ -121,6 +123,7 @@ export class ArticleSupplierComponent implements OnInit {
       this.Paging = false;
     }
     this.Products = _.isEmpty(fzProducts) ? [] : fzProducts;
+    this.cd.detectChanges();
     Helpers.setLoading(false);
   }
 

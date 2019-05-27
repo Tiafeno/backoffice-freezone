@@ -10,8 +10,7 @@ import * as _ from 'lodash';
 export class AuthorizationService {
 
   constructor(
-    private Http: HttpClient,
-    private router: Router
+    private Http: HttpClient
   ) { }
 
   public login(email: string, pwd: string): any {

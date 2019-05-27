@@ -35,7 +35,7 @@ export class AddArticleComponent implements OnInit {
     this.Form = new FormGroup({
       title: new FormControl('', Validators.required),
       price: new FormControl(0, Validators.required),
-      product_cat: new FormControl(null, Validators.required),
+      product_cat: new FormControl(0, Validators.required),
       product_id: new FormControl(null, Validators.required),
       user_id: new FormControl(null, Validators.required),
       stock: new FormControl(null, Validators.required)
@@ -52,19 +52,6 @@ export class AddArticleComponent implements OnInit {
       }, (err) => {
         console.log('error', err);
         this.Products = [];
-        this.detector.markForCheck();
-      });
-    this.typeaheadCategories
-      .pipe(
-        debounceTime(400),
-        switchMap(term => this.loadCategories(term))
-      )
-      .subscribe(items => {
-        this.Categories = items;
-        this.detector.markForCheck();
-      }, (err) => {
-        console.log('error', err);
-        this.Categories = [];
         this.detector.markForCheck();
       });
   }
@@ -104,24 +91,32 @@ export class AddArticleComponent implements OnInit {
 
   onSubmit(): void {
     if (this.Form.valid) {
-      let value: any = this.Form.value;
-      let args: any = {
-        status: 'publish',
-        title: value.title,
-        content: '',
-        price: parseInt(value.price),
-        total_sales: parseInt(value.stock),
-        user_id: parseInt(value.user_id),
-        product_id: parseInt(value.product_id),
-        product_cat: [parseInt(value.product_cat)],
-        date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
-        date_review: moment().format('YYYY-MM-DD HH:mm:ss')
-      };
-      Helpers.setLoading(true);
-      this.WP.fz_product().create(args).then(article => {
-        Helpers.setLoading(false);
-        $('#add-article-supplier-modal').modal('hide');
-      })
+      const value: any = this.Form.value;
+
+      if (!_.isNull(value.product_id)) {
+        Helpers.setLoading(true);
+        this.WP.products().id(parseInt(value.product_id)).then(product => {
+          let categories: Array<number> = _.map(product.Categories, ctg => ctg.id);
+          let args: any = {
+            status: 'publish',
+            title: value.title,
+            content: '',
+            price: parseInt(value.price),
+            total_sales: parseInt(value.stock),
+            user_id: parseInt(value.user_id),
+            product_id: parseInt(value.product_id),
+            product_cat: categories,
+            date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
+            date_review: moment().format('YYYY-MM-DD HH:mm:ss')
+          };
+         
+          this.WP.fz_product().create(args).then(article => {
+            Helpers.setLoading(false);
+            $('#add-article-supplier-modal').modal('hide');
+          });
+        });
+      }
+      
     }
   }
 

@@ -42,22 +42,22 @@ export class ReviewSupplierComponent implements OnInit {
       columns: [
         {
           data: 'company_name', render: (data) => {
-            return `<span>${data}</span>`;
+            return `<span class="badge badge-default">${data}</span>`;
           }
         },
         {
           data: 'reference', render: (data, type, row) => {
+            return `<b>${data}</b>`; 
+          }
+        },
+        {
+          data: 'phone', render: (data, type, row) => {
             return data;
           }
         },
         {
-          data: 'commission', render: (data, type, row) => {
-            return data + '%';
-          }
-        },
-        {
           data: 'data', render: (data, type, row) => {
-            return data.user_email;
+            return `<a href="mailto:${data.user_email}" >${data.user_email}</a>`;
           }
         },
         {

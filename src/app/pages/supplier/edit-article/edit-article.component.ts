@@ -22,7 +22,6 @@ export class EditArticleComponent implements OnInit, OnChanges {
   private WP: any;
   public Form: FormGroup;
   public Products: Array<any> = [];
-  public Categories: Array<any> = [];
   public Suppliers: Array<any> = [];
   public postResponseCache = new Map();
   public notice: any = null;
@@ -35,8 +34,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
     this.Form = new FormGroup({
       title: new FormControl('', Validators.required),
       price: new FormControl(0, Validators.required),
-      product_cat: new FormControl(null, Validators.required),
-      product_id: new FormControl(null, Validators.required),
+      product_id: new FormControl({value: null, disabled: true}, Validators.required),
       user_id: new FormControl(null, Validators.required),
       stock: new FormControl(null, Validators.required)
     });
@@ -77,17 +75,6 @@ export class EditArticleComponent implements OnInit, OnChanges {
     return response
   }
 
-  loadCategories(): Observable<any[]> {
-    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/product_cat?hide_empty=false&per_page=100`;
-    const postCache = this.postResponseCache.get(URL);
-    if (postCache) {
-      return of(postCache);
-    }
-    const response = this.http.get<any>(URL);
-    response.subscribe(categories => this.postResponseCache.set(URL, categories));
-
-    return response
-  }
 
   get f() { return this.Form.controls; }
 
@@ -125,7 +112,6 @@ export class EditArticleComponent implements OnInit, OnChanges {
     this.WP.fz_product().id(this.ID).update({
       title: Values.title,
       price: Values.price,
-      product_cat: [parseInt(Values.product_cat)],
       product_id: parseInt(Values.product_id),
       user_id: parseInt(Values.user_id),
       total_sales: parseInt(Values.stock),
@@ -144,16 +130,13 @@ export class EditArticleComponent implements OnInit, OnChanges {
     this.notice = null;
     const ObsProduct = this.loadPost('product');
     const ObsSuppliers = this.loadSuppliers();
-    const ObsCategories = this.loadCategories();
-    const Zip = Observable.zip(ObsProduct, ObsSuppliers, ObsCategories);
+    const Zip = Observable.zip(ObsProduct, ObsSuppliers);
     Zip.subscribe(results => {
-      this.Categories = _.isEmpty(this.Categories) ? results[2] : this.Categories;
-      this.Suppliers = _.isEmpty(this.Suppliers) ? results[1] : this.Suppliers;
       this.Products = _.isEmpty(this.Products) ? results[0] : this.Products;
+      this.Suppliers = _.isEmpty(this.Suppliers) ? results[1] : this.Suppliers;
       this.Form.patchValue({
         title: this.Article.title.rendered,
         price: this.Article.price,
-        product_cat: _.isArray(this.Article.product_cat) && !_.isEmpty(this.Article.product_cat) ? this.Article.product_cat[0] : null,
         product_id: this.Article.product_id,
         user_id: this.Article.user_id,
         stock: this.Article.total_sales

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { config } from '../../../../environments/environment';
 import * as moment from 'moment';
+import * as _ from 'lodash';
 declare var $:any;
 
 @Component({
@@ -36,14 +37,20 @@ export class SavComponent implements OnInit {
       columns: [
         { data: 'ID', render: (data) => { return `n°${data}`} },
         {
-          data: 'author', render: (data, type, row) => {
-
+          data: 'auctor', render: (data, type, row) => {
+            if (_.isEmpty(data)) return "Non renseigner";
             return `<span>${data.data.last_name} ${data.data.first_name}</span>`;
           }
         },
         {
           data: 'reference', render: (data, type, row) => {
+            if (_.isEmpty(data)) return 'Non renseigner';
             return `<span class="badge badge-success ">${data}</span>`;
+          }
+        },
+        {
+          data: 'product', render: (data, type, row) => {
+            return `<span class="badge badge-default ">${data}</span>`;
           }
         },
         {
@@ -52,13 +59,8 @@ export class SavComponent implements OnInit {
           }
         },
         {
-          data: 'type', render: (data, type, row) => {
-            return `<span class="badge badge-default ">${data}</span>`;
-          }
-        },
-        {
           data: 'date_appointment', render: (data, type, row) => {
-            let dt = moment(data).format('LL');
+            let dt = moment(data, 'DD-MM-YYYY HH:mm:ss').format('LLL');
             return `<span class="badge badge-success ">${dt}</span>`;
           }
         },

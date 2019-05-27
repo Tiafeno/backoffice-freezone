@@ -13,11 +13,11 @@
     <table class="table table-hover" id="quotation-edit-table">
       <thead class="thead-default thead-lg">
         <tr>
-          <th class="pl-4">Designation</th>
-          <th>Nbr</th>
-          <th>État</th>
-          <th>Fournisseurs</th>
-          <th class="pr-4" style="width:91px;">Action</th>
+          <th class="pl-4">DESIGNATION</th>
+          <th>QTÉ</th>
+          <th>ÉTAT</th>
+          <th>FOURNISSEUR</th>
+          <th class="pr-4" style="width:91px;">#</th>
         </tr>
       </thead>
     </table>
@@ -47,16 +47,21 @@
       </div>
       <div class="modal-body p-4">
         <div>
+          <div class="row">
+            <div class="col-6">
+                <label>Marge en <b>%</b>:</label>
+                <input type="text" class="form-control marge" style="background-color: lavender;" [value]="itemMarge" [attr.data-product]="Item.product_id">
+            </div>
+            
+          </div>
           <table class="table table-hover" id="quotation-supplier-table">
             <thead class="thead-default thead-lg">
               <tr>
-                <th class="pl-4">#</th>
-                <th>Fournisseurs</th>
-                <th>Stock</th>
-                <th>État</th>
-                <th>Prix</th>
-                <th>Pourcentage</th>
-                <th class="pr-4" style="width:91px;">Action</th>
+                <th>FOURNISSEUR</th>
+                <th>QTÉ</th>
+                <th>ÉTAT</th>
+                <th>PRIX UNITAIRE</th>
+                <th class="pr-4" style="width:91px;">#</th>
               </tr>
             </thead>
           </table>

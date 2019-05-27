@@ -1,15 +1,8 @@
 <div class="page-content fade-in-up">
   <div class="row">
-    <div class="col-lg-4">
-      <div class="ibox">
-        <div class="ibox-body">
-          <app-filter-article [word]="findWord" (search)="onSubmit($event)"></app-filter-article>
-        </div>
-
-      </div>
-    </div>
-    <div class="col-lg-8">
+    <div class="col-lg-12">
       <app-filter-search-article (findword)="onSearchWord($event)"></app-filter-search-article>
+      <app-filter-article [word]="findWord" (search)="onSubmit($event)"></app-filter-article>
       <div class="mb-3">
         <span>
           <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-article-supplier-modal">Ajouter une article</button>
@@ -18,13 +11,13 @@
       <div class="ibox">
         <div class="ibox-body" *ngIf="Products">
           <div class="mb-4">
-            <h3 class="mt-1">{{Products.length}} results found
-              <span *ngIf="findWord"> for: <span class="text-primary">“{{findWord}}”</span></span>
+            <h3 class="mt-1">{{Products.length}} article{{Products.length > 1 ? 's':''}} trouvé
+              <span *ngIf="findWord"> pour: <span class="text-primary">“{{findWord}}”</span></span>
             </h3>
           </div>
           <div class="table-responsive" *ngIf="Products.length > 0">
               <table class="table">
-                  <thead>
+                  <thead style="background-color: lavender;">
                       <tr>
                           <th>Titre</th>
                           <th>Prix</th>
@@ -36,7 +29,7 @@
                   <tbody>
                       <tr *ngFor="let article of Products">
                           <td><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a></td>
-                          <td><span class="badge badge-default">{{article.price}} MGA</span></td>
+                          <td><span class="badge badge-default">{{article.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</span></td>
                           <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']" routerLinkActive="active"  class="badge badge-success">
                             {{article.supplier.company_name}}
                           </a></td>

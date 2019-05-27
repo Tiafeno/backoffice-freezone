@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewEncapsulation, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
 import { Helpers } from '../../../helpers';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import Swal from 'sweetalert2';
@@ -27,6 +27,7 @@ export class QuotationEditComponent implements OnInit {
   public Table: any;
   public qtSupplierTable: any;
   public Item: any;
+  public itemMarge: string = '0';
   public objectMeta: Array<any> = [];
   public loading: boolean = false;
 
@@ -34,12 +35,22 @@ export class QuotationEditComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private apiWC: ApiWoocommerceService,
     private apiWP: ApiWordpressService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private zone: NgZone
   ) {
     this.WCAPI = this.apiWC.getWoocommerce();
     this.WPAPI = this.apiWP.getWPAPI();
+  }
+
+  public currencyFormat(numb: number, cur: string = "MGA"): string {
+    return new Intl.NumberFormat('de-DE', {
+      style: "currency",
+      minimumFractionDigits: 0,
+      currency: cur
+    }).format(numb);
   }
 
   ngOnInit() {
@@ -64,6 +75,7 @@ export class QuotationEditComponent implements OnInit {
               data: 'meta_data', render: (data) => {
                 let meta: any = _.find(data, { key: 'status' });
                 let status: string = parseInt(meta.value) === 0 ? 'En attente' : (parseInt(meta.value) === 1 ? "Traitée" : "Rejeté");
+
                 return `<span class="badge badge-success">${status}</span>`;
               }
             },
@@ -73,6 +85,7 @@ export class QuotationEditComponent implements OnInit {
                 if (!meta || _.isUndefined(meta)) return 'Non définie';
                 let value: any = JSON.parse(meta.value);
                 let countSuppliers = Object.keys(value);
+
                 return `<span class="badge badge-default">${countSuppliers.length} Fournisseur(s)</span>`;
               }
             },
@@ -93,12 +106,13 @@ export class QuotationEditComponent implements OnInit {
               this.WPAPI.fz_product().param('meta_key', "product_id").param('meta_value', this.Item.product_id).then(_response => {
                 let __FZPRODUCTS__: Array<any> = _.clone(_response);
                 this.__FZPRODUCTS__ = _.cloneDeep(__FZPRODUCTS__);// Collect tous les articles pour ce produit
+                // Vérfier si la liste des fournisseur disponible pour l'article est vide
                 if (_.isEmpty(__FZPRODUCTS__)) {
                   Swal.fire('Désolé', "Aucun fournisseur ne posséde cette article", "warning");
                   Helpers.setLoading(false);
                   return false;
                 }
-                let user_ids: Array<number> = _.map(__FZPRODUCTS__, (product) => { return parseInt(product.user_id); });
+                let user_ids: Array<number> = _.map(this.__FZPRODUCTS__, (product) => { return parseInt(product.user_id); });
                 this.WPAPI.users().include(_.join(user_ids, ',')).roles('fz-supplier').context('edit').then(_users => {
                   let __USERS__: Array<any> = _.clone(_users);
                   this.qtSupplierTable = $('#quotation-supplier-table').DataTable({
@@ -108,23 +122,22 @@ export class QuotationEditComponent implements OnInit {
                     "sDom": 'rtip',
                     data: __USERS__,
                     columns: [
-                      { data: 'id' }, // user_id
                       {
                         data: 'company_name', render: (data, type, row) => {
-                          return data;
+                          return `<span class="badge badge-default view-supplier" data-supplier="${row.id}">${data}</span>`
                         }
                       },
                       {
                         data: 'id', render: (data, type, row) => { // stock
                           let userId: any = data;
-                          let pdt: any = _.find(__FZPRODUCTS__, { user_id: userId });
+                          let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
                           return pdt.total_sales;
                         }
                       },
                       {
                         data: 'id', render: (data) => {
                           let userId: any = data;
-                          let pdt: any = _.find(__FZPRODUCTS__, { user_id: userId });
+                          let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
                           let dateReview: any = moment(pdt.date_review);
                           let dateLimit: any = moment().subtract(2, 'day');
                           let msg: string = dateLimit < dateReview ? "Traité" : "En attente";
@@ -135,11 +148,10 @@ export class QuotationEditComponent implements OnInit {
                       {
                         data: 'id', render: data => {
                           let userId: any = data;
-                          let pdt: any = _.find(__FZPRODUCTS__, { user_id: userId });
-                          return `${pdt.price} MGA`;
+                          let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
+                          return this.currencyFormat(pdt.price);
                         }
                       }, // price product
-                      { data: 'commission', render: (data) => { return `${data}%` } },
                       {
                         data: null, render: (data, type, row) => {
                           let value: number = 0;
@@ -156,25 +168,36 @@ export class QuotationEditComponent implements OnInit {
                             });
                           }
 
-                          let fzProduct: any = _.find(__FZPRODUCTS__, { user_id: row.id });
-                          return `<input type="number" class="input-increment" value="${value}" min="0" max="${fzProduct.total_sales}" 
+                          let fzProduct: any = _.find(this.__FZPRODUCTS__, { user_id: row.id });
+                          return `<input type="number" class="input-increment form-control" value="${value}" min="0" max="${fzProduct.total_sales}" 
                           data-product="${fzProduct.product_id}" data-supplier="${row.id}" data-article="${fzProduct.id}">`;
                         }
                       }
                     ],
                     initComplete: () => {
                       Helpers.setLoading(false);
+                      // Récuperer la marge pour le produit
+                      let fzProduct: any = this.__FZPRODUCTS__;
+                      this.itemMarge = _.clone(fzProduct[0].marge);
+                      this.itemMarge = `${this.itemMarge} %`;
+
                       $('#quotation-view-supplier-modal').modal('show');
-                      $('.input-increment').on('change', ev => {
+                      $('#quotation-supplier-table tbody').on('click', '.view-supplier', ev => {
+                        ev.preventDefault();
+                        const element = $(ev.currentTarget);
+                        const elData:any = $(element).data();
+                        $('.modal').modal('hide');
+                        setTimeout(() => {
+                          this.zone.run(() => this.router.navigate(['/supplier', elData.supplier, 'edit']) );
+                        }, 600);
+                        
+                      });
+                      $('#quotation-supplier-table tbody').on('change', '.input-increment', ev => {
                         ev.preventDefault();
 
                         let element = $(ev.currentTarget);
-                        let currentValue = element.val();
-                        let id = element.data('supplier');
-                        let productID = element.data('product');
-                        let articleID = element.data('article');
-                        productID = parseInt(productID);
-
+                        let currentValue = $(element).val();
+                        const elData:any = $(element).data();
                         let countInputSet = 0;
 
                         // Vérifier la quantité et la quantité ajouter pour les fournisseurs
@@ -188,8 +211,45 @@ export class QuotationEditComponent implements OnInit {
                           element.val(Math.abs(parseInt(currentValue) - 1));
                           return false;
                         };
-                        this.objectMeta = _.reject(this.objectMeta, {supplier: id});
-                        this.objectMeta.push({ supplier: id, get: parseInt(element.val()), product_id: productID, article_id: articleID });
+                        this.objectMeta = _.reject(this.objectMeta, {supplier: elData.supplier});
+                        this.objectMeta.push({ 
+                          supplier: elData.supplier, 
+                          get: parseInt(element.val()),
+                          product_id: parseInt(elData.product), 
+                          article_id: elData.article 
+                        });
+                      });
+
+                      $('#quotation-view-supplier-modal').on('change', '.marge', ev => {
+                        ev.preventDefault();
+                        let element: any = ev.currentTarget;
+                        let defaultValue: any = element.defaultValue;
+                        defaultValue = parseInt(defaultValue.replace(/%/g, ''));
+
+                        let currentValue: any = $(element).val();
+                        currentValue = parseInt(currentValue.replace(/%/g, ''));
+                        let value: number = _.isNaN(currentValue) ? parseInt(defaultValue) : parseInt(currentValue);
+
+                        $(element).val(value + " %");
+
+                        if ( ! _.isNaN(currentValue) ) {
+                          // Mettre à jour la marge du produit
+                          const data: any = {
+                            meta_data: [
+                              { key: '_fz_marge', 'value': value}
+                            ]
+                          };
+                          const elData: any = $(element).data();
+                          Helpers.setLoading(true);
+                          this.WCAPI.put(`products/${elData.product}`, data, (err, data, res) => {
+                            Helpers.setLoading(false);
+                            let product: any = JSON.parse(res);
+                            this.__FZPRODUCTS__ = _.reject(this.__FZPRODUCTS__, {id: product.id});
+                            this.__FZPRODUCTS__.push(product);
+                            this.cd.detectChanges();
+                            
+                          });
+                        }
                       });
 
                       this.cd.detectChanges();
