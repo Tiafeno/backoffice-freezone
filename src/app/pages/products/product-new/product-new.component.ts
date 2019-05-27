@@ -43,6 +43,7 @@ export class ProductNewComponent implements OnInit {
     this.Form = new FormGroup({
       name:        new FormControl('', Validators.required),
       description: new FormControl(''),
+      marge: new FormControl(''),
       sku:         new FormControl('', Validators.required),
       categorie:   new FormControl('', Validators.required)
     });
@@ -61,7 +62,6 @@ export class ProductNewComponent implements OnInit {
   }
 
   onSubmit(): void | boolean {
-    console.log(this.Form.value);
     if (this.Form.invalid || !this.Form.dirty) return false;
     let Value:any = this.Form.value;
     let ctgs: Array<any> = _.map(Value.categorie, ctg => { return {id: ctg }});
@@ -73,6 +73,9 @@ export class ProductNewComponent implements OnInit {
       on_sale: true,
       total_sales: 0,
       sku: Value.sku,
+      meta_data: [
+        {key: '_fz_marge', value: Value.marge}
+      ],
       regular_price: '0', // Important, string value
       description: Value.description,
       short_description: Value.description,
