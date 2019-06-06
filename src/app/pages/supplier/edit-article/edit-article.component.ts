@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import * as _ from 'lodash';
 import { HttpClient } from '@angular/common/http';
@@ -29,7 +29,8 @@ export class EditArticleComponent implements OnInit, OnChanges {
   @Output() refresh = new EventEmitter<any>();
   constructor(
     private http: HttpClient,
-    private apiWP: ApiWordpressService
+    private apiWP: ApiWordpressService,
+    private cd: ChangeDetectorRef
   ) {
     this.Form = new FormGroup({
       title: new FormControl('', Validators.required),
@@ -141,6 +142,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
         user_id: this.Article.user_id,
         stock: this.Article.total_sales
       });
+      this.cd.detectChanges();
       $('#edit-article-supplier-modal').modal('show');
     }, error => {}, () => {
       Helpers.setLoading(false);

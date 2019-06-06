@@ -15,6 +15,7 @@ declare var $: any;
 })
 export class ReviewMailSupplierComponent implements OnInit, OnChanges {
   public Fournisseur: any = {};
+  public email: string = "contact@freezone.click";
   public pendingArticle: Array<any> = [];
   @Input() supplier: any = {};
 
@@ -57,7 +58,27 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
   }
 
   onSend() {
-    Swal.fire('En construction', "Cette option est en cour de construction", 'info');
+    if (this.Form.invalid) return false;
+    const Value: any = this.Form.value;
+    let Form: FormData = new FormData();
+    Form.append('subject', Value.subject);
+    Form.append('message', Value.message);
+    Helpers.setLoading(true);
+    this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.ID}`, Form).subscribe(result => {
+      Helpers.setLoading(false);
+      let response: any = _.clone(result);
+      if (response.success) {
+        this.Form.patchValue({
+          subject: '',
+          message: ''
+        });
+        $('.modal').modal('hide');
+        Swal.fire('Succès', response.data, 'success');
+      } else {
+        Swal.fire('Désolé', response.data, 'error');
+      }
+          
+    });
   }
 
   openDialog() {

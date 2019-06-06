@@ -64,6 +64,10 @@ export class ProductListsComponent implements OnInit {
             return _.isEmpty(data) ? 'Non définie' : data;
           }
         },
+        { data: 'marge', render: (data, type, row) => {
+          return _.isEmpty(data) ? '0%' : data+'%';
+        }
+      },
         { data: 'categories', render: (data, type, row) => {
             return data;
             // let ctg: Array<any> = _.isEmpty(data) ? [] : _.clone(data);

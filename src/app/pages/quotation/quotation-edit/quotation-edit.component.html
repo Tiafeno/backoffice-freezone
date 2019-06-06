@@ -61,6 +61,7 @@
                 <th>QTÉ</th>
                 <th>ÉTAT</th>
                 <th>PRIX UNITAIRE</th>
+                <th>PRODUIT</th>
                 <th class="pr-4" style="width:91px;">#</th>
               </tr>
             </thead>
@@ -92,5 +93,11 @@
     <div class="modal-content">
       <app-quotation-mail [order]="__ORDER__"></app-quotation-mail>
     </div>
+  </div>
+</div>
+
+<div class="modal fade" id="edit-article-supplier-modal">
+  <div class="modal-dialog" role="document">
+    <app-edit-article [Article]="Editor" (refresh)="closeSupplierView()"></app-edit-article>
   </div>
 </div>

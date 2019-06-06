@@ -47,6 +47,7 @@ import { ReviewArticlesComponent } from './pages/supplier/review-articles/review
 import { ReviewSupplierComponent } from './pages/supplier/review-supplier/review-supplier.component';
 import { ReviewMailSupplierComponent } from './pages/supplier/review-mail-supplier/review-mail-supplier.component';
 import { SavComponent } from './pages/sav/sav/sav.component';
+import { ScheduleGuard } from './guards/schedule.guard';
 
 
 const routes: Routes = [
@@ -54,7 +55,7 @@ const routes: Routes = [
     {
         path: "",
         component: LayoutComponent,
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, ScheduleGuard],
         children: [
             {
                 path: "dashboard",
@@ -225,6 +226,7 @@ const routes: Routes = [
         FzServicesService,
         AuthGuard,
         LoginGuard,
+        ScheduleGuard,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true }
         // { provide: LocationStrategy, useClass: HashLocationStrategy}
     ],
