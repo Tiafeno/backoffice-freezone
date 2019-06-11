@@ -6,6 +6,7 @@
       <div class="mb-3">
         <span>
           <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-article-supplier-modal">Ajouter une article</button>
+          <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#import-article-modal">+ Importer des articles</button>
         </span>
       </div>
       <div class="ibox">
@@ -67,11 +68,16 @@
           <app-add-article></app-add-article>
         </div>
       </div>
-
       
       <div class="modal fade" id="edit-article-supplier-modal">
         <div class="modal-dialog" role="document">
           <app-edit-article [Article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
+        </div>
+      </div>
+
+      <div class="modal fade" id="import-article-modal">
+        <div class="modal-dialog" role="document">
+          <app-import-article (refresh)="onRefreshResults()"></app-import-article>
         </div>
       </div>
 

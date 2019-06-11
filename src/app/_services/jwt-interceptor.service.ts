@@ -19,7 +19,6 @@ export class JwtInterceptorService implements HttpInterceptor {
       if (err instanceof HttpErrorResponse) { // here you can even check for err.status == 404 | 401 etc
         if (err.status == 401 || err.status == 511 || err.status == 500) {
           setTimeout(() => {
-            //localStorage.removeItem('currentUser');
             location.reload();
             localStorage.removeItem('__fzCurrentUser');
           }, 1500);

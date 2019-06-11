@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { FilterArticleComponent } from '../../../components/filter-article/filter-article.component';
 import { FilterSearchArticleComponent } from '../../../components/filter-search-article/filter-search-article.component';
 import { Helpers } from '../../../helpers';
+import { ImportArticleComponent } from '../../../components/import-article/import-article.component';
 
 @Component({
   selector: 'app-article-supplier',
@@ -26,6 +27,7 @@ export class ArticleSupplierComponent implements OnInit {
 
   @ViewChild(FilterArticleComponent) public Filter: FilterArticleComponent;
   @ViewChild(FilterSearchArticleComponent) Search: FilterSearchArticleComponent;
+  @ViewChild(ImportArticleComponent) Importation: ImportArticleComponent;
 
   constructor(
     private apiWC: ApiWoocommerceService,

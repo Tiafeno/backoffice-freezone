@@ -26,12 +26,17 @@ export class ApiWordpressService {
 
     let routeUsers = '/users/(?P<id>\\d+)';
     this.wpEndPoint.users = this.wpEndPoint.registerRoute(namespace, routeUsers, {
-      params: ['roles', 'context', 'include', 'exclude', 'per_page', 'orderby']
+      params: ['roles', 'context', 'include', 'exclude', 'per_page', 'orderby', 'filter']
     });
 
     let routeProducts = '/products/(?P<id>\\d+)';
     this.wpEndPoint.products = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeProducts, {
-      params: ['search']
+      params: ['search', 'filter', 'sku']
+    });
+
+    let routeGD = '/good-deal/(?P<id>\\d+)';
+    this.wpEndPoint.good_deal = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeGD, {
+      params: ['search', 'context', 'include', 'exclude', 'filter']
     });
 
     let routeOrders = '/orders/(?P<id>\\d+)';

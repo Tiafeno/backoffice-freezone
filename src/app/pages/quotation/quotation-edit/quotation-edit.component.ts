@@ -118,7 +118,7 @@ export class QuotationEditComponent implements OnInit {
               let item = this.Table.row(el).data();
               this.Item = _.cloneDeep(item); // Contient l'item en cours de traitement
               Helpers.setLoading(true);
-              this.WPAPI.fz_product().param('meta_key', "product_id").param('meta_value', this.Item.product_id).then(_response => {
+              this.WPAPI.fz_product().context('edit').param('meta_key', "product_id").param('meta_value', this.Item.product_id).then(_response => {
                 let __FZPRODUCTS__: Array<any> = _.clone(_response);
                 this.__FZPRODUCTS__ = _.cloneDeep(__FZPRODUCTS__);// Collect tous les articles pour ce produit
                 // Vérfier si la liste des fournisseur disponible pour l'article est vide

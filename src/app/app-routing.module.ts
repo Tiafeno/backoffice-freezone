@@ -48,6 +48,7 @@ import { ReviewSupplierComponent } from './pages/supplier/review-supplier/review
 import { ReviewMailSupplierComponent } from './pages/supplier/review-mail-supplier/review-mail-supplier.component';
 import { SavComponent } from './pages/sav/sav/sav.component';
 import { ScheduleGuard } from './guards/schedule.guard';
+import { ImportArticleComponent } from './components/import-article/import-article.component';
 
 
 const routes: Routes = [
@@ -206,6 +207,7 @@ const routes: Routes = [
         ReviewArticlesComponent,
         ReviewSupplierComponent,
         ReviewMailSupplierComponent,
+        ImportArticleComponent,
         SavComponent,
         MomentsPipe
     ],
