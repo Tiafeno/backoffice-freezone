@@ -46,7 +46,8 @@ export class ProductEditComponent implements OnInit {
 		this.Form = new FormGroup({
 			name: new FormControl('', Validators.required),
 			description: new FormControl(''),
-			marge: new FormControl(''),
+			marge: new FormControl('', Validators.required),
+			marge_dealer: new FormControl('', Validators.required),
 			sku: new FormControl('', Validators.required),
 			categorie: new FormControl('', Validators.required)
 		})
@@ -68,13 +69,16 @@ export class ProductEditComponent implements OnInit {
 				Observable.zip(Categories).subscribe(results => {
 					this.Categories = _.isEmpty(this.Categories) ? _.filter(results[0], ctg => ctg) : this.Categories; // TODO: Ne pas afficher les categories parents
 					let inputCtg: Array<number> = _.map(this.Product.categories, ctg => { return ctg.id });
-					let _marge: any = _.find(this.Product.meta_data, {key: '_fz_marge'});
+					let _marge: any = _.find(this.Product.meta_data, { key: '_fz_marge' });
+					let _marge_dealer: any = _.find(this.Product.meta_data, { key: '_fz_marge_dealer' });
 					_marge = _.isUndefined(_marge) || _.isEmpty(_marge) ? 0 : _marge.value;
+					_marge_dealer = _.isUndefined(_marge_dealer) || _.isEmpty(_marge_dealer) ? 0 : _marge_dealer.value;
 					this.Form.patchValue({
 						name: this.Product.name,
 						description: this.Product.description,
 						sku: this.Product.sku,
 						marge: _marge,
+						marge_dealer: _marge_dealer,
 						categorie: inputCtg
 					});
 					Helpers.setLoading(false);
@@ -91,15 +95,10 @@ export class ProductEditComponent implements OnInit {
 		let Value: any = this.Form.value;
 		let Ctg: Array<any> = _.map(Value.categorie, ctg => { return { id: ctg }; });
 		let metaData: any = this.Product.meta_data;
-		if (_.find(metaData, {key: '_fz_marge'})) {
-			metaData = _.map(metaData, (meta) => {
-				if (meta.key === '_fz_marge') meta.value = Value.marge;
-				return meta;
-			});
-		} else {
-			metaData.push({key: '_fz_meta', value: Value.marge});
-		}
-		
+
+		metaData = _.reject(metaData, (meta) => meta.key === '_fz_marge' || meta.key === '_fz_marge_dealer');
+		metaData.push({ key: '_fz_marge', value: Value.marge }, { key: '_fz_marge_dealer', value: Value.marge_dealer });
+
 		let data: any = {
 			name: Value.name,
 			description: Value.description,

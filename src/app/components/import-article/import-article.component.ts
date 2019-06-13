@@ -42,8 +42,8 @@ export class ImportArticleComponent implements OnInit {
         { key: 'LastUpdate', label: "Date de revision" },
         { key: 'Categorie', label: "Categories" },
         { key: 'Mark', label: "Marque" },
-        { key: 'Marge', label: "Marge" },
-        { key: 'MargeDealder', label: "Marge de revendeur" },
+        { key: 'Marge', label: "Marge en %" },
+        { key: 'MargeDealer', label: "Marge de revendeur" },
     ]
 
     public Inputs: Array<any>;
@@ -197,7 +197,7 @@ export class ImportArticleComponent implements OnInit {
                     if (_.isUndefined(response.code)) {
                         resolve(response);
                     } else {
-                        resolve({id: response.data.resource_id, name: '', description: ''});
+                        resolve({ id: response.data.resource_id, name: '', description: '' });
                     }
                 });
             });
@@ -233,8 +233,8 @@ export class ImportArticleComponent implements OnInit {
                 if (_.isUndefined(response.code)) {
                     resolve(response);
                 } else {
-                    if (response.code === 'term_exists'){
-                        resolve({id: response.data.resource_id});
+                    if (response.code === 'term_exists') {
+                        resolve({ id: response.data.resource_id });
                     }
                     resolve(false);
                 }

@@ -3,6 +3,7 @@ import { AuthorizationService } from '../../_services/authorization.service';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 declare var $: any;
 
 @Component({
@@ -13,6 +14,7 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public formLogin: FormGroup;
   public loading: boolean = false;
   public submitted: boolean = false;
+  public errorResponse: HttpErrorResponse = null;
   constructor(
     private auth: AuthorizationService,
     private router: Router
@@ -62,6 +64,8 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         error => {
           this.loading = false;
+          this.errorResponse = error;
+          this.formLogin.patchValue({pwd: ""});
         });
   }
 

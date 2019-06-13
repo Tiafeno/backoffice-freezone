@@ -49,8 +49,13 @@
         <div>
           <div class="row">
             <div class="col-6">
-                <label>Marge en <b>%</b>:</label>
+                <label>Marge <b>%</b>:</label>
                 <input type="text" class="form-control marge" style="background-color: lavender;" [value]="itemMarge" [attr.data-product]="Item.product_id">
+            </div>
+
+            <div class="col-6">
+              <label>Marge Revendeur <b>%</b>:</label>
+              <input type="text" class="form-control marge-dealer" style="background-color: lavender;" [value]="itemMargeDealer" [attr.data-product]="Item.product_id">
             </div>
             
           </div>
@@ -58,10 +63,11 @@
             <thead class="thead-default thead-lg">
               <tr>
                 <th>FOURNISSEUR</th>
+                <th>REFERENCE</th>
                 <th>QTÉ</th>
                 <th>ÉTAT</th>
                 <th>PRIX UNITAIRE</th>
-                <th>PRODUIT</th>
+                <th>ARTICLE</th>
                 <th class="pr-4" style="width:91px;">#</th>
               </tr>
             </thead>

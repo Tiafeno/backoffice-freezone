@@ -65,7 +65,7 @@ export class ProductListsComponent implements OnInit {
           }
         },
         { data: 'marge', render: (data, type, row) => {
-          return _.isEmpty(data) ? '0%' : data+'%';
+          return parseInt(data) + '%';
         }
       },
         { data: 'categories', render: (data, type, row) => {

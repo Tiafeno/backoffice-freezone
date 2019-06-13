@@ -31,6 +31,7 @@ export class QuotationEditComponent implements OnInit {
   public qtSupplierTable: any;
   public Item: any;
   public itemMarge: string = '0';
+  public itemMargeDealer: string = '0';
   public objectMeta: Array<any> = [];
   public loading: boolean = false;
 
@@ -139,7 +140,12 @@ export class QuotationEditComponent implements OnInit {
                     columns: [
                       {
                         data: 'company_name', render: (data, type, row) => {
-                          return `<span class="badge badge-default view-supplier" data-supplier="${row.id}">${data}</span>`
+                          return `<span>${data}</span>`
+                        }
+                      },
+                      {
+                        data: 'reference', render: (data, type, row) => {
+                          return `<span class="badge badge-default view-supplier" style="cursor: pointer" data-supplier="${row.id}">${data}</span>`
                         }
                       },
                       {
@@ -203,6 +209,7 @@ export class QuotationEditComponent implements OnInit {
                       let fzProduct: any = this.__FZPRODUCTS__;
                       this.itemMarge = _.clone(fzProduct[0].marge);
                       this.itemMarge = `${this.itemMarge} %`;
+                      this.itemMargeDealer = _.clone(fzProduct[0].marge_dealer);
 
                       $('#quotation-view-supplier-modal').modal('show');
                       $('#quotation-supplier-table tbody').on('click', '.view-supplier', ev => {
@@ -265,6 +272,38 @@ export class QuotationEditComponent implements OnInit {
                           const data: any = {
                             meta_data: [
                               { key: '_fz_marge', 'value': value }
+                            ]
+                          };
+                          const elData: any = $(element).data();
+                          Helpers.setLoading(true);
+                          this.WCAPI.put(`products/${elData.product}`, data, (err, data, res) => {
+                            Helpers.setLoading(false);
+                            let product: any = JSON.parse(res);
+                            this.__FZPRODUCTS__ = _.reject(this.__FZPRODUCTS__, { id: product.id });
+                            this.__FZPRODUCTS__.push(product);
+                            this.cd.detectChanges();
+
+                          });
+                        }
+                      });
+
+                      $('#quotation-view-supplier-modal').on('change', '.marge-dealer', ev => {
+                        ev.preventDefault();
+                        let element: any = ev.currentTarget;
+                        let defaultValue: any = element.defaultValue;
+                        defaultValue = parseInt(defaultValue.replace(/%/g, ''));
+
+                        let currentValue: any = $(element).val();
+                        currentValue = parseInt(currentValue.replace(/%/g, ''));
+                        let value: number = _.isNaN(currentValue) ? parseInt(defaultValue) : parseInt(currentValue);
+
+                        $(element).val(value + " %");
+
+                        if (!_.isNaN(currentValue)) {
+                          // Mettre à jour la marge du produit
+                          const data: any = {
+                            meta_data: [
+                              { key: '_fz_marge_dealer', 'value': value }
                             ]
                           };
                           const elData: any = $(element).data();

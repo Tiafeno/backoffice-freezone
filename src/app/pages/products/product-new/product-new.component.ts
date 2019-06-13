@@ -44,6 +44,7 @@ export class ProductNewComponent implements OnInit {
       name: new FormControl('', Validators.required),
       description: new FormControl(''),
       marge: new FormControl('', Validators.required),
+      marge_dealer: new FormControl('', Validators.required),
       sku: new FormControl('', Validators.required),
       categorie: new FormControl('', Validators.required)
     });
@@ -74,7 +75,8 @@ export class ProductNewComponent implements OnInit {
       total_sales: 0,
       sku: Value.sku,
       meta_data: [
-        { key: '_fz_marge', value: Value.marge }
+        { key: '_fz_marge', value: Value.marge },
+        { key: '_fz_marge_dealer', value: Value.marge_dealer }
       ],
       regular_price: '0', // Important, string value
       description: Value.description,
