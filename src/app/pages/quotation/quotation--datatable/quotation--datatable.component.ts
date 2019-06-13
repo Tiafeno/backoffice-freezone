@@ -9,6 +9,7 @@ import { Helpers } from '../../../helpers';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { StatusQuotationSwitcherComponent } from '../../../components/status-quotation-switcher/status-quotation-switcher.component';
 import { AuthorizationService } from '../../../_services/authorization.service';
+import { FzSecurityService } from '../../../_services/fz-security.service';
 declare var $: any;
 @Component({
   selector: 'app-quotation--datatable',
@@ -30,7 +31,8 @@ export class QuotationDatatableComponent implements OnInit {
     private apiWP: ApiWordpressService,
     private apiWC: ApiWoocommerceService,
     private cd: ChangeDetectorRef,
-    private auth: AuthorizationService
+    private auth: AuthorizationService,
+    private security: FzSecurityService
   ) {
     this.WPAPI = this.apiWP.getWPAPI();
     this.WCAPI = this.apiWC.getWoocommerce();
@@ -111,33 +113,40 @@ export class QuotationDatatableComponent implements OnInit {
         $("#quotation-table tbody").on('click', '.remove-quotation', ev => {
           ev.preventDefault();
           let __quotation = getElementData(ev);
-          Swal.fire({
-            title: "Confirmation",
-            text: "Voulez vous vraiment supprimer cette commande?",
-            type: 'warning',
-            showCancelButton: true
-          }).then(result => {
-            if (result.value) {
-              Helpers.setLoading(true);
-              this.WPAPI.orders().id(__quotation.ID).delete({force: true, reassign: 1}).then(resp => {
-                Helpers.setLoading(false);
-                this.reload();
-                Swal.fire("Succès", "Client supprimer avec succès", 'success');
-              });
-            }
-          })
+          // Vérifier le niveau d'accès
+          if (this.security.hasAccess('s2')) {
+            Swal.fire({
+              title: "Confirmation",
+              text: "Voulez vous vraiment supprimer ce demande?",
+              type: 'warning',
+              showCancelButton: true
+            }).then(result => {
+              if (result.value) {
+                Helpers.setLoading(true);
+                this.WPAPI.orders().id(__quotation.ID).delete({force: true, reassign: 1}).then(resp => {
+                  Helpers.setLoading(false);
+                  this.reload();
+                  Swal.fire("Succès", "Client supprimer avec succès", 'success');
+                });
+              }
+            });
+          }
+          
         });
 
         $('#quotation-table tbody').on('click', '.status-switcher', e => {
           e.preventDefault();
           let __quotation = getElementData(e);
-          Helpers.setLoading(true);
-          this.WCAPI.get(`orders/${__quotation.ID}`, (err, data, res) => {
-            let response: any = JSON.parse(res);
-            this.qtSelected = _.clone(response);
-            Helpers.setLoading(false);
-            this.cd.detectChanges();
-          });
+          if (this.security.hasAccess('s3')) {
+            Helpers.setLoading(true);
+            this.WCAPI.get(`orders/${__quotation.ID}`, (err, data, res) => {
+              let response: any = JSON.parse(res);
+              this.qtSelected = _.clone(response);
+              Helpers.setLoading(false);
+              this.cd.detectChanges();
+            });
+          }
+          
         });
 
         $('#quotation-switcher-modal').on('hide.bs.modal', e => {

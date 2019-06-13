@@ -61,6 +61,7 @@ export class AddArticleComponent implements OnInit {
   ngOnInit() {
     moment.locale('fr');
     $('#add-article-supplier-modal').on('show.bs.modal', e => {
+      
       Helpers.setLoading(true);
       this.init();
       Helpers.setLoading(false);

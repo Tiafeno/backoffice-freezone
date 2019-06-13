@@ -49,6 +49,10 @@ import { ReviewMailSupplierComponent } from './pages/supplier/review-mail-suppli
 import { SavComponent } from './pages/sav/sav/sav.component';
 import { ScheduleGuard } from './guards/schedule.guard';
 import { ImportArticleComponent } from './components/import-article/import-article.component';
+import { ClientsComponent } from './pages/clients/clients.component';
+import { EditClientComponent } from './pages/clients/edit-client/edit-client.component';
+import { NoCommercialAccessGuard } from './guards/no-commercial-access.guard';
+import { FzSecurityService } from './_services/fz-security.service';
 
 
 const routes: Routes = [
@@ -63,7 +67,7 @@ const routes: Routes = [
                 children: [
                     { path: "", redirectTo: 'quotation', pathMatch: 'full' },
                     {
-                        path: '', 
+                        path: '',
                         component: Dashboard7Component,
                         children: [
                             {
@@ -77,7 +81,7 @@ const routes: Routes = [
                                     { path: "edit", component: QuotationEditComponent }
                                 ]
                             }
-                            
+
                         ]
                     }
                 ]
@@ -87,19 +91,37 @@ const routes: Routes = [
                 component: SavComponent
             },
             {
+                path: "client",
+                children: [
+                    { path: '', redirectTo: 'lists', pathMatch: "full" },
+                    { path: 'lists', component: ClientsComponent },
+                    {
+                        path: ":id",
+                        canActivate: [NoCommercialAccessGuard],
+                        children: [
+                            { path: "", redirectTo: 'edit', pathMatch: 'full' },
+                            { path: 'edit', component: EditClientComponent }
+                        ]
+                    },
+                ]
+            },
+            {
                 path: "supplier",
                 children: [
                     { path: "", redirectTo: 'lists', pathMatch: "full" },
                     {
                         path: 'lists',
+                        canActivate: [NoCommercialAccessGuard],
                         component: SupplierDatatableComponent
                     },
                     {
                         path: 'new',
+                        canActivate: [NoCommercialAccessGuard],
                         component: AddSupplierComponent
                     },
                     {
                         path: 'review',
+                        canActivate: [NoCommercialAccessGuard],
                         component: ReviewSupplierComponent
                     },
                     {
@@ -112,16 +134,18 @@ const routes: Routes = [
                     },
                     {
                         path: ":id",
+                        canActivate: [NoCommercialAccessGuard],
                         children: [
                             { path: "", redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: EditSupplierComponent }
                         ]
                     },
-                    
+
                 ]
             },
             {
                 path: "product",
+                canActivate: [NoCommercialAccessGuard],
                 children: [
                     { path: "", redirectTo: "lists", pathMatch: "full" },
                     {
@@ -135,7 +159,7 @@ const routes: Routes = [
                     {
                         path: ':id',
                         children: [
-                            { path: "", redirectTo: 'edit', pathMatch: 'full'},
+                            { path: "", redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: ProductEditComponent }
                         ]
                     }
@@ -208,6 +232,8 @@ const routes: Routes = [
         ReviewSupplierComponent,
         ReviewMailSupplierComponent,
         ImportArticleComponent,
+        ClientsComponent,
+        EditClientComponent,
         SavComponent,
         MomentsPipe
     ],
@@ -229,6 +255,8 @@ const routes: Routes = [
         AuthGuard,
         LoginGuard,
         ScheduleGuard,
+        NoCommercialAccessGuard,
+        FzSecurityService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true }
         // { provide: LocationStrategy, useClass: HashLocationStrategy}
     ],
@@ -239,4 +267,4 @@ const routes: Routes = [
 
 export class AppRoutingModule {
 
- }
+}

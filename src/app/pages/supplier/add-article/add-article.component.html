@@ -16,7 +16,7 @@
             <ng-select name="supplier" placeholder="Selectionner un fournisseur" formControlName="user_id"
               bindLabel="name" bindValue="id" [hideSelected]="true" [multiple]="false" [items]="Suppliers" required>
               <ng-template ng-option-tmp let-item="item">
-                  {{item.name}} (<b>F{{item.id}}</b>)
+                  <b>{{item.company_name}}</b> <i>{{item.reference}}</i>
               </ng-template>
             </ng-select>
           </div>

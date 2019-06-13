@@ -53,5 +53,11 @@ export class AuthorizationService {
   public getCurrentUser() {
     let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
     return __fzCurrentUser;
- }
+  }
+
+  public getCurrentUserRole(): string {
+    let User: any = this.getCurrentUser();
+    return User.data.roles[0];
+  }
+  
 }

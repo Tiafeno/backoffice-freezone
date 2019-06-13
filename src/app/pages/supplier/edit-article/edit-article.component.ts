@@ -10,6 +10,7 @@ import 'rxjs/add/observable/zip';
 import Swal from 'sweetalert2';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as moment from 'moment'
+import { FzSecurityService } from '../../../_services/fz-security.service';
 declare var $: any;
 
 @Component({
@@ -27,21 +28,24 @@ export class EditArticleComponent implements OnInit, OnChanges {
     public notice: any = null;
     public dateReview: string;
     public dateReviewFromNow: string;
+    public canEdit: boolean = true;
     @Input() Article: any;
     @Output() refresh = new EventEmitter<any>();
     constructor(
         private http: HttpClient,
+        private security: FzSecurityService,
         private apiWP: ApiWordpressService,
         private cd: ChangeDetectorRef
     ) {
         this.Form = new FormGroup({
             title: new FormControl('', Validators.required),
-            price: new FormControl(0, Validators.required),
+            price: new FormControl({ value: 0, disabled: this.canEdit }, Validators.required),
             product_id: new FormControl({ value: null, disabled: true }, Validators.required),
             user_id: new FormControl(null, Validators.required),
-            stock: new FormControl(null, Validators.required)
+            stock: new FormControl({ value: null, disabled: this.canEdit }, Validators.required)
         });
         this.WP = this.apiWP.getWPAPI();
+        this.canEdit = this.security.hasAccess('s6', false);
     }
 
     ngOnInit() {
@@ -111,6 +115,9 @@ export class EditArticleComponent implements OnInit, OnChanges {
             this.add_notice("Aucune modifications n'ont été apportées", 'warning');
             return false;
         }
+        if (!this.security.hasAccess('s6')) {
+            return false;
+        }
         const Values = this.Form.value;
         Helpers.setLoading(true);
         this.WP.fz_product().id(this.ID).update({
@@ -165,22 +172,25 @@ export class EditArticleComponent implements OnInit, OnChanges {
      */
     onRemoveArticle(id: number): void | boolean {
         if (!_.isNumber(id)) return false;
-        $('#edit-article-supplier-modal').modal('hide');
-        Swal.fire({
-            title: "Confirmation",
-            text: "Voulez vous vraiment supprimer cette article?",
-            type: 'warning',
-            showCancelButton: true
-        }).then(result => {
-            if (result.value) {
-                Helpers.setLoading(true);
-                this.WP.fz_product().id(id).delete({ force: true, reassign: 1 }).then(resp => {
-                    this.refresh.emit();
-                    Helpers.setLoading(false);
-                    Swal.fire("Succès", "Article supprimer avec succès", 'success');
-                });
-            }
-        })
+        if (this.security.hasAccess('s7')) {
+            $('#edit-article-supplier-modal').modal('hide');
+            Swal.fire({
+                title: "Confirmation",
+                text: "Voulez vous vraiment supprimer cette article?",
+                type: 'warning',
+                showCancelButton: true
+            }).then(result => {
+                if (result.value) {
+                    Helpers.setLoading(true);
+                    this.WP.fz_product().id(id).delete({ force: true, reassign: 1 }).then(resp => {
+                        this.refresh.emit();
+                        Helpers.setLoading(false);
+                        Swal.fire("Succès", "Article supprimer avec succès", 'success');
+                    });
+                }
+            });
+        }
+
     }
 
 }

@@ -8,9 +8,7 @@ import { ApiWordpressService } from '../../_services/api-wordpress.service';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/zip';
 import { Helpers } from '../../helpers';
-import { forEach } from '@angular/router/src/utils/collection';
 import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
-import { reject } from 'q';
 
 @Component({
     selector: 'app-import-article',
@@ -31,6 +29,7 @@ export class ImportArticleComponent implements OnInit {
         Mark: '',
         Marge: '',
         MargeDealer: '',
+        Description: ''
     };
 
     public loopColumn: Array<any> = [
@@ -44,7 +43,8 @@ export class ImportArticleComponent implements OnInit {
         { key: 'Mark', label: "Marque" },
         { key: 'Marge', label: "Marge en %" },
         { key: 'MargeDealer', label: "Marge de revendeur" },
-    ]
+        { key: 'Description', label: "Description" },
+    ];
 
     public Inputs: Array<any>;
     private Wordpress: any;
@@ -116,7 +116,7 @@ export class ImportArticleComponent implements OnInit {
                         status: 'publish',
                         name: column[this.Columns.Title],
                         regular_price: '0',
-                        description: '',
+                        description: column[this.Columns.Description],
                         short_description: '',
                         categories: _categories,
                         attributes: [
