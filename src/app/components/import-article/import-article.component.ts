@@ -137,13 +137,16 @@ export class ImportArticleComponent implements OnInit {
                     Observable.zip(productRef, supplier).subscribe(dataObs => {
 
                         // return value with pagination (property: _paging)
-                        let product: any = dataObs[0];
+                        let product: any = _.isArray(dataObs) ? dataObs[0] : dataObs;
                         let supplier: any = dataObs[1][0];
 
-                        if (_.isEmpty(product) || _.isEmpty(supplier)) {
+                        if ( ! _.isObject(product) || ! _.isObject(supplier)) {
                             parser.resume();
                             return;
                         }
+
+                        let _price: string = column[this.Columns.Price];
+                        let _priceDealer: string = column[this.Columns.PriceDealer];
 
                         this.Wordpress
                             .fz_product()
@@ -151,8 +154,8 @@ export class ImportArticleComponent implements OnInit {
                                 title: _.isNull(this.Columns.Title) ? product.name : column[this.Columns.Title],
                                 content: product.description,
                                 status: 'publish',
-                                price: column[this.Columns.Price],
-                                price_dealer: column[this.Columns.PriceDealer],
+                                price: _price,
+                                price_dealer: _priceDealer,
                                 date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
                                 date_review: moment().format('YYYY-MM-DD HH:mm:ss'),
                                 product_id: product.id,
@@ -163,8 +166,7 @@ export class ImportArticleComponent implements OnInit {
                                 parser.resume();
                             }).catch(function (err) {
                                 parser.abord();
-                            })
-
+                            });
                     });
                 } else {
                     parser.resume();
@@ -189,7 +191,6 @@ export class ImportArticleComponent implements OnInit {
 
     createProduct(args: any): Promise<any> {
         return new Promise((resolve, reject) => {
-
             this.Woocommerce.post("products", args, (err, data, response) => {
                 let product: any = JSON.parse(response);
                 this.Woocommerce.put(`products/${product.id}`, { sku: `PRD${product.id}` }, (err, data, res) => {

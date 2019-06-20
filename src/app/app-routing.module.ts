@@ -14,7 +14,9 @@ import { Error500Component } from './pages/error-500/error-500.component';
 import { MaintenanceComponent } from './pages/maintenance/maintenance.component';
 import { AuthGuard } from './guards/auth.guard';
 import { LoginGuard } from './guards/login.guard';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { TagInputModule } from 'ngx-chips';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
@@ -245,6 +247,8 @@ const routes: Routes = [
         ReactiveFormsModule,
         NgSelectModule,
         EditorModule,
+        TagInputModule,
+        BrowserAnimationsModule,
         RouterModule.forRoot(routes)
     ],
     providers: [

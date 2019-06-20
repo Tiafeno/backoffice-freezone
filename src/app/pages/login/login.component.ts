@@ -20,7 +20,10 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router
   ) {
     this.formLogin = new FormGroup({
-      email: new FormControl('', Validators.required),
+      email: new FormControl('', Validators.compose([
+        Validators.required,
+        Validators.pattern('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$')
+      ])),
       pwd: new FormControl('', Validators.required)
     })
   }

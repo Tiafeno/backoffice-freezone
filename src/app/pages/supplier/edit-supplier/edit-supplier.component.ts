@@ -4,6 +4,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Helpers } from '../../../helpers';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import Swal from 'sweetalert2';
+import * as _ from 'lodash';
 
 @Component({
 	selector: 'app-edit-supplier',
@@ -27,6 +28,8 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
 			phone: new FormControl('', Validators.required),
 			first_name: new FormControl('', Validators.required),
 			last_name: new FormControl('', Validators.required),
+			mail_commercial_cc: new FormControl(''),
+			mail_logistics_cc: new FormControl(''),
 			email: new FormControl({ value: '', disabled: true }, [Validators.email, Validators.required])
 		});
 
@@ -52,7 +55,9 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
 					phone: user.phone,
 					first_name: user.first_name,
 					last_name: user.last_name,
-					email: user.email
+					email: user.email,
+					mail_commercial_cc: _.isNull(user.mail_commercial_cc) ? [] : _.split(user.mail_commercial_cc, ','),
+					mail_logistics_cc: _.isNull(user.mail_logistics_cc) ? [] : _.split(user.mail_logistics_cc, ','),
 				});
 
 				Helpers.setLoading(false);
@@ -67,13 +72,18 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
 			return false;
 		}
 		Helpers.setLoading(true);
+		let Value: any = this.supplierForm.value;
+		let mail_commercials: Array<string> = _.map(Value.mail_commercial_cc, mail => mail.value);
+		let mail_logistics: Array<string> = _.map(Value.mail_logistics_cc, mail => mail.value);
 		this.WPAPI.users().id(this.ID).update({
 			address: this.supplierForm.value.address,
 			company_name: this.supplierForm.value.company_name,
 			phone: this.supplierForm.value.phone,
 			last_name: this.supplierForm.value.last_name,
 			first_name: this.supplierForm.value.first_name,
-			reference: this.supplierForm.value.reference
+			reference: this.supplierForm.value.reference,
+			mail_commercial_cc: _.join(mail_commercials, ','),
+			mail_logistics_cc: _.join(mail_logistics, ',')
 		}).then(user => {
 			Swal.fire("Succès", "Modification effectuer avec succès", 'success');
 			Helpers.setLoading(false);

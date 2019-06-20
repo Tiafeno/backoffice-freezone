@@ -4,6 +4,7 @@ import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
 import { Router } from '@angular/router';
 import swal from 'sweetalert2';
+import * as _ from 'lodash';
 declare var $: any;
 
 @Component({
@@ -24,11 +25,13 @@ export class AddSupplierComponent implements OnInit, AfterViewInit {
         this.formSupplier = new FormGroup({
             company_name: new FormControl('', Validators.required),
             reference: new FormControl('', Validators.required),
-            address: new FormControl('', Validators.required),
-            phone: new FormControl('', Validators.required),
+            address: new FormControl(''),
+            phone: new FormControl(''),
             first_name: new FormControl('', Validators.required),
-            last_name: new FormControl('', Validators.required),
-            email: new FormControl('', [Validators.email, Validators.required]),
+            last_name: new FormControl(''),
+            mail_commercial_cc: new FormControl([], Validators.required),
+            mail_logistics_cc: new FormControl([], Validators.required),
+            email: new FormControl('', Validators.compose([Validators.email, Validators.required])),
             pwd: new FormControl('', Validators.required)
         });
         this.WPAPI = api.getWPAPI();
@@ -58,16 +61,21 @@ export class AddSupplierComponent implements OnInit, AfterViewInit {
             return false;
         }
         Helpers.setLoading(true);
+        let Value: any = this.formSupplier.value;
+        let mail_commercial: Array<string> = _.map(Value.mail_commercial_cc, mail => mail.value);
+        let mail_logistics: Array<string> = _.map(Value.mail_logistics_cc, mail => mail.value);
         this.WPAPI.users().create({
-            username: this.formSupplier.value.reference,
-            address: this.formSupplier.value.address,
-            company_name: this.formSupplier.value.company_name,
-            phone: this.formSupplier.value.phone,
-            email: this.formSupplier.value.email,
-            last_name: this.formSupplier.value.last_name,
-            first_name: this.formSupplier.value.first_name,
-            password: this.formSupplier.value.pwd,
-            reference: this.formSupplier.value.reference
+            username: Value.reference,
+            address: Value.address,
+            company_name: Value.company_name,
+            phone: Value.phone,
+            email: Value.email,
+            mail_commercial_cc: _.join(mail_commercial, ','),
+            mail_logistics_cc: _.join(mail_logistics, ','),
+            last_name: Value.last_name,
+            first_name: Value.first_name,
+            password: Value.pwd,
+            reference: Value.reference
         }).then(resp => {
             this.WPAPI.users().id(resp.id).update({ roles: ['fz-supplier'] })
                 .then(user => {
