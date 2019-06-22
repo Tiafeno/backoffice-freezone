@@ -48,6 +48,10 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
 		this.route.parent.params.subscribe(params => {
 			this.ID = params.id;
 			this.WPAPI.users().id(this.ID).context('edit').then(user => {
+				let commercials: Array<string> = _.split(user.mail_commercial_cc, ',');
+				let logistics: Array<string> = _.split(user.mail_logistics_cc, ',');
+				logistics = _.filter(logistics, logistic => !_.isEmpty(logistic));
+				commercials = _.filter(commercials, com => !_.isEmpty(com));
 				this.supplierForm.patchValue({
 					company_name: user.company_name,
 					reference: user.reference,
@@ -56,8 +60,8 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
 					first_name: user.first_name,
 					last_name: user.last_name,
 					email: user.email,
-					mail_commercial_cc: _.isNull(user.mail_commercial_cc) ? [] : _.split(user.mail_commercial_cc, ','),
-					mail_logistics_cc: _.isNull(user.mail_logistics_cc) ? [] : _.split(user.mail_logistics_cc, ','),
+					mail_commercial_cc: commercials,
+					mail_logistics_cc: logistics,
 				});
 
 				Helpers.setLoading(false);

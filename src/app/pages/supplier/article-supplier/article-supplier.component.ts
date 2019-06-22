@@ -4,8 +4,10 @@ import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as _ from 'lodash';
 import { FilterArticleComponent } from '../../../components/filter-article/filter-article.component';
 import { FilterSearchArticleComponent } from '../../../components/filter-search-article/filter-search-article.component';
-import { Helpers } from '../../../helpers';
 import { ImportArticleComponent } from '../../../components/import-article/import-article.component';
+import {Helpers} from '../../../helpers';
+import {StatusArticleComponent} from '../../../components/status-article/status-article.component';
+declare var $: any;
 
 @Component({
   selector: 'app-article-supplier',
@@ -24,10 +26,12 @@ export class ArticleSupplierComponent implements OnInit {
   public currentPage: number = 1;
   public perPage: number = 10;
   public Editor: any;
+  public articleEdit: any;
 
   @ViewChild(FilterArticleComponent) public Filter: FilterArticleComponent;
-  @ViewChild(FilterSearchArticleComponent) Search: FilterSearchArticleComponent;
-  @ViewChild(ImportArticleComponent) Importation: ImportArticleComponent;
+  @ViewChild(FilterSearchArticleComponent) public Search: FilterSearchArticleComponent;
+  @ViewChild(ImportArticleComponent) public Importation: ImportArticleComponent;
+  @ViewChild(StatusArticleComponent) public Status: StatusArticleComponent;
 
   constructor(
     private apiWC: ApiWoocommerceService,
@@ -40,6 +44,9 @@ export class ArticleSupplierComponent implements OnInit {
 
   ngOnInit() {
     this.Query = this.WP.fz_product().context('edit').per_page(this.perPage);
+    $('#status-product-modal').on('hide.bs.modal', ev => {
+      this.articleEdit = null;
+    });
   }
 
   onSearchWord($event): void {
@@ -53,6 +60,11 @@ export class ArticleSupplierComponent implements OnInit {
       this.cd.detectChanges();
       Helpers.setLoading(false);
     });
+  }
+
+  onChangeStatus(article: any) {
+    this.articleEdit = _.clone(article);
+    $('#status-product-modal').modal('show');
   }
 
   /**
@@ -82,30 +94,33 @@ export class ArticleSupplierComponent implements OnInit {
   }
 
   onPrevious($event: any): void | boolean {
-    let prevPage: number = this.currentPage - 1;
-    if (prevPage <= 0) return false;
-    Helpers.setLoading(true);
-    this.Query.page(prevPage).head().then(fzProducts => {
-      this.loadData(fzProducts);
-      this.currentPage = prevPage;
-    })
+    const prevPage: number = this.currentPage - 1;
+    if (prevPage > 0) {
+      Helpers.setLoading(true);
+      this.Query.page(prevPage).head().then(fzProducts => {
+        this.loadData(fzProducts);
+        this.currentPage = prevPage;
+      });
+    } else {
+      return false;
+    }
   }
 
   onNext($event: any): void | boolean {
-    let nextPage: number = this.currentPage + 1;
-    if (nextPage > parseInt(this.Paging.totalPages)) return false;
+    const nextPage: number = this.currentPage + 1;
+    if (nextPage > parseInt(this.Paging.totalPages, 10)) return false;
     Helpers.setLoading(true);
     this.Query.page(nextPage).head().then(fzProducts => {
       this.loadData(fzProducts);
       this.currentPage = nextPage;
-    })
+    });
   }
 
   onRefreshResults() {
     Helpers.setLoading(true);
     this.Query.page(this.currentPage).head().then(fzProducts => {
       this.loadData(fzProducts);
-    })
+    });
   }
 
   onChangePage($page: number): void {
@@ -113,18 +128,24 @@ export class ArticleSupplierComponent implements OnInit {
     this.Query.page($page).head().then(fzProducts => {
       this.loadData(fzProducts);
       this.currentPage = $page;
-    })
+    });
   }
 
   loadData(fzProducts: any): void {
     if ( ! _.isEmpty(fzProducts) ) {
       this.Paging = _.clone(fzProducts['_paging']);
-      this.Paging._totalPages = _.range(parseInt(this.Paging.totalPages));
+      this.Paging._totalPages = _.range(parseInt(this.Paging.totalPages, 10));
       delete fzProducts['_paging'];
     } else {
       this.Paging = false;
     }
     this.Products = _.isEmpty(fzProducts) ? [] : fzProducts;
+    this.Products = _.map(this.Products, product => {
+      const price = parseInt(product.price, 10);
+      const priceMarge = (price * parseInt(product.marge, 10)) / 100;
+      product.priceUF = priceMarge + price;
+      return product;
+    });
     this.cd.detectChanges();
     Helpers.setLoading(false);
   }

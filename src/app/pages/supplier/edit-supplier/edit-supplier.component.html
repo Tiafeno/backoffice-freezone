@@ -10,6 +10,15 @@
       <div class="ibox ibox-fullheight">
         <form class="ibox-body" [formGroup]="supplierForm" id="supplier-form" (ngSubmit)="onSubmitEdit()">
           <div class="row">
+            <div class="col-12">
+                <div class="page-heading mb-4">
+                    <h1 class="page-title">Modifier le fournisseur
+                      <a class="btn btn-sm btn-dark" [routerLink]="['/supplier', 'new']" routerLinkActive="active" >Ajouter une nouvelle fournisseur</a>
+                    </h1>
+                </div>
+            </div>
+          </div>
+          <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
                 <label>Nom de la société</label>
@@ -39,7 +48,8 @@
             <div class="col-sm-12">
               <div class="form-group mb-4">
                 <label>Adresse email commercials</label>
-                  <tag-input [placeholder]="'Ajouter un adresse email'" [separatorKeyCodes]="[32,188]" formControlName="mail_commercial_cc" id="mail_commercial_cc" name="mail_commercial_cc" theme='dark'></tag-input>
+                  <tag-input [placeholder]="'Ajouter une adresse email'" [secondaryPlaceholder]="'Ajouter des adresses email'" [separatorKeyCodes]="[32,188]" formControlName="mail_commercial_cc" 
+                  id="mail_commercial_cc" name="mail_commercial_cc" theme='dark'></tag-input>
               </div>
             </div>
           </div>
@@ -48,12 +58,13 @@
             <div class="col-sm-12">
               <div class="form-group mb-4">
                 <label>Adresse email logistiques</label>
-                  <tag-input [placeholder]="'Ajouter un adresse email'" [separatorKeyCodes]="[32,188]" formControlName="mail_logistics_cc" id="mail_logistics_cc" name="mail_logistics_cc" theme='dark'></tag-input>
+                  <tag-input [placeholder]="'Ajouter une adresse email'" [secondaryPlaceholder]="'Ajouter des adresses email'" [separatorKeyCodes]="[32,188]" formControlName="mail_logistics_cc" 
+                  id="mail_logistics_cc" name="mail_logistics_cc" theme='dark'></tag-input>
               </div>
             </div>
           </div>
 
-          <div class="row">
+          <div class="row"> 
             <div class="col-md-6">
               <div class="form-group mb-4">
                 <label>Numéro de téléphone</label>

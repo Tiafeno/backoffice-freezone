@@ -33,17 +33,17 @@ export class ImportArticleComponent implements OnInit {
     };
 
     public loopColumn: Array<any> = [
-        { key: 'Title', label: "Titre" },
-        { key: 'SupplierRef', label: "Réference du fournisseur" },
-        { key: 'Price', label: "Prix fournisseur" },
-        { key: 'PriceDealer', label: "Prix revendeur" },
-        { key: 'Qty', label: "Quantité" },
-        { key: 'LastUpdate', label: "Date de revision" },
-        { key: 'Categorie', label: "Categories" },
-        { key: 'Mark', label: "Marque" },
-        { key: 'Marge', label: "Marge en %" },
-        { key: 'MargeDealer', label: "Marge de revendeur" },
-        { key: 'Description', label: "Description" },
+        { key: 'Title', label: 'Titre' },
+        { key: 'SupplierRef', label: 'Réference du fournisseur' },
+        { key: 'Price', label: 'Prix fournisseur' },
+        { key: 'PriceDealer', label: 'Prix revendeur' },
+        { key: 'Qty', label: 'Quantité' },
+        { key: 'LastUpdate', label: 'Date de revision' },
+        { key: 'Categorie', label: 'Categories' },
+        { key: 'Mark', label: 'Marque' },
+        { key: 'Marge', label: 'Marge en %' },
+        { key: 'MargeDealer', label: 'Marge de revendeur' },
+        { key: 'Description', label: 'Description' },
     ];
 
     public Inputs: Array<any>;
@@ -56,7 +56,7 @@ export class ImportArticleComponent implements OnInit {
         private apiWC: ApiWoocommerceService,
         private cd: ChangeDetectorRef
     ) {
-        this.Form = new FormGroup({ csv: new FormControl({ value: "" }, Validators.required) });
+        this.Form = new FormGroup({ csv: new FormControl({ value: '' }, Validators.required) });
         this.Wordpress = this.apiWP.getWPAPI();
         this.Woocommerce = this.apiWC.getWoocommerce();
     }
@@ -83,9 +83,8 @@ export class ImportArticleComponent implements OnInit {
     }
 
     onSelectColumn($event, index) {
-        let element: any = $event.currentTarget;
-        let key: string = $(element).val();
-
+        const element: any = $event.currentTarget;
+        const key: string = $(element).val();
         this.Columns[key] = index;
 
         console.log(this.Columns);
@@ -101,17 +100,17 @@ export class ImportArticleComponent implements OnInit {
                 parser.pause();
                 if (results || results.data) {
                     const column: any = results.data;
-                    const price: number = parseInt(column[this.Columns.Price]);
+                    const price: number = parseInt(column[this.Columns.Price], 10);
                     if (_.isNaN(price)) {
                         console.log('is NaN!');
                         parser.resume();
                         return;
                     }
 
-                    let categorie: string = column[this.Columns.Categorie];
+                    const categorie: string = column[this.Columns.Categorie];
                     let _categories: Array<any> = await this.createCategories(_.split(categorie, ','));
-                    _categories = _.map(_categories, (ctg) => { return { id: ctg.id } });
-                    let args: object = {
+                    _categories = _.map(_categories, (ctg) => { return {id: ctg.id}; });
+                    const args: object = {
                         type: 'simple',
                         status: 'publish',
                         name: column[this.Columns.Title],
@@ -132,36 +131,38 @@ export class ImportArticleComponent implements OnInit {
                         ],
                         images: []
                     };
-                    let productRef = this.createProduct(args); // Crée le produit
-                    let supplier = this.Wordpress.users().roles('fz-supplier').filter({ meta_key: 'reference', meta_value: column[this.Columns.SupplierRef] });
+                    const productRef = this.createProduct(args);
+                    const supplier = this.Wordpress.users().roles('fz-supplier').filter(
+                      {
+                        meta_key: 'reference',
+                        meta_value: column[this.Columns.SupplierRef]
+                      });
                     Observable.zip(productRef, supplier).subscribe(dataObs => {
-
                         // return value with pagination (property: _paging)
-                        let product: any = _.isArray(dataObs) ? dataObs[0] : dataObs;
-                        let supplier: any = dataObs[1][0];
-
-                        if ( ! _.isObject(product) || ! _.isObject(supplier)) {
+                        const productObs: any = _.isArray(dataObs) ? dataObs[0] : dataObs;
+                        const supplierObs: any = _.isArray(dataObs[1]) && !_.isUndefined(dataObs[1][0]) ? dataObs[1][0] : null;
+                        if ( ! _.isObject(productObs) || ! _.isObject(supplierObs)) {
                             parser.resume();
                             return;
                         }
 
-                        let _price: string = column[this.Columns.Price];
-                        let _priceDealer: string = column[this.Columns.PriceDealer];
+                        const _price: string = column[this.Columns.Price];
+                        const _priceDealer: string = column[this.Columns.PriceDealer];
 
                         this.Wordpress
                             .fz_product()
                             .create({
-                                title: _.isNull(this.Columns.Title) ? product.name : column[this.Columns.Title],
-                                content: product.description,
+                                title: _.isNull(this.Columns.Title) ? productObs.name : column[this.Columns.Title],
+                                content: productObs.description,
                                 status: 'publish',
                                 price: _price,
                                 price_dealer: _priceDealer,
                                 date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
                                 date_review: moment().format('YYYY-MM-DD HH:mm:ss'),
-                                product_id: product.id,
+                                product_id: productObs.id,
                                 total_sales: this.Columns.Qty.toString(),
-                                user_id: supplier.id,
-                                product_cat: _.map(product.categories, (ctg) => ctg.id)
+                                user_id: supplierObs.id,
+                                product_cat: _.map(productObs.categories, (ctg) => ctg.id)
                             }).then(() => {
                                 parser.resume();
                             }).catch(function (err) {
@@ -172,16 +173,15 @@ export class ImportArticleComponent implements OnInit {
                     parser.resume();
                 }
             },
-            encoding: "UTF-8",
+            encoding: 'UTF-8',
             complete: (results: any) => {
-                console.log("Finished:", results.data);
+                console.log('Finished:', results.data);
                 $('#import-article-modal').modal('hide');
                 Helpers.setLoading(false);
                 this.refresh.emit();
             },
             error: this.errorFn,
             dynamicTyping: true,
-            //header: true,
             download: false,
             before: (file, inputElement) => {
 
@@ -191,10 +191,10 @@ export class ImportArticleComponent implements OnInit {
 
     createProduct(args: any): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.Woocommerce.post("products", args, (err, data, response) => {
-                let product: any = JSON.parse(response);
+            this.Woocommerce.post('products', args, (err, data, response) => {
+                const product: any = JSON.parse(response);
                 this.Woocommerce.put(`products/${product.id}`, { sku: `PRD${product.id}` }, (err, data, res) => {
-                    let response: any = JSON.parse(res);
+                    const response: any = JSON.parse(res);
                     if (_.isUndefined(response.code)) {
                         resolve(response);
                     } else {
@@ -202,18 +202,18 @@ export class ImportArticleComponent implements OnInit {
                     }
                 });
             });
-        })
+        });
     }
 
     private createCategories(ctgs: any): Promise<Array<any>> {
-        let results: Array<any> = [];
+        const results: Array<any> = [];
         return new Promise(async (resolve, reject) => {
             let categories: Array<string> = _.map(ctgs, ctg => _.trim(ctg));
             categories = _.filter(categories, ctg => !_.isEmpty(ctg));
             if (_.isEmpty(categories)) resolve([]);
 
-            for (let ctg of categories) {
-                let categorie: any = await this.createProductCategory(ctg);
+            for (const ctg of categories) {
+                const categorie: any = await this.createProductCategory(ctg);
                 if (!categorie) continue;
                 results.push(categorie);
             }
@@ -226,11 +226,11 @@ export class ImportArticleComponent implements OnInit {
     private createProductCategory(category: string): Promise<any> {
         return new Promise((resolve) => {
             if (_.isEmpty(category)) resolve(false);
-            let args: any = {
+            const args: any = {
                 name: category
             };
             this.Woocommerce.post('products/categories', args, (err, data, res) => {
-                let response: any = JSON.parse(res);
+                const response: any = JSON.parse(res);
                 if (_.isUndefined(response.code)) {
                     resolve(response);
                 } else {
@@ -240,12 +240,12 @@ export class ImportArticleComponent implements OnInit {
                     resolve(false);
                 }
             });
-        })
+        });
     }
 
 
     errorFn(err: any, file: any) {
-        console.warn("ERROR:", err, file);
+        console.warn('ERROR:', err, file);
         Helpers.setLoading(false);
     }
 

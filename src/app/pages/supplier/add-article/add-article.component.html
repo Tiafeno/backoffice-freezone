@@ -13,8 +13,8 @@
         <div class="col-md-12">
           <div class="form-group mb-4">
             <label>Fournisseur</label>
-            <ng-select name="supplier" placeholder="Selectionner un fournisseur" formControlName="user_id"
-              bindLabel="name" bindValue="id" [hideSelected]="true" [multiple]="false" [items]="Suppliers" required>
+            <ng-select name="supplier" placeholder="Tapez le nom du fournisseur" formControlName="user_id"
+              bindLabel="company_name" bindValue="id" [hideSelected]="false" [multiple]="false" [items]="Suppliers" required>
               <ng-template ng-option-tmp let-item="item">
                   <b>{{item.company_name}}</b> <i>{{item.reference}}</i>
               </ng-template>
@@ -25,50 +25,100 @@
       <div class="row">
           <div class="col-md-12">
             <div class="form-group mb-4">
-              <label>Réference du produit</label>
-              <ng-select name="product" placeholder="Tapez un produit" formControlName="product_id" (change)="onSelectProduct($event)"
-                bindValue="id" bindLabel="title.rendered" [hideSelected]="true" [typeahead]="typeaheadProducts" [multiple]="false" [items]="Products" required>
-                <ng-template ng-option-tmp let-item="item">
-                    {{item.title.rendered}}
-                </ng-template>
-              </ng-select>
+              <label>Designation</label>
+              <input class="form-control" autocomplete="off" formControlName="title" type="text" id="title" name="title"
+                   placeholder="Designation">
             </div>
           </div>
         </div>
+        <div class="text-muted mb-2 mt-3">Fournisseur</div>
       <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
           <div class="form-group mb-4">
-            <label>Titre</label>
-            <input class="form-control" formControlName="title" type="text" id="title" name="title"
-              placeholder="Ajouter un titre">
-            <div *ngIf="f.title.errors && f.title.dirty">
-              <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+            <label>Prix</label>
+            <input class="form-control" formControlName="price" type="number" id="price" name="price"
+                   placeholder="Ajouter un prix en AR">
+            <div *ngIf="f.price.errors && f.price.dirty">
+              <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Marge</label>
+            <input class="form-control" formControlName="marge" type="number" id="marge" name="marge"
+                   placeholder="Ajouter une marge">
+            <div *ngIf="f.marge.errors && f.marge.dirty">
+              <label id="marge-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
           </div>
         </div>
       </div>
+      <div class="text-muted mb-2 mt-3">Revendeur</div>
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="form-group mb-4">
-            <label>Prix (MGA)</label>
-            <input class="form-control" formControlName="price" type="text" id="title" name="price"
-              placeholder="Ajouter un prix">
-            <div *ngIf="f.price.errors && f.price.dirty">
-              <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+            <label>Prix R.</label>
+            <input class="form-control" formControlName="priceDealer" type="number" id="price_dealer" name="price_dealer"
+                   placeholder="Ajouter un prix en AR">
+            <div *ngIf="f.priceDealer.errors && f.priceDealer.dirty">
+              <label id="price-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
           </div>
         </div>
-        <div class="col-md-8">
-            <div class="form-group mb-4">
-              <label>Stock</label>
-              <input class="form-control" formControlName="stock" type="text" id="title" name="stock"
-                placeholder="Ajouter la quantité disponible">
-              <div *ngIf="f.stock.errors && f.stock.dirty">
-                <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
-              </div>
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Marge R.</label>
+            <input class="form-control" formControlName="margeDealer" type="number" id="marge_dealer" name="marge_dealer"
+                   placeholder="Ajouter une marge">
+            <div *ngIf="f.margeDealer.errors && f.margeDealer.dirty">
+              <label id="marge-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
           </div>
+        </div>
+      </div>
 
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Quantité disponible(s)</label>
+            <input class="form-control" formControlName="stock" type="number" id="stock" name="stock"
+                   placeholder="Ajouter la quantité disponible">
+            <div *ngIf="f.stock.errors && f.stock.dirty">
+              <label id="qty-error" class="help-block error">Ce champ est obligatoire.</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Marque</label>
+            <input class="form-control" formControlName="mark" type="text" id="mark" name="mark"
+                   placeholder="Ajouter une marque">
+            <div *ngIf="f.mark.errors && f.mark.dirty">
+              <label id="mark-error" class="help-block error">Ce champ est obligatoire.</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group mb-4">
+            <label class="font-light">Categorie(s)</label>
+            <ng-select name="product_cat" placeholder="Selectionner un categorie" formControlName="product_cat"
+              bindLabel="name" bindValue="id" [hideSelected]="true" [typeahead]="typeaheadCategories" [multiple]="true" [items]="Categories" required>
+              <ng-template ng-option-tmp let-item="item">
+                {{item.name}}
+              </ng-template>
+            </ng-select>
+            <div *ngIf="f.product_cat.errors && f.product_cat.dirty">
+              <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>

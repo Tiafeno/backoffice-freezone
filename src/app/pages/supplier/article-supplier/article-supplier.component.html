@@ -17,67 +17,89 @@
             </h3>
           </div>
           <div class="table-responsive" *ngIf="Products.length > 0">
-              <table class="table">
-                  <thead style="background-color: lavender;">
-                      <tr>
-                          <th>Titre</th>
-                          <th>Prix</th>
-                          <th>Fournisseur</th>
-                          <th>Produit</th>
-                          <th>Date de revision</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <tr *ngFor="let article of Products">
-                          <td><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a></td>
-                          <td><span class="badge badge-default">{{article.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</span></td>
-                          <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']" routerLinkActive="active"  class="badge badge-success">
-                            {{article.supplier.company_name}}
-                          </a></td>
-                          <td>
-                            <a target="_blank" [routerLink]="['/product', article.product_id, 'edit']" routerLinkActive="active" class="badge badge-warning">Voir</a>
-                          </td>
-                          <td><span>{{article.date_review}}</span></td>
-                      </tr>
-                  </tbody>
-              </table>
+            <table class="table">
+              <thead style="background-color: lavender;">
+              <tr>
+                <th>Designation</th>
+                <th>Statut</th>
+                <th>Prix Fmg</th>
+                <th>Prix AR</th>
+                <th>%UF</th>
+                <th>Prix UF</th>
+                <th>%R</th>
+                <th>Prix R</th>
+                <th>F.</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let article of Products">
+                <td width="325"><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
+                </td>
+                <td><span class="badge"
+                          [ngClass]="{'badge-blue': article.product_status === 'publish', 'badge-pink': article.product_status === 'pending'}"
+                          (click)="onChangeStatus(article)" style="cursor: pointer">
+                  {{article.product_status === 'publish' ? 'PUBLIER' : 'DESACTIVER'}}</span>
+                </td>
+                <td>{{article.price * 5 | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                <td>{{article.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                <td>{{article.marge}} %</td>
+                <td>{{article.priceUF | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                <td>{{article.marge_dealer}} %</td>
+                <td>{{article.price_dealer | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']"
+                       routerLinkActive="active" class="badge badge-success">
+                  {{article.supplier.reference}}
+                </a></td>
+                <td>
+                  <a (click)="onEditArticle(article.id)" class="badge badge-pink text-white">Modifier</a>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
 
           <ul class="pagination justify-content-center mt-4" *ngIf="Paging">
             <li class="page-item">
               <a class="page-link page-link-solid" href="javascript:;" (click)="onPrevious($event)"
-                aria-label="Previous">
+                 aria-label="Previous">
                 <span aria-hidden="true"><i class="la la-angle-left"></i></span>
               </a>
             </li>
             <li class="page-item" [ngClass]="{'active': (page + 1) === currentPage}"
-              *ngFor="let page of Paging._totalPages">
+                *ngFor="let page of Paging._totalPages">
               <a class="page-link" href="javascript:;" (click)="onChangePage(page+1)">{{page + 1}}</a>
             </li>
             <li class="page-item">
               <a class="page-link page-link-solid" href="javascript:;" (click)="onNext($event)" aria-label="Next"><i
-                  class="la la-angle-right"></i>
+                class="la la-angle-right"></i>
               </a>
             </li>
           </ul>
         </div>
       </div>
 
-      <div class="modal fade" id="add-article-supplier-modal">
+      <div class="modal fade" id="add-article-supplier-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
-          <app-add-article></app-add-article>
+          <app-add-article (refresh)="onRefreshResults()"></app-add-article>
         </div>
       </div>
-      
-      <div class="modal fade" id="edit-article-supplier-modal">
+
+      <div class="modal fade" id="edit-article-supplier-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <app-edit-article [Article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
         </div>
       </div>
 
-      <div class="modal fade" id="import-article-modal">
+      <div class="modal fade" id="import-article-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <app-import-article (refresh)="onRefreshResults()"></app-import-article>
+        </div>
+      </div>
+
+      <div class="modal fade" id="status-product-modal" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+          <app-status-article [article]="articleEdit" (refresh)="onRefreshResults()"></app-status-article>
         </div>
       </div>
 
