@@ -12,7 +12,7 @@
       <div class="ibox">
         <div class="ibox-body" *ngIf="Products">
           <div class="mb-4">
-            <h3 class="mt-1">{{Products.length}} article{{Products.length > 1 ? 's':''}} trouvé
+            <h3 class="mt-1">{{Paging._total ? Paging._total : '0'}} article(s) trouvé
               <span *ngIf="findWord"> pour: <span class="text-primary">“{{findWord}}”</span></span>
             </h3>
           </div>
@@ -59,23 +59,11 @@
             </table>
           </div>
 
-          <ul class="pagination justify-content-center mt-4" *ngIf="Paging">
-            <li class="page-item">
-              <a class="page-link page-link-solid" href="javascript:;" (click)="onPrevious($event)"
-                 aria-label="Previous">
-                <span aria-hidden="true"><i class="la la-angle-left"></i></span>
-              </a>
-            </li>
-            <li class="page-item" [ngClass]="{'active': (page + 1) === currentPage}"
-                *ngFor="let page of Paging._totalPages">
-              <a class="page-link" href="javascript:;" (click)="onChangePage(page+1)">{{page + 1}}</a>
-            </li>
-            <li class="page-item">
-              <a class="page-link page-link-solid" href="javascript:;" (click)="onNext($event)" aria-label="Next"><i
-                class="la la-angle-right"></i>
-              </a>
-            </li>
-          </ul>
+        </div>
+      </div>
+
+      <div class="inner-left preview" id="demo">
+        <div class="paginationjs">
         </div>
       </div>
 

@@ -93,7 +93,8 @@
         "../node_modules/clockpicker/dist/bootstrap-clockpicker.min.js",
         "../node_modules/jquery-minicolors/jquery.minicolors.min.js",
         "../node_modules/clipboard/dist/clipboard.min.js",
-        "assets/js/app.js"
+        "assets/js/app.js",
+        "assets/js/pagination.min.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {

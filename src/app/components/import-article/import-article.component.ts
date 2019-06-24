@@ -19,7 +19,7 @@ export class ImportArticleComponent implements OnInit {
     private Columns: any = {
         Title: null,
         SupplierRef: null,
-        Qty: 1,
+        Qty: null,
         Price: 0,
         PriceDealer: 0,
         LastUpdate: null, // Date

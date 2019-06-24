@@ -56,6 +56,7 @@ import { EditClientComponent } from './pages/clients/edit-client/edit-client.com
 import { NoCommercialAccessGuard } from './guards/no-commercial-access.guard';
 import { FzSecurityService } from './_services/fz-security.service';
 import {StatusArticleComponent} from './components/status-article/status-article.component';
+import {TypeClientSwitcherComponent} from "./components/type-client-switcher/type-client-switcher.component";
 
 
 const routes: Routes = [
@@ -239,6 +240,7 @@ const routes: Routes = [
         EditClientComponent,
         SavComponent,
         StatusArticleComponent,
+        TypeClientSwitcherComponent,
         MomentsPipe
     ],
     imports: [

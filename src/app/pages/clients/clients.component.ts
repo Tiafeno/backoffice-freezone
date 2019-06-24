@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ApiWordpressService} from "../../_services/api-wordpress.service";
 import {config} from "../../../environments/environment";
 import {Helpers} from "../../helpers";
@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 declare var $: any;
 import {Router} from '@angular/router';
+import {TypeClientSwitcherComponent} from "../../components/type-client-switcher/type-client-switcher.component";
 
 @Component({
   selector: 'app-clients',
@@ -17,6 +18,7 @@ export class ClientsComponent implements OnInit {
   private WPAPI: any;
   public Table: any;
 
+  @ViewChild(TypeClientSwitcherComponent) public SwitchType: TypeClientSwitcherComponent;
   constructor(
     private apiWp: ApiWordpressService,
     private router: Router
@@ -65,8 +67,9 @@ export class ClientsComponent implements OnInit {
         },
         {
           data: 'role_office', render: (data, type, row) => {
-            const status: string = _.isEmpty(data) || _.isNull(data) ? 'En attente': (data === 1 ? 'Acheteur' : 'Revendeur');
-            return `<span class="badge badge-pink">${status}</span>`;
+            const status: string = data == 0 ? 'En attente' : (data == 1 ? 'Acheteur' : 'Revendeur');
+            const style: string = status === 'En attente' ? 'pink' : (status === 'Acheteur' ? 'blue' : 'primary');
+            return `<span class="badge badge-${style} switch-type uppercase" style="cursor: pointer;">${status}</span>`;
           }
         },
         {
@@ -99,6 +102,12 @@ export class ClientsComponent implements OnInit {
         $('#clients-table tbody').on('click', '.edit-client', e => {
           e.preventDefault();
           const __clt: any = getElementData(e);
+        });
+
+        $('#clients-table tbody').on('click', '.switch-type', e => {
+          e.preventDefault();
+          const __clt: any = getElementData(e);
+          this.SwitchType.fnOpen(__clt);
         });
 
       },

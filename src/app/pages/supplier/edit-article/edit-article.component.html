@@ -24,6 +24,7 @@
                 <small>{{item.reference}}</small>
               </ng-template>
             </ng-select>
+            <p class="font-bold badge badge-pink">{{supplierReference}}</p>
           </div>
         </div>
       </div>
@@ -31,37 +32,43 @@
         <div class="col-md-12">
           <div class="form-group mb-4">
             <label>Produit</label>
-            <ng-select name="product" placeholder="Tapez un produit" formControlName="product_id"
-                       (change)="onSelectProduct($event)"
-                       bindValue="id" bindLabel="title.rendered" [searchable]="true" [multiple]="false"
-                       [items]="Products" required>
-              <ng-template ng-option-tmp let-item="item">
-                {{item.title.rendered}}
-              </ng-template>
-            </ng-select>
+            <input name="product" placeholder="Designation du produit" formControlName="product" class="form-control"/>
           </div>
         </div>
       </div>
       <div class="text-muted mb-2 mt-3">Fournisseur</div>
       <div class="row">
-        <div class="col-md-6">
-          <div class="form-group mb-4">
-            <label>Prix</label>
-            <input class="form-control" formControlName="price" type="number" id="price" name="price"
-                   placeholder="Ajouter un prix en AR">
-            <div *ngIf="f.price.errors && f.price.dirty">
-              <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
+        <div class="col-12">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Prix</label>
+                <input class="form-control" formControlName="price" (ngModelChange)="onChangePrice($event)" type="number" id="price" name="price"
+                       placeholder="Ajouter un prix en AR">
+                <div *ngIf="f.price.errors && f.price.dirty">
+                  <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Marge</label>
+                <input class="form-control" formControlName="marge" (ngModelChange)="onChangeMarge($event)" type="number" id="marge" name="marge"
+                       placeholder="Ajouter une marge">
+                <div *ngIf="f.marge.errors && f.marge.dirty">
+                  <label id="marge-error" class="help-block error">Ce champ est obligatoire.</label>
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
-        <div class="col-md-6">
+        <div class="col-12">
           <div class="form-group mb-4">
-            <label>Marge</label>
-            <input class="form-control" formControlName="marge" type="number" id="marge" name="marge"
-                   placeholder="Ajouter une marge">
-            <div *ngIf="f.marge.errors && f.marge.dirty">
-              <label id="marge-error" class="help-block error">Ce champ est obligatoire.</label>
-            </div>
+            <label>Prix UF</label>
+            <input class="form-control" formControlName="priceUf" type="number" id="price_uf" name="price_uf"
+                   placeholder="">
+            <p class="help-block font-11">Le prix est en Ariary</p>
           </div>
         </div>
       </div>

@@ -20,7 +20,15 @@
       <li><a routerLink="/supplier/lists" routerLinkActive="active">Tous les fournisseurs</a></li>
       <li><a [routerLink]="['/supplier', 'review']" routerLinkActive="active">En attente</a></li>
       <li><a routerLink="/supplier/new" routerLinkActive="active">Ajouter</a></li>
-      <li class="heading" style="padding-left: 22%">ARTICLES</li>
+    </ul>
+  </li>
+  <li routerLinkActive="active">
+    <a href="href=&quot;javascript:;&quot;">
+      <i class="sidebar-item-icon ti-layers-alt"></i>
+      <span class="nav-label">Articles</span>
+      <i class="fa fa-angle-left arrow"></i>
+    </a>
+    <ul class="nav-2-level collapse" routerLinkActive="in">
       <li><a routerLink="/supplier/articles" routerLinkActive="active">Tous les articles</a></li>
       <li><a routerLink="/supplier/article/review" routerLinkActive="active">En attente</a></li>
     </ul>

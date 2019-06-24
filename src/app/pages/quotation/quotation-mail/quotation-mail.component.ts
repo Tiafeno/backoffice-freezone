@@ -60,16 +60,16 @@ export class QuotationMailComponent implements OnInit, OnChanges {
       this.Form.patchValue({
         subject: `Devis #${this.Order.id} - Demande de confirmation`,
         content: "Bonjour, <br><br> <p>Vous trouverez ci-joint votre devis.<p><p>Nous vous remercions d'avoir choisi notre solution!<br><br> Cordialement."
-      })
+      });
     }
   }
 
   onSend() {
     if (this.Form.invalid) return false;
-    let Value: any = this.Form.value;
+    const Value: any = this.Form.value;
     if (this.security.hasAccess('s8')) {
       Helpers.setLoading(true);
-      let fData: FormData = new FormData();
+      const fData: FormData = new FormData();
       fData.append('subject', Value.subject);
       fData.append('message', Value.content);
       // Mettre la demamde pour 'Envoyer'
@@ -79,13 +79,11 @@ export class QuotationMailComponent implements OnInit, OnChanges {
         .subscribe(resp => {
           Helpers.setLoading(false);
           $('.modal').modal('hide');
-  
-          let response: any = _.clone(resp);
-          let message: string = response.data;
-          let title: string = response.success ? "Succès" : "Désolé";
-          let type: SweetAlertType = response.success ? 'success' : "error";
+          const response: any = _.clone(resp);
+          const message: string = response.data;
+          const title: string = response.success ? "Succès" : "Désolé";
+          const type: SweetAlertType = response.success ? 'success' : "error";
           Swal.fire(title, message, type);
-          
         }, err => {
           Swal.fire('Désolé', "Une erreur s'est produit pendant l'envoie. Veuillez réessayer plus tard", 'error');
           Helpers.setLoading(false);

@@ -62,16 +62,16 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             return false;
         }
         this.QtItems = _.map(this.QtItems, item => {
-            // Mettre le prix unitaire pour 0 par default 
+            // Mettre le prix unitaire pour 0 par default
             // (Le prix sera regenerer automatiquement par woocommerce)
             item.price = '0';
             return item;
         });
         let pricetax: number = (this.Billing.total * this.Tax) / 100;
-        let data: any = { 
+        let data: any = {
             currency: 'MGA',
-            line_items: this.QtItems, 
-            cart_tax: pricetax.toString() 
+            line_items: this.QtItems,
+            cart_tax: pricetax.toString()
         };
         Helpers.setLoading(true);
         $('.modal').modal('hide');
@@ -94,6 +94,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         let aIds: Array<any> = this.getMeta('article_id');
         this.supplierSchema = await this.loadSchema();
         const ARTICLES = await this.getArticles(_.join(aIds, ','));
+        const CLIENT = await this.getUsers(this.order.customer_id); // Array of user
         this.supplierSchema = _.flatten(this.supplierSchema);
         this.supplierSchema = _.map(this.supplierSchema, schema => {
             let supplierId: number = parseInt(schema.supplier);
@@ -102,6 +103,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             // "marge" appartient au produit woocommerce
             // Cette valeur est herité depuis le post type 'product'
             schema.marge = parseInt(article.marge);
+            schema.marge_dealer = parseInt(article.marge_dealer, 10);
             schema.price = parseInt(article.price);
 
             return schema;
@@ -123,7 +125,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             setTimeout(() => {
                 Swal.fire('Désolé', "Article en attente détecté. Veuillez mettre à jours l'article", 'error');
             }, 600);
-            
+
             return false;
         }
 
@@ -141,11 +143,13 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             if (_.isUndefined(price) || product.quantity > take) {
                 product.stock = product.total = product.subtotal = product.price = 0;
                 this.error = true;
-                return product; 
+                return product;
             }
             this.error = false;
-            let marge = _.find(SCHEMAS, schema => { return schema.price === price; }).marge;
-            let benefit: number = (price * marge) / 100;
+            const _marge = _.find(SCHEMAS, schema => { return schema.price === price; }).marge;
+            const _marge_dealer = _.find(SCHEMAS, schema => { return schema.price === price; }).marge_dealer;
+            const marge: number = parseInt(CLIENT[0].role_office, 10) === 2 ? _marge_dealer : _marge;
+            const benefit: number = (price * marge) / 100;
             let total: number = (price + benefit) * take;
             total = Math.round(total);
 
@@ -199,10 +203,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     }
 
     /**
-     * Cette fonction permet de récupérer la valeur d'une propriété 
+     * Cette fonction permet de récupérer la valeur d'une propriété
      * définie dans l'item meta "suppliers"
-     * 
-     * @param property 
+     *
+     * @param property
      */
     private getMeta(property: string): Array<any> {
         return _.map(this.Items, item => {
@@ -236,7 +240,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
             resolve(container);
         })
-        
+
     }
 
     public initQuotation(): void {

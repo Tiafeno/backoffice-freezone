@@ -34,6 +34,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
   public Form: FormGroup;
   public Products: Array<any> = [];
   public Suppliers: Array<any> = [];
+  public supplierReference: string = null;
   public postResponseCache = new Map();
   public notice: any = null;
   public dateReview: string;
@@ -55,9 +56,10 @@ export class EditArticleComponent implements OnInit, OnChanges {
       priceDealer: new FormControl({value: 0, disabled: !this.canEdit}, Validators.required),
       marge: new FormControl({value: 0}, Validators.required),
       margeDealer: new FormControl({value: 0}, Validators.required),
-      product_id: new FormControl({value: null, disabled: true}, Validators.required),
+      product: new FormControl({value: null, disabled: true}, Validators.required),
       user_id: new FormControl(null, Validators.required),
-      stock: new FormControl({value: null, disabled: !this.canEdit}, Validators.required)
+      stock: new FormControl({value: null, disabled: !this.canEdit}, Validators.required),
+      priceUf: new FormControl({value: '', disabled: true})
     });
     this.WP = this.apiWP.getWPAPI();
   }
@@ -73,16 +75,28 @@ export class EditArticleComponent implements OnInit, OnChanges {
     this.Form.patchValue({title: $event.title.rendered});
   }
 
-  loadPost(type: string): Observable<any> {
-    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/${type}?per_page=100&status=any`;
-    const postCache = this.postResponseCache.get(URL);
-    if (postCache) {
-      return of(postCache);
+  onChangeMarge(newValue) {
+    const formValue: any = this.Form.value;
+    if (formValue.price) {
+      const per_price: number = parseInt(formValue.price, 10) * parseInt(newValue, 10) / 100;
+      const priceUf: number = per_price + parseInt(formValue.price, 10);
+      this.Form.patchValue({priceUf: priceUf});
     }
-    const response = this.http.get<any>(URL);
-    response.subscribe(posts => this.postResponseCache.set(URL, posts));
+  }
 
-    return response;
+  onChangePrice(newValue) {
+    const formValue: any = this.Form.value;
+    if (formValue.price) {
+      const per_price: number = parseInt(newValue, 10) * parseInt(formValue.marge, 10) / 100;
+      const priceUf: number = per_price + parseInt(newValue, 10);
+      this.Form.patchValue({priceUf: priceUf});
+    }
+  }
+
+
+  loadPost(type: string, id?: number): Observable<any> {
+    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/${type}?include=${id}&status=any`;
+    return this.http.get<any>(URL);
   }
 
   loadSuppliers(): Observable<any> {
@@ -101,13 +115,13 @@ export class EditArticleComponent implements OnInit, OnChanges {
     return this.Form.controls;
   }
 
-  ngOnChanges(changes: SimpleChanges): void | boolean {
+  ngOnChanges(changes: SimpleChanges) {
     if (!_.isUndefined(changes.Article.currentValue) && !_.isEmpty(changes.Article.currentValue)) {
       const cV: any = changes.Article.currentValue;
       this.ID = _.isUndefined(cV.id) ? (_.isUndefined(cV.ID) ? 0 : cV.ID) : cV.id;
-      if (this.ID === 0) return false;
-      this.initValues();
-      return true;
+      if (this.ID) {
+        this.initValues();
+      }
     }
   }
 
@@ -141,7 +155,6 @@ export class EditArticleComponent implements OnInit, OnChanges {
       price_dealer: Values.priceDealer,
       marge: Values.marge,
       marge_dealer: Values.margeDealer,
-      product_id: parseInt(Values.product_id, 10),
       user_id: parseInt(Values.user_id, 10),
       total_sales: parseInt(Values.stock, 10),
       date_review: moment().format('YYYY-MM-DD HH:mm:ss')
@@ -157,25 +170,30 @@ export class EditArticleComponent implements OnInit, OnChanges {
   initValues() {
     Helpers.setLoading(true);
     this.notice = null;
-    const ObsProduct = this.loadPost('product');
-    const ObsSuppliers = this.loadSuppliers();
+    const ObsProduct: Observable<any> = this.loadPost('product', parseInt(this.Article.product_id, 10));
+    const ObsSuppliers: Observable<any> = this.loadSuppliers();
     const Zip = Observable.zip(ObsProduct, ObsSuppliers);
     Zip.subscribe(results => {
-      this.Products = _.isEmpty(this.Products) ? results[0] : this.Products;
-      this.Suppliers = _.isEmpty(this.Suppliers) ? results[1] : this.Suppliers;
+      this.Products = results[0];
+      this.Suppliers = results[1];
+      const currentSupplierEdit = _.find(this.Suppliers, {id: this.Article.user_id});
+      this.supplierReference = currentSupplierEdit.reference;
+      this.cd.detectChanges();
+      const per_price: number = parseInt(this.Article.price, 10) * parseInt(this.Article.marge, 10) / 100;
+      const priceUf: number = per_price + parseInt(this.Article.price, 10);
       this.Form.patchValue({
         title: this.Article.title.rendered,
         price: this.Article.price,
         priceDealer: this.Article.price_dealer,
         marge: this.Article.marge,
         margeDealer: this.Article.marge_dealer,
-        product_id: this.Article.product_id,
+        product: this.Products[0].title.rendered,
         user_id: this.Article.user_id,
-        stock: this.Article.total_sales
+        stock: this.Article.total_sales,
+        priceUf: priceUf
       } as any);
 
       this.Form.controls.user_id.disable();
-      this.Form.controls.product_id.disable();
 
       this.dateReview = moment(this.Article.date_review).format('LLL');
       this.dateReviewFromNow = moment(this.Article.date_review).fromNow();

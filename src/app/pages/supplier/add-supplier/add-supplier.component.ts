@@ -29,8 +29,8 @@ export class AddSupplierComponent implements OnInit, AfterViewInit {
             phone: new FormControl(''),
             first_name: new FormControl('', Validators.required),
             last_name: new FormControl(''),
-            mail_commercial_cc: new FormControl([], Validators.required),
-            mail_logistics_cc: new FormControl([], Validators.required),
+            mail_commercial_cc: new FormControl([]),
+            mail_logistics_cc: new FormControl([]),
             email: new FormControl('', Validators.compose([Validators.email, Validators.required])),
             pwd: new FormControl('', Validators.required)
         });

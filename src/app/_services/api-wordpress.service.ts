@@ -21,7 +21,7 @@ export class ApiWordpressService {
 
     const routeArticles = '/fz_product/(?P<id>\\d+)';
     this.wpEndPoint.fz_product = this.wpEndPoint.registerRoute(namespace, routeArticles, {
-      params: ['filter', 'per_page', 'page', 'offset', 'search', 'context', 'head', 'include']
+      params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include']
     });
 
     const routeUsers = '/users/(?P<id>\\d+)';
