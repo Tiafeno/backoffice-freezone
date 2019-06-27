@@ -14,9 +14,8 @@
     </div>
     <div>
       <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
           <div class="form-group mb-4">
-            <label>Fournisseur</label>
             <ng-select name="supplier" placeholder="Selectionner un fournisseur" formControlName="user_id"
                        bindLabel="company_name" bindValue="id" [multiple]="false" [items]="Suppliers" required>
               <ng-template ng-option-tmp let-item="item">
@@ -24,8 +23,10 @@
                 <small>{{item.reference}}</small>
               </ng-template>
             </ng-select>
-            <p class="font-bold badge badge-pink">{{supplierReference}}</p>
           </div>
+        </div>
+        <div class="col-md-4">
+          <p class="font-bold badge badge-pink" style="font-size: 20px">{{supplierReference}}</p>
         </div>
       </div>
       <div class="row">
@@ -42,7 +43,7 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
-                <label>Prix</label>
+                <label>Prix de revient</label>
                 <input class="form-control" formControlName="price" (ngModelChange)="onChangePrice($event)" type="number" id="price" name="price"
                        placeholder="Ajouter un prix en AR">
                 <div *ngIf="f.price.errors && f.price.dirty">
@@ -50,7 +51,19 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-6">
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Prix de vente UF</label>
+                <input class="form-control" formControlName="priceUf" type="number" id="price_uf" name="price_uf"
+                       placeholder="">
+                <p class="help-block font-11">Le prix est en Ariary</p>
+              </div>
+            </div>
+            <div class="col-sm-6">
               <div class="form-group mb-4">
                 <label>Marge</label>
                 <input class="form-control" formControlName="marge" (ngModelChange)="onChangeMarge($event)" type="number" id="marge" name="marge"
@@ -62,14 +75,6 @@
             </div>
           </div>
 
-        </div>
-        <div class="col-12">
-          <div class="form-group mb-4">
-            <label>Prix UF</label>
-            <input class="form-control" formControlName="priceUf" type="number" id="price_uf" name="price_uf"
-                   placeholder="">
-            <p class="help-block font-11">Le prix est en Ariary</p>
-          </div>
         </div>
       </div>
       <div class="text-muted mb-2 mt-3">Revendeur</div>

@@ -11,6 +11,8 @@ import {HttpClient} from '@angular/common/http';
 import {ApiWordpressService} from '../../../_services/api-wordpress.service';
 import * as moment from 'moment';
 import {ApiWoocommerceService} from '../../../_services/api-woocommerce.service';
+import {FzSecurityService} from "../../../_services/fz-security.service";
+import Swal from "sweetalert2";
 
 declare var $: any;
 
@@ -30,6 +32,7 @@ export class AddArticleComponent implements OnInit {
 
   constructor(
     private fzServices: FzServicesService,
+    private Security: FzSecurityService,
     private http: HttpClient,
     private detector: ChangeDetectorRef,
     private apiWP: ApiWordpressService,
@@ -70,12 +73,17 @@ export class AddArticleComponent implements OnInit {
     $('#add-article-supplier-modal').on('show.bs.modal', e => {
       Helpers.setLoading(true);
       this.init();
-      Helpers.setLoading(false);
     });
   }
 
   async init() {
     this.Suppliers = await this.fzServices.getSuppliers();
+    if ( ! this.Security.hasAccess('s9', false)) {
+      $('#add-article-supplier-modal').modal('hide');
+      Swal.fire('Désolé', "Vous n'avez pas l'autorisation nécessaire pour ajouter un article", "error");
+
+    }
+    Helpers.setLoading(false);
   }
 
   loadCategories(term: string): Observable<any[]> {
@@ -111,31 +119,54 @@ export class AddArticleComponent implements OnInit {
         ],
         images: []
       };
-
-      this.WC.post('products', argsProduct, (err, data, res) => {
-        const product: any = JSON.parse(res);
-        const args: any = {
-          status: 'publish',
-          title: Value.title,
-          content: '',
-          price: parseInt(Value.price, 10),
-          price_dealer: parseInt(Value.priceDealer, 10),
-          total_sales: parseInt(Value.stock, 10),
-          user_id: parseInt(Value.user_id, 10),
-          product_id: product.id,
-          product_cat: Value.product_cat,
-          date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
-          date_review: moment().format('YYYY-MM-DD HH:mm:ss')
-        };
-
-        this.WP.fz_product().create(args).then(() => {
-          Helpers.setLoading(false);
-          this.refresh.emit();
-          $('#add-article-supplier-modal').modal('hide');
-          this.Form.reset();
-        });
+      this.WC.get(`products?search=${Value.title}`, (err, data, res) => {
+        const response: any = JSON.parse(res);
+        if (_.isEmpty(response) && _.isArray(response)) {
+          this.WC.post('products', argsProduct, (errno, data_, res_) => {
+            const product: any = JSON.parse(res_);
+            const args: any = {
+              status: 'publish',
+              title: Value.title,
+              content: '',
+              price: parseInt(Value.price, 10),
+              price_dealer: parseInt(Value.priceDealer, 10),
+              total_sales: parseInt(Value.stock, 10),
+              user_id: parseInt(Value.user_id, 10),
+              product_id: product.id,
+              product_cat: Value.product_cat,
+              date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
+              date_review: moment().format('YYYY-MM-DD HH:mm:ss')
+            };
+            this.insert(args);
+          });
+        } else {
+          const args: any = {
+            status: 'publish',
+            title: response.name,
+            content: '',
+            price: parseInt(Value.price, 10),
+            price_dealer: parseInt(Value.priceDealer, 10),
+            total_sales: parseInt(Value.stock, 10),
+            user_id: parseInt(Value.user_id, 10),
+            product_id: response.id,
+            product_cat: Value.product_cat,
+            date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
+            date_review: moment().format('YYYY-MM-DD HH:mm:ss')
+          };
+          this.insert(args);
+        }
       });
+
     }
+  }
+
+  protected insert(args: any) {
+    this.WP.fz_product().create(args).then(() => {
+      Helpers.setLoading(false);
+      this.refresh.emit();
+      $('#add-article-supplier-modal').modal('hide');
+      this.Form.reset();
+    });
   }
 
 }

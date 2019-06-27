@@ -4,4 +4,6 @@ import { Component } from '@angular/core';
   selector: '[app-footer]',
   templateUrl: './app-footer.component.html'
 })
-export class AppFooter {}
+export class AppFooter {
+  public author: string = "http://falicrea.com";
+}

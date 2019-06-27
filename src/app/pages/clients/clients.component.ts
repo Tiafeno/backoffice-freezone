@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild, NgZone} from '@angular/core';
 import {ApiWordpressService} from "../../_services/api-wordpress.service";
 import {config} from "../../../environments/environment";
 import {Helpers} from "../../helpers";
@@ -7,6 +7,8 @@ import * as moment from 'moment';
 declare var $: any;
 import {Router} from '@angular/router';
 import {TypeClientSwitcherComponent} from "../../components/type-client-switcher/type-client-switcher.component";
+import Swal from 'sweetalert2';
+import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
 
 @Component({
   selector: 'app-clients',
@@ -16,18 +18,36 @@ import {TypeClientSwitcherComponent} from "../../components/type-client-switcher
 export class ClientsComponent implements OnInit {
 
   private WPAPI: any;
+  private WCAPI: any;
   public Table: any;
 
   @ViewChild(TypeClientSwitcherComponent) public SwitchType: TypeClientSwitcherComponent;
   constructor(
     private apiWp: ApiWordpressService,
-    private router: Router
+    private apiWc: ApiWoocommerceService,
+    private router: Router,
+    private zone: NgZone
   ) {
     this.WPAPI = this.apiWp.getWPAPI();
+    this.WCAPI = this.apiWc.getWoocommerce();
   }
 
   public reload() {
     this.Table.ajax.reload(null, false);
+  }
+
+  public fnDeleteCustomer(customerid: number) {
+    Helpers.setLoading(true);
+    this.WCAPI.delete(`customers/${customerid}?force=true&reassing=1`, (err, data, res) => {
+      const response: any = JSON.parse(res);
+      Helpers.setLoading(false);
+      this.reload();
+      if (!_.isUndefined(response.code)) {
+        Swal.fire('Désolé', response.message, 'error');
+        return false;
+      }
+      Swal.fire('Succès', "Client supprimer avec succès", 'success');
+    });
   }
 
   ngOnInit() {
@@ -66,8 +86,9 @@ export class ClientsComponent implements OnInit {
           }
         },
         {
-          data: 'role_office', render: (data, type, row) => {
-            const status: string = data == 0 ? 'En attente' : (data == 1 ? 'Acheteur' : 'Revendeur');
+          data: 'meta_data', render: (data, type, row) => {
+            const roleOffice: any = _.find(data, {key : 'role_office'});
+            const status: string = roleOffice.value == 0 ? 'En attente' : (roleOffice.value == 1 ? 'Acheteur' : 'Revendeur');
             const style: string = status === 'En attente' ? 'pink' : (status === 'Acheteur' ? 'blue' : 'primary');
             return `<span class="badge badge-${style} switch-type uppercase" style="cursor: pointer;">${status}</span>`;
           }
@@ -78,7 +99,7 @@ export class ClientsComponent implements OnInit {
           }
         },
         {
-          data: 'registered_date', render: (data) => {
+          data: 'date_created', render: (data) => {
             return moment(data).fromNow();
           }
         },
@@ -92,16 +113,34 @@ export class ClientsComponent implements OnInit {
                         <i class="fab-icon-active la la-close"></i>
                      </button>
                      <ul class="fab-menu">
-                        <li><button class="btn btn-primary btn-icon-only btn-circle btn-air edit-product"><i class="la la-edit"></i></button></li>
+                     <li><button class="btn btn-pink btn-icon-only btn-circle btn-air delete-customer"><i class="la la-trash"></i></button></li>
+                        <li><button class="btn btn-primary btn-icon-only btn-circle btn-air edit-customer"><i class="la la-edit"></i></button></li>
                      </ul>
                   </div>`;
           }
         }
       ],
       initComplete: (setting, json) => {
-        $('#clients-table tbody').on('click', '.edit-client', e => {
+        $('#clients-table tbody').on('click', '.edit-customer', e => {
           e.preventDefault();
           const __clt: any = getElementData(e);
+          this.zone.run(() => { this.router.navigate(['/client', __clt.id, 'edit'])});
+        });
+
+        $('#clients-table tbody').on('click', '.delete-customer', e => {
+          e.preventDefault();
+          const __clt: any = getElementData(e);
+          Swal.fire({
+            title: 'Confirmation',
+            html: `<b>Action non récommandé</b>. Voulez vous vraiment supprimer le client < <b>${__clt.email}</b> >?`,
+            type: 'warning',
+            showCancelButton: true
+          }).then(result => {
+            if (result.value) {
+              this.fnDeleteCustomer(parseInt(__clt.id, 10));
+            }
+          });
+          
         });
 
         $('#clients-table tbody').on('click', '.switch-type', e => {

@@ -1,3 +1,240 @@
-<p>
-  edit-client works!
-</p>
+<style type="text/css">
+  .form-control {
+    font-family: inherit;
+  }
+
+</style>
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-lg-8">
+
+      <div class="ibox ibox-fullheight">
+        <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
+          <p class="lead mb-4 font-bold">Modification</p>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Nom</label>
+                <input class="form-control" autocomplete="off" formControlName="last_name" type="text" id="last_name"
+                  name="last_name" placeholder="">
+              </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">Prénom</label>
+                  <input class="form-control" autocomplete="off" formControlName="first_name" type="text" id="first_name"
+                    name="first_name" placeholder="">
+                </div>
+              </div>
+          </div>
+
+          <div class="row">
+              <div class="col-md-6">
+                  <div class="form-group mb-4">
+                    <label class="font-light">Adresse E-mail</label>
+                    <input class="form-control" autocomplete="off" formControlName="email" type="text" id="email"
+                      name="email" placeholder="">
+                  </div>
+              </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Adresse</label>
+                <input class="form-control" autocomplete="off" formControlName="address" id="address" name="address"
+                  type="text" placeholder="">
+                <div *ngIf="f.address.errors && f.address.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Numéro de téléphone</label>
+                <input class="form-control" autocomplete="off" formControlName="phone" id="phone" name="phone"
+                  type="text" placeholder="">
+                <div *ngIf="f.phone.errors && f.phone.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label class="font-light">Statut du client</label>
+                <ng-select name="client_status" placeholder="Veuillez selectionner" formControlName="client_status"
+                  bindLabel="label" bindValue="value" [hideSelected]="false" [multiple]="false" [items]="Status"
+                  required>
+                  <ng-template ng-option-tmp let-item="item">
+                    {{item.label}}
+                  </ng-template>
+                </ng-select>
+                <div *ngIf="f.client_status.errors && f.client_status.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="clientStatus.value === 'company'">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">STAT</label>
+                  <input class="form-control" autocomplete="off" formControlName="stat" id="stat" name="stat"
+                    type="text" placeholder="">
+                </div>
+              </div>
+
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">NIF</label>
+                  <input class="form-control" autocomplete="off" formControlName="nif" id="nif" name="nif" type="text"
+                    placeholder="">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">RC</label>
+                  <input class="form-control" autocomplete="off" formControlName="rc" id="rc" name="rc" type="text"
+                    placeholder="">
+                </div>
+              </div>
+
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">CIF</label>
+                  <input class="form-control" autocomplete="off" formControlName="cif" id="cif" name="cif" type="text"
+                    placeholder="">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!--- Billing & Shipping form here... -->
+          <div class="row mt-4 mb-2">
+            <div class="col-sm-6" [formGroup]="billForm" style="border: none !important">
+              <div class="mt-2">
+                <h2 class="lead font-bold mb-3">Adresse de facturation</h2>
+              </div>
+              <div class="form-group mb-4">
+                <label class="font-light">Adresse 1</label>
+                <input class="form-control" autocomplete="off" formControlName="address_1" id="address_1"
+                  name="address_1" type="text" placeholder="">
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Adresse 2</label>
+                <input class="form-control" autocomplete="off" formControlName="address_2" id="address_2"
+                  name="address_2" type="text" placeholder="">
+              </div>
+
+              <div class="form-group mb-4">
+                  <label class="font-light">Adresse E-mail</label>
+                  <input class="form-control" autocomplete="off" formControlName="email" id="bill_email"
+                    name="bill_email" type="text" placeholder="">
+                </div>
+
+              <div class="form-group mb-4">
+                  <label class="font-light">Pays</label>
+                  <input class="form-control" autocomplete="off" formControlName="country" id="country" name="country" type="text"
+                    placeholder="">
+                </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Ville</label>
+                <input class="form-control" autocomplete="off" formControlName="city" id="city" name="city" type="text"
+                  placeholder="">
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Code postal</label>
+                <input class="form-control" autocomplete="off" formControlName="postcode" id="postcode" name="postcode"
+                  type="number" placeholder="">
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Nom de l'entreprise</label>
+                <input class="form-control" autocomplete="off" formControlName="company" id="company" name="company"
+                  type="text" placeholder="">
+              </div>
+
+            </div>
+            <div class="col-sm-6" [formGroup]="shipForm" style="border: none !important">
+              <div class="mt-2">
+                <h2 class="lead font-bold mb-3">Adresse de livraison</h2>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group mb-4">
+                    <label class="font-light">Nom</label>
+                    <input class="form-control" autocomplete="off" formControlName="last_name" id="last_name"
+                      name="last_name" type="text" placeholder="">
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="form-group mb-4">
+                    <label class="font-light">Prénom</label>
+                    <input class="form-control" autocomplete="off" formControlName="first_name" id="first_name"
+                      name="first_name" type="text" placeholder="">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Adresse 1</label>
+                <input class="form-control" autocomplete="off" formControlName="address_1" id="address_1"
+                  name="address_1" type="text" placeholder="">
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Adresse 2</label>
+                <input class="form-control" autocomplete="off" formControlName="address_2" id="address_2"
+                  name="address_2" type="text" placeholder="">
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Ville</label>
+                <input class="form-control" autocomplete="off" formControlName="city" id="city" name="city" type="text"
+                  placeholder="">
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Code postal</label>
+                <input class="form-control" autocomplete="off" formControlName="postcode" id="postcode" name="postcode"
+                  type="number" placeholder="">
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="font-light">Nom de l'entreprise</label>
+                <input class="form-control" autocomplete="off" formControlName="company" id="company" name="company"
+                  type="text" placeholder="">
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mb-4 mt-4">
+            <div class="row">
+              <button class="btn btn-primary  col-4" type="submit">METTRE A JOUR</button>
+              <a class="btn btn-secondary ml-3 col-4" [routerLink]="['/client', 'lists']"
+                routerLinkActive="active">RETOUR</a>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <div class="col-lg-4">
+    </div>
+  </div>
+</div>

@@ -15,7 +15,7 @@ declare var $: any;
 })
 export class ReviewMailSupplierComponent implements OnInit, OnChanges {
   public Fournisseur: any = {};
-  public email: string = "contact@freezone.click";
+  public email = 'contact@freezone.click';
   public pendingArticle: Array<any> = [];
   @Input() supplier: any = {};
 
@@ -27,7 +27,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       '//fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
       '//www.tinymce.com/css/codepen.min.css'
     ],
-    content_style: ".mce-content-body p { margin: 5px 0; }",
+    content_style: '.mce-content-body p { margin: 5px 0; }',
     inline: false,
     statusbar: true,
     resize: true,
@@ -42,7 +42,8 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
   ) {
     this.Form = new FormGroup({
       subject: new FormControl('', Validators.required),
-      message: new FormControl('', Validators.required)
+      message: new FormControl('', Validators.required),
+      cc: new FormControl('')
     });
     this.Fournisseur.data = {};
   }
@@ -58,32 +59,33 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
   }
 
   onSend() {
-    if (this.Form.invalid) return false;
-    const Value: any = this.Form.value;
-    let Form: FormData = new FormData();
-    Form.append('subject', Value.subject);
-    Form.append('message', Value.message);
-    Helpers.setLoading(true);
-    this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.ID}`, Form).subscribe(result => {
-      Helpers.setLoading(false);
-      let response: any = _.clone(result);
-      if (response.success) {
-        this.Form.patchValue({
-          subject: '',
-          message: ''
-        });
-        $('.modal').modal('hide');
-        Swal.fire('Succès', response.data, 'success');
-      } else {
-        Swal.fire('Désolé', response.data, 'error');
-      }
-          
-    });
+    if (this.Form.valid)  {
+      const Value: any = this.Form.value;
+      const Form: FormData = new FormData();
+      Form.append('subject', Value.subject);
+      Form.append('message', Value.message);
+      Form.append('cc', Value.cc);
+      Helpers.setLoading(true);
+      this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.ID}`, Form).subscribe(result => {
+        Helpers.setLoading(false);
+        const response: any = _.clone(result);
+        if (response.success) {
+          this.Form.patchValue({
+            subject: '',
+            message: '',
+            cc: ''
+          });
+          $('.modal').modal('hide');
+          Swal.fire('Succès', response.data, 'success');
+        } else {
+          Swal.fire('Désolé', response.data, 'error');
+        }
+      });
+    }
   }
 
   openDialog() {
-    let args: any =
-    {
+    const args: any = {
       post_type: 'fz_product',
       post_status: 'publish',
       meta_query: [
@@ -100,17 +102,16 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
         }
       ]
     };
-    let Form: FormData = new FormData();
+    const Form: FormData = new FormData();
     Form.append('args', JSON.stringify(args));
     Helpers.setLoading(true);
     this.Http.post<any>(`${config.apiUrl}/fz_product/query`, Form).subscribe(resp => {
       Helpers.setLoading(false);
-      let response: any = _.clone(resp);
-      let data: any = response.data;
+      const response: any = _.clone(resp);
+      const data: any = response.data;
       this.pendingArticle = data;
-      $("#send-mail-modal").modal('show');
+      $('#send-mail-modal').modal('show');
     });
-    
   }
 
 }

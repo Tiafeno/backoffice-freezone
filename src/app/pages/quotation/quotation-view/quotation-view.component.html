@@ -19,16 +19,37 @@
                     <h5 class="font-strong text-success mb-3">{{billingAdress.first_name}} {{billingAdress.last_name}}</h5>
                     <div class="text-light">{{billingAdress.address_1}}, {{billingAdress.postcode}} {{billingAdress.city}}.</div>
                     <div class="text-light">{{billingAdress.email}}</div>
-                    <div class="text-light">{{billingAdress.phone}}</div>
+                    <div class="text-light mb-4">{{billingAdress.phone}}</div>
+
+                    <div class="row mb-2">
+                      <div class="col-6 text-muted">STAT:</div>
+                      <div class="col-6">Lynn</div>
+                    </div>
+
+                    <div class="row mb-2">
+                      <div class="col-6 text-muted">NIF:</div>
+                      <div class="col-6">Weaver</div>
+                    </div>
+
+                    <div class="row mb-2">
+                      <div class="col-6 text-muted">RC:</div>
+                      <div class="col-6">Weaver</div>
+                    </div>
+
+                    <div class="row mb-2">
+                      <div class="col-6 text-muted">CIF:</div>
+                      <div class="col-6">Weaver</div>
+                    </div>
+
                 </div>
             </div>
-            <div class="ibox-fullwidth-block">
-                <table class="table mb-4" *ngIf="!loading">
+            <div class="ibox-block">
+                <table class="table mb-0" *ngIf="!loading">
                     <thead class="thead-default thead-lg">
                         <tr>
                             <th class="pl-4">Désignation</th>
-                            <th>Quantité</th>
-                            <th>Unit HT</th>
+                            <th>Qté</th>
+                            <th>P.U HT</th>
                             <th class="text-right pr-4">Total</th>
                         </tr>
                     </thead>
@@ -49,24 +70,33 @@
                     </tfoot>
                 </table>
             </div>
-            <div class="d-flex justify-content-end" *ngIf="Billing">
-                <div class="text-right" style="width:450px;">
-                    <div class="row mb-2">
-                        <div class="col-6">Sous-total HT:</div>
-                        <div class="col-6">{{Billing.subtotal | currency:'MGA':'symbole':'4.2-2':'fr'}}</div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-6">Taxe:</div>
-                        <div class="col-6" style="font-weight: bold">{{Tax}} %</div>
-                    </div>
-                    <div class="row font-strong font-20 align-items-center">
-                        <div class="col-6">Total TTC:</div>
-                        <div class="col-6">
-                            <div class="h3 font-strong mb-0">{{Billing.total_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</div>
-                        </div>
-                    </div>
-                </div>
+
+            <div *ngIf="Billing">
+              <table class="table table-bordered table-head-purple table-border-purple mb-5">
+                <thead>
+                  <tr>
+                    <th>Total HT Brut</th>
+                    <th>Total Net</th>
+                    <th>TVA 20%</th>
+                    <th>Montant Taxe</th>
+                    <th>Acompte</th>
+                    <th>NET A PAYER</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr>
+                    <td>{{Billing.subtotal | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                    <td>{{Billing.subtotal | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                    <td>{{Tax}}%</td>
+                    <td>{{Billing.price_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                    <td></td>
+                    <td>{{Billing.total_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+
         </div>
     </div>
 </div>

@@ -22,6 +22,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public billingAdress: any = {}; // adresse de facturation
     public shippingAdress: any = {}; // adresse de facturation
     public loading: boolean = false;
+    public ownerClient: any = {};
 
     private Woocommerce: any;
     private Wordpress: any;
@@ -45,14 +46,14 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     }
 
     ngAfterViewInit() {
-        $('#quotation-view-modal').on('show.bs.modal', e => {
-            this.onShowModal();
-        });
-
-        $('#quotation-view-modal').on('hide.bs.modal', e => {
-            this.QtItems = [];
-            this.Billing = {};
-            this.supplierSchema = [];
+        $("#quotation-view-modal")
+            .on('show.bs.modal', e => {
+              this.onShowModal();
+            })
+            .on('hide.bs.modal', e => {
+              this.QtItems = [];
+              this.Billing = {};
+              this.supplierSchema = [];
         });
     }
 
@@ -92,9 +93,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         Helpers.setLoading(true);
 
         let aIds: Array<any> = this.getMeta('article_id');
+        const ARTICLES = await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
+        const CLIENT = await this.getUsers(this.order.customer_id); // Array of user or empty
+        this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
         this.supplierSchema = await this.loadSchema();
-        const ARTICLES = await this.getArticles(_.join(aIds, ','));
-        const CLIENT = await this.getUsers(this.order.customer_id); // Array of user
         this.supplierSchema = _.flatten(this.supplierSchema);
         this.supplierSchema = _.map(this.supplierSchema, schema => {
             let supplierId: number = parseInt(schema.supplier);
@@ -148,7 +150,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             this.error = false;
             const _marge = _.find(SCHEMAS, schema => { return schema.price === price; }).marge;
             const _marge_dealer = _.find(SCHEMAS, schema => { return schema.price === price; }).marge_dealer;
-            const marge: number = parseInt(CLIENT[0].role_office, 10) === 2 ? _marge_dealer : _marge;
+            const marge: number = parseInt(this.ownerClient.role_office, 10) === 2 ? _marge_dealer : _marge;
             const benefit: number = (price * marge) / 100;
             let total: number = (price + benefit) * take;
             total = Math.round(total);
@@ -166,6 +168,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.Billing.total = _.sum(totalItemsArray);
 
         let priceTax: number = (this.Billing.subtotal * this.Tax) / 100;
+        this.Billing.price_tax = priceTax;
         this.Billing.total_tax = parseInt(this.Billing.subtotal) + priceTax;
 
         this.loading = false;
@@ -190,7 +193,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         return new Promise(resolve => {
             this.Wordpress.fz_product().include(ids).then(fzProducts => {
                 resolve(fzProducts);
-            });
+            }).catch(err => resolve([]));
         })
     }
 
@@ -198,7 +201,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         return new Promise(resolve => {
             this.Wordpress.users().include(ids).then(users => {
                 resolve(users);
-            });
+            }).catch(err => { resolve([]); });
         });
     }
 
