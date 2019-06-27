@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { config } from '../../environments/environment';
 
 import { map } from 'rxjs/operators/map';
@@ -10,8 +9,7 @@ import * as _ from 'lodash';
 export class AuthorizationService {
 
   constructor(
-    private Http: HttpClient,
-    private router: Router
+    private Http: HttpClient
   ) { }
 
   public login(email: string, pwd: string): any {
@@ -55,5 +53,11 @@ export class AuthorizationService {
   public getCurrentUser() {
     let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
     return __fzCurrentUser;
- }
+  }
+
+  public getCurrentUserRole(): string {
+    let User: any = this.getCurrentUser();
+    return User.data.roles[0];
+  }
+  
 }

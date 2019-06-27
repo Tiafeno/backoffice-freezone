@@ -10,94 +10,129 @@
   <div class="modal-body p-4">
     <div class="alert alert-{{notice.classes}}" *ngIf="notice">
       <strong>{{notice.classes === 'warning' ? "Avertissement" : "Attention"}}</strong>
-      <br>{{notice.msg}} 
+      <br>{{notice.msg}}
     </div>
     <div>
       <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
           <div class="form-group mb-4">
-            <label>Fournisseur</label>
             <ng-select name="supplier" placeholder="Selectionner un fournisseur" formControlName="user_id"
-              bindLabel="company_name" bindValue="id" [multiple]="false" [items]="Suppliers" required>
+                       bindLabel="company_name" bindValue="id" [multiple]="false" [items]="Suppliers" required>
               <ng-template ng-option-tmp let-item="item">
-                {{item.company_name}} <br />
+                {{item.company_name}} <br/>
                 <small>{{item.reference}}</small>
               </ng-template>
             </ng-select>
           </div>
         </div>
+        <div class="col-md-4">
+          <p class="font-bold badge badge-pink" style="font-size: 20px">{{supplierReference}}</p>
+        </div>
       </div>
-      <div class="row">
-          <div class="col-md-12">
-            <div class="form-group mb-4">
-              <label>Catégorie</label>
-              <ng-select name="categorie" placeholder="Tapez une categorie" formControlName="product_cat"
-                bindValue="id" bindLabel="name"  [multiple]="false" [items]="Categories" required>
-                <ng-template ng-option-tmp let-item="item">
-                    {{item.name}}
-                </ng-template>
-              </ng-select>
-            </div>
-          </div>
-        </div>
-      <div class="row">
-          <div class="col-md-12">
-            <div class="form-group mb-4">
-              <label>Réference du produit</label>
-              <ng-select name="product" placeholder="Tapez un produit" formControlName="product_id" (change)="onSelectProduct($event)"
-              bindValue="id" bindLabel="title.rendered" [searchable]="true"  [multiple]="false" [items]="Products" required>
-                <ng-template ng-option-tmp let-item="item">
-                    {{item.title.rendered}} 
-                </ng-template>
-              </ng-select>
-            </div>
-          </div>
-        </div>
       <div class="row">
         <div class="col-md-12">
           <div class="form-group mb-4">
-            <label>Titre</label>
-            <input class="form-control" formControlName="title" type="text" id="title" name="title"
-              placeholder="Ajouter un titre">
-            <div *ngIf="f.title.errors && f.title.dirty">
-              <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
-            </div>
+            <label>Produit</label>
+            <input name="product" placeholder="Designation du produit" formControlName="product" class="form-control"/>
           </div>
         </div>
       </div>
+      <div class="text-muted mb-2 mt-3">Fournisseur</div>
       <div class="row">
-        <div class="col-md-4">
-          <div class="form-group mb-4">
-            <label>Prix (MGA)</label>
-            <input class="form-control" formControlName="price" type="text" id="price" name="price"
-              placeholder="Ajouter un prix">
-            <div *ngIf="f.price.errors && f.price.dirty">
-              <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-8">
-            <div class="form-group mb-4">
-              <label>Stock</label>
-              <input class="form-control" formControlName="stock" type="text" id="stock" name="stock"
-                placeholder="Ajouter la quantité disponible">
-              <div *ngIf="f.stock.errors && f.stock.dirty">
-                <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+        <div class="col-12">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Prix de revient</label>
+                <input class="form-control" formControlName="price" (ngModelChange)="onChangePrice($event)" type="number" id="price" name="price"
+                       placeholder="Ajouter un prix en AR">
+                <div *ngIf="f.price.errors && f.price.dirty">
+                  <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+        <div class="col-12">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Prix de vente UF</label>
+                <input class="form-control" formControlName="priceUf" type="number" id="price_uf" name="price_uf"
+                       placeholder="">
+                <p class="help-block font-11">Le prix est en Ariary</p>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Marge</label>
+                <input class="form-control" formControlName="marge" (ngModelChange)="onChangeMarge($event)" type="number" id="marge" name="marge"
+                       placeholder="Ajouter une marge">
+                <div *ngIf="f.marge.errors && f.marge.dirty">
+                  <label id="marge-error" class="help-block error">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="text-muted mb-2 mt-3">Revendeur</div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Prix R.</label>
+            <input class="form-control" formControlName="priceDealer" type="number" id="price_dealer" name="price_dealer"
+                   placeholder="Ajouter un prix en AR">
+            <div *ngIf="f.priceDealer.errors && f.priceDealer.dirty">
+              <label id="price-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Marge R.</label>
+            <input class="form-control" formControlName="margeDealer" type="number" id="marge_dealer" name="marge_dealer"
+                   placeholder="Ajouter une marge">
+            <div *ngIf="f.margeDealer.errors && f.margeDealer.dirty">
+              <label id="marge-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Quantité disponible(s)</label>
+            <input class="form-control" formControlName="stock" type="number" id="stock" name="stock"
+                   placeholder="Ajouter la quantité disponible">
+            <div *ngIf="f.stock.errors && f.stock.dirty">
+              <label id="qty-error" class="help-block error">Ce champ est obligatoire.</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group mb-4">
+            <label>La dernière mise à jour date de</label>
+            <div id="date_review" class="alert alert-pink">{{dateReview}}, {{dateReviewFromNow}}</div>
+          </div>
+        </div>
       </div>
       <div class="text-muted font-11">
-          Sed tristique lacinia enim, sit amet consequat ante suscipit at. Quisque a eros vitae elit molestie tristique.
+        Sed tristique lacinia enim, sit amet consequat ante suscipit at. Quisque a eros vitae elit molestie tristique.
       </div>
 
     </div>
   </div>
   <div class="modal-footer justify-content-between bg-primary-50">
-  
-      <div>
-          <button class="btn btn-primary btn-rounded mr-3" type="submit">Mettre à jour</button>
-      </div>
-      <a class="text-danger" (click)="onRemoveArticle(ID)"><i class="la la-trash font-20"></i></a>
+
+    <div>
+      <button class="btn btn-primary btn-rounded mr-3" type="submit" [disabled]=" ! canEdit">Mettre à jour</button>
+    </div>
+    <a class="text-danger" (click)="onRemoveArticle(ID)"><i class="la la-trash font-20"></i></a>
   </div>
 </form>

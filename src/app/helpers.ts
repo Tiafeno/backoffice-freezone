@@ -41,7 +41,11 @@ export class Helpers {
 	    // SEARCH BAR ACTION
 	    $('.js-search-toggler').click(function() {
 	        $('.search-top-bar').backdrop().find('.search-input').focus();
-	    });
+		});
+		
+		$('.page-sidebar').on('mouseleave', e => {
+			$('.page-sidebar').removeClass('opened');
+		});
 
 	    // Session timeout
 	    

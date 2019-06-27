@@ -7,7 +7,6 @@
         right: 0;
         background-repeat: no-repeat;
         background-size: cover;
-        background-image: url('./assets/img/blog/17.jpeg');
     }
 
     .cover {
@@ -48,7 +47,14 @@
         <span class="auth-head-icon"><i class="la la-user"></i></span>
     </div>
     <form class="ibox-body" [formGroup]="formLogin" id="login-form" (ngSubmit)="onSubmit()">
-        <h4 class="font-strong text-center mb-5">LOG IN</h4>
+        <h4 class="font-strong text-center mb-5">SE CONNECTER</h4>
+        <div *ngIf="submitted && errorResponse">
+            <div class="alert alert-pink alert-dismissable fade show">
+                <button class="close" data-dismiss="alert" aria-label="Close"></button>
+                <h3 class="font-strong">{{errorResponse.status}}</h3>
+                <span [innerHTML]="errorResponse.error.message"></span> 
+            </div>
+        </div>
         <div class="form-group mb-4">
             <input class="form-control form-control-line" formControlName="email" type="text"  placeholder="Email">
             <div *ngIf="submitted && f.email.errors">
@@ -66,11 +72,11 @@
                 <label class="ui-switch switch-icon mr-2 mb-0">
                     <input type="checkbox" checked="">
                     <span></span>
-                </label>Remember</span>
-            <a class="text-primary" routerLink="/forgot_password">Forgot password?</a>
+                </label>Se souvenir de moi</span>
+            <!-- <a class="text-primary" routerLink="/forgot_password">Forgot password?</a> -->
         </div>
         <div class="text-center mb-4">
-            <button class="btn btn-primary btn-rounded btn-block" [disabled]="loading" type="submit">LOGIN</button>
+            <button class="btn btn-primary btn-rounded btn-block" [disabled]="loading" type="submit">CONNECTER</button>
         </div>
     </form>
 </div>

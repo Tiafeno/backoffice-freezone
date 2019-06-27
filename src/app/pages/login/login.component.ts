@@ -3,6 +3,7 @@ import { AuthorizationService } from '../../_services/authorization.service';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
+import { HttpErrorResponse } from '@angular/common/http';
 declare var $: any;
 
 @Component({
@@ -13,12 +14,16 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
   public formLogin: FormGroup;
   public loading: boolean = false;
   public submitted: boolean = false;
+  public errorResponse: HttpErrorResponse = null;
   constructor(
     private auth: AuthorizationService,
     private router: Router
   ) {
     this.formLogin = new FormGroup({
-      email: new FormControl('', Validators.required),
+      email: new FormControl('', Validators.compose([
+        Validators.required,
+        Validators.pattern('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$')
+      ])),
       pwd: new FormControl('', Validators.required)
     })
   }
@@ -55,11 +60,15 @@ export class LoginComponent implements OnInit, AfterViewInit, OnDestroy {
         data => {
           if (data) {
             this.router.navigate(['dashboard']);
+          } else {
+            this.formLogin.patchValue({email: "", pwd: ""});
           }
           this.loading = false;
         },
         error => {
           this.loading = false;
+          this.errorResponse = error;
+          this.formLogin.patchValue({pwd: ""});
         });
   }
 

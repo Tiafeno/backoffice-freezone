@@ -14,7 +14,9 @@ import { Error500Component } from './pages/error-500/error-500.component';
 import { MaintenanceComponent } from './pages/maintenance/maintenance.component';
 import { AuthGuard } from './guards/auth.guard';
 import { LoginGuard } from './guards/login.guard';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { TagInputModule } from 'ngx-chips';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { BrowserModule } from '@angular/platform-browser';
@@ -46,21 +48,30 @@ import { QuotationMailComponent } from './pages/quotation/quotation-mail/quotati
 import { ReviewArticlesComponent } from './pages/supplier/review-articles/review-articles.component';
 import { ReviewSupplierComponent } from './pages/supplier/review-supplier/review-supplier.component';
 import { ReviewMailSupplierComponent } from './pages/supplier/review-mail-supplier/review-mail-supplier.component';
+import { SavComponent } from './pages/sav/sav/sav.component';
+import { ScheduleGuard } from './guards/schedule.guard';
+import { ImportArticleComponent } from './components/import-article/import-article.component';
+import { ClientsComponent } from './pages/clients/clients.component';
+import { EditClientComponent } from './pages/clients/edit-client/edit-client.component';
+import { NoCommercialAccessGuard } from './guards/no-commercial-access.guard';
+import { FzSecurityService } from './_services/fz-security.service';
+import {StatusArticleComponent} from './components/status-article/status-article.component';
+import {TypeClientSwitcherComponent} from "./components/type-client-switcher/type-client-switcher.component";
 
 
 const routes: Routes = [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     {
-        path: "",
+        path: '',
         component: LayoutComponent,
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, ScheduleGuard],
         children: [
             {
-                path: "dashboard",
+                path: 'dashboard',
                 children: [
-                    { path: "", redirectTo: 'quotation', pathMatch: 'full' },
+                    { path: '', redirectTo: 'quotation', pathMatch: 'full' },
                     {
-                        path: '', 
+                        path: '',
                         component: Dashboard7Component,
                         children: [
                             {
@@ -70,29 +81,51 @@ const routes: Routes = [
                             {
                                 path: 'quotation/:id',
                                 children: [
-                                    { path: "", redirectTo: 'edit', pathMatch: 'full' },
-                                    { path: "edit", component: QuotationEditComponent }
+                                    { path: '', redirectTo: 'edit', pathMatch: 'full' },
+                                    { path: 'edit', component: QuotationEditComponent }
                                 ]
                             }
-                            
+
                         ]
                     }
                 ]
             },
             {
-                path: "supplier",
+                path: 'sav',
+                component: SavComponent
+            },
+            {
+                path: 'client',
                 children: [
-                    { path: "", redirectTo: 'lists', pathMatch: "full" },
+                    { path: '', redirectTo: 'lists', pathMatch: 'full' },
+                    { path: 'lists', component: ClientsComponent },
+                    {
+                        path: ':id',
+                        canActivate: [NoCommercialAccessGuard],
+                        children: [
+                            { path: '', redirectTo: 'edit', pathMatch: 'full' },
+                            { path: 'edit', component: EditClientComponent }
+                        ]
+                    },
+                ]
+            },
+            {
+                path: 'supplier',
+                children: [
+                    { path: '', redirectTo: 'lists', pathMatch: 'full' },
                     {
                         path: 'lists',
+                        canActivate: [NoCommercialAccessGuard],
                         component: SupplierDatatableComponent
                     },
                     {
                         path: 'new',
+                        canActivate: [NoCommercialAccessGuard],
                         component: AddSupplierComponent
                     },
                     {
                         path: 'review',
+                        canActivate: [NoCommercialAccessGuard],
                         component: ReviewSupplierComponent
                     },
                     {
@@ -104,31 +137,33 @@ const routes: Routes = [
                         component: ReviewArticlesComponent
                     },
                     {
-                        path: ":id",
+                        path: ':id',
+                        canActivate: [NoCommercialAccessGuard],
                         children: [
-                            { path: "", redirectTo: 'edit', pathMatch: 'full' },
+                            { path: '', redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: EditSupplierComponent }
                         ]
                     },
-                    
+
                 ]
             },
             {
-                path: "product",
+                path: 'product',
+                canActivate: [NoCommercialAccessGuard],
                 children: [
-                    { path: "", redirectTo: "lists", pathMatch: "full" },
+                    { path: '', redirectTo: 'lists', pathMatch: 'full' },
                     {
                         path: 'lists',
                         component: ProductListsComponent
                     },
                     {
-                        path: "new",
+                        path: 'new',
                         component: ProductNewComponent
                     },
                     {
                         path: ':id',
                         children: [
-                            { path: "", redirectTo: 'edit', pathMatch: 'full'},
+                            { path: '', redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: ProductEditComponent }
                         ]
                     }
@@ -137,35 +172,35 @@ const routes: Routes = [
         ]
     },
     {
-        path: "login",
+        path: 'login',
         canActivate: [LoginGuard],
         component: LoginComponent
     },
     {
-        "path": "forgot_password",
+        'path': 'forgot_password',
         canActivate: [LoginGuard],
-        "component": ForgotPasswordComponent
+        'component': ForgotPasswordComponent
     },
     {
-        "path": "error_404",
-        "component": Error404Component
+        'path': 'error_404',
+        'component': Error404Component
     },
     {
-        "path": "error_403",
-        "component": Error403Component
+        'path': 'error_403',
+        'component': Error403Component
     },
     {
-        "path": "error_500",
-        "component": Error500Component
+        'path': 'error_500',
+        'component': Error500Component
     },
     {
-        "path": "maintenance",
-        "component": MaintenanceComponent
+        'path': 'maintenance',
+        'component': MaintenanceComponent
     },
     {
-        "path": "**",
-        "redirectTo": "error_404",
-        "pathMatch": "full"
+        'path': '**',
+        'redirectTo': 'error_404',
+        'pathMatch': 'full'
     },
 ];
 
@@ -200,6 +235,12 @@ const routes: Routes = [
         ReviewArticlesComponent,
         ReviewSupplierComponent,
         ReviewMailSupplierComponent,
+        ImportArticleComponent,
+        ClientsComponent,
+        EditClientComponent,
+        SavComponent,
+        StatusArticleComponent,
+        TypeClientSwitcherComponent,
         MomentsPipe
     ],
     imports: [
@@ -210,6 +251,8 @@ const routes: Routes = [
         ReactiveFormsModule,
         NgSelectModule,
         EditorModule,
+        TagInputModule,
+        BrowserAnimationsModule,
         RouterModule.forRoot(routes)
     ],
     providers: [
@@ -219,6 +262,9 @@ const routes: Routes = [
         FzServicesService,
         AuthGuard,
         LoginGuard,
+        ScheduleGuard,
+        NoCommercialAccessGuard,
+        FzSecurityService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true }
         // { provide: LocationStrategy, useClass: HashLocationStrategy}
     ],
@@ -229,4 +275,4 @@ const routes: Routes = [
 
 export class AppRoutingModule {
 
- }
+}

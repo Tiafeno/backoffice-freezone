@@ -47,6 +47,28 @@
             </div>
           </div>
           <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Marge en <b>%</b></label>
+                <input class="form-control" autocomplete="off" formControlName="marge" id="marge" name="marge" type="text"
+                  placeholder="">
+                <div *ngIf="f.marge.errors && f.marge.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Marge revendeur en %</label>
+                <input class="form-control" autocomplete="off" formControlName="marge_dealer" id="marge_dealer" name="marge_dealer" type="text"
+                  placeholder="Marge en %">
+                <div *ngIf="f.marge_dealer.errors && f.marge_dealer.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
             <div class="col-md-12">
               <div class="form-group mb-4">
                 <label class="font-light">Categorie(s)</label>

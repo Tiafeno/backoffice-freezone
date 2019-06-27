@@ -6,6 +6,7 @@ import { Helpers } from '../../../helpers';
 import { config } from '../../../../environments/environment';
 import Swal, { SweetAlertType } from 'sweetalert2';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
+import { FzSecurityService } from '../../../_services/fz-security.service';
 declare var $:any;
 
 @Component({
@@ -40,7 +41,8 @@ export class QuotationMailComponent implements OnInit, OnChanges {
   constructor(
     private Http: HttpClient,
     private apiWC: ApiWoocommerceService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private security: FzSecurityService
   ) {
     this.Form = new FormGroup({
       subject: new FormControl('', Validators.required),
@@ -58,36 +60,37 @@ export class QuotationMailComponent implements OnInit, OnChanges {
       this.Form.patchValue({
         subject: `Devis #${this.Order.id} - Demande de confirmation`,
         content: "Bonjour, <br><br> <p>Vous trouverez ci-joint votre devis.<p><p>Nous vous remercions d'avoir choisi notre solution!<br><br> Cordialement."
-      })
+      });
     }
   }
 
   onSend() {
     if (this.Form.invalid) return false;
-    let Value: any = this.Form.value;
-    Helpers.setLoading(true);
-    let fData: FormData = new FormData();
-    fData.append('subject', Value.subject);
-    fData.append('message', Value.content);
-    this.Woocommerce.put(`orders/${this.Order.id}`, {position: 1} , (err, data, res) => {
-      this.Http.post<any>(`${config.apiUrl}/mail/client/${this.Order.id}`, fData)
-      .subscribe(resp => {
-        Helpers.setLoading(false);
-        $('.modal').modal('hide');
-
-        let response: any = _.clone(resp);
-        let message: string = response.data;
-        let title: string = response.success ? "Succès" : "Désolé";
-        let type: SweetAlertType = response.success ? 'success' : "error";
-        Swal.fire(title, message, type);
-        
-      }, err => {
-        Swal.fire('Désolé', "Une erreur s'est produit pendant l'envoie. Veuillez réessayer plus tard", 'error');
-        Helpers.setLoading(false);
+    const Value: any = this.Form.value;
+    if (this.security.hasAccess('s8')) {
+      Helpers.setLoading(true);
+      const fData: FormData = new FormData();
+      fData.append('subject', Value.subject);
+      fData.append('message', Value.content);
+      // Mettre la demamde pour 'Envoyer'
+      this.Woocommerce.put(`orders/${this.Order.id}`, {position: 1} , (err, data, res) => {
+        // Envoyer le mail
+        this.Http.post<any>(`${config.apiUrl}/mail/order/${this.Order.id}`, fData)
+        .subscribe(resp => {
+          Helpers.setLoading(false);
+          $('.modal').modal('hide');
+          const response: any = _.clone(resp);
+          const message: string = response.data;
+          const title: string = response.success ? "Succès" : "Désolé";
+          const type: SweetAlertType = response.success ? 'success' : "error";
+          Swal.fire(title, message, type);
+        }, err => {
+          Swal.fire('Désolé', "Une erreur s'est produit pendant l'envoie. Veuillez réessayer plus tard", 'error');
+          Helpers.setLoading(false);
+        });
+        this.cd.detectChanges();
       });
-      this.cd.detectChanges();
-    });
-    
+    }
   }
 
 

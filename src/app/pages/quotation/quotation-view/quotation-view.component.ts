@@ -3,8 +3,8 @@ import * as _ from 'lodash';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
-import { HttpClient } from '@angular/common/http';
-import { config } from '../../../../environments/environment';
+import Swal from 'sweetalert2';
+import * as moment from 'moment';
 declare var $: any;
 
 @Component({
@@ -22,10 +22,16 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public billingAdress: any = {}; // adresse de facturation
     public shippingAdress: any = {}; // adresse de facturation
     public loading: boolean = false;
+    public ownerClient: any = {};
+
     private Woocommerce: any;
     private Wordpress: any;
     private supplierSchema: Array<any> = [];
+    private error: boolean = false;
+    private Tax: number = 20; // Tax de 20%
+
     @Input() order: any;
+
     constructor(
         private apiWC: ApiWoocommerceService,
         private apiWP: ApiWordpressService,
@@ -36,83 +42,134 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     }
 
     ngOnInit() {
+        moment.locale('fr');
     }
 
     ngAfterViewInit() {
-        $('#quotation-view-modal').on('show.bs.modal', e => {
-            this.onShowModal();
-        });
-
-        $('#quotation-view-modal').on('hide.bs.modal', e => {
-            this.QtItems = [];
-            this.Billing = {};
-            this.supplierSchema = [];
+        $("#quotation-view-modal")
+            .on('show.bs.modal', e => {
+              this.onShowModal();
+            })
+            .on('hide.bs.modal', e => {
+              this.QtItems = [];
+              this.Billing = {};
+              this.supplierSchema = [];
         });
     }
 
-    public onSendMail() {
+    public onSendMail(): void | boolean {
+        if (this.error) {
+            Swal.fire("Désolé", "Vous ne pouvez pas envoyer par mail ce devis pour l'instant. Veuillez bien vérifier l'articles des fournisseurs. Merci", "error");
+            return false;
+        }
         this.QtItems = _.map(this.QtItems, item => {
+            // Mettre le prix unitaire pour 0 par default
+            // (Le prix sera regenerer automatiquement par woocommerce)
             item.price = '0';
             return item;
         });
-        let data: any = { line_items: this.QtItems };
+        let pricetax: number = (this.Billing.total * this.Tax) / 100;
+        let data: any = {
+            currency: 'MGA',
+            line_items: this.QtItems,
+            cart_tax: pricetax.toString()
+        };
         Helpers.setLoading(true);
         $('.modal').modal('hide');
         this.Woocommerce.put(`orders/${this.ID}`, data, (err, data, res) => {
-            let order: any = JSON.parse(res);
             Helpers.setLoading(false);
-            // afficher la boite de dialogue pour l'envoie de mail
+            // Afficher la boite de dialogue pour l'envoie de mail
             $('#quotation-mail-modal').modal('show');
         });
     }
 
+    /**
+     * Cette fonction sera exécuter quand la boit de dialogue s'affiche
+     */
     public async onShowModal() {
         this.loading = true;
+        this.error = false;
         this.cd.detectChanges();
         Helpers.setLoading(true);
 
-        let productIds: Array<any> = this.getMeta('article_id');
-        this.getSchema();
-        let pIds: string = _.join(productIds, ',');
-        const ARTICLES = await this.getArticles(pIds);
-        let supplierIds: Array<any> = this.getMeta('supplier');
-        let sIds: string = _.join(supplierIds, ',');
-
-        const USERS = await this.getUsers(sIds);
+        let aIds: Array<any> = this.getMeta('article_id');
+        const ARTICLES = await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
+        const CLIENT = await this.getUsers(this.order.customer_id); // Array of user or empty
+        this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
+        this.supplierSchema = await this.loadSchema();
         this.supplierSchema = _.flatten(this.supplierSchema);
         this.supplierSchema = _.map(this.supplierSchema, schema => {
-            let user: any = _.find(USERS, { id: schema.supplier });
-            let article: any = _.find(ARTICLES, { user_id: schema.supplier });
-            if (_.isUndefined(user) || _.isUndefined(article)) return schema;
-            schema.commission = parseInt(user.commission);
+            let supplierId: number = parseInt(schema.supplier);
+            let article: any = _.find(ARTICLES, { user_id: supplierId });
+            if (_.isUndefined(article)) return schema;
+            // "marge" appartient au produit woocommerce
+            // Cette valeur est herité depuis le post type 'product'
+            schema.marge = parseInt(article.marge);
+            schema.marge_dealer = parseInt(article.marge_dealer, 10);
             schema.price = parseInt(article.price);
 
             return schema;
         });
 
-        //TODO: Vérifier la quantité des articles
+        // Vérifier si la date de revision est périmé
+        _.map(ARTICLES, (a) => {
+            let dateReview: any = moment(a.date_review);
+            let dateLimit: any = moment().subtract(2, 'day');
+            if ( dateLimit > dateReview ) {
+                this.error = true;
+            }
+        });
 
-        this.QtItems = _.map(this.Items, item => {
-            let schemas: any = _.filter(this.supplierSchema, { product_id: item.product_id });
-            let totalArray: Array<number> = [];
-            _.map(schemas, schema => {
-                let pourcentage: number = (schema.price * schema.commission) / 100;
-                let x: number = (schema.price + pourcentage) * parseInt(schema.get);
-                totalArray.push(Math.round(x));
-            });
-            let total: number = _.sum(totalArray);
-            let stock: Array<number> = _.map(schemas, schema => { return parseInt(schema.get); })
-            item.stock = _.sum(stock);
-            item.total = total.toString();
-            item.subtotal = total.toString();
-            item.price = Math.round(total / item.quantity);
+        if (this.error) {
+            $('.modal').modal('hide');
+            Helpers.setLoading(this.loading = false);
+            this.cd.detectChanges();
+            setTimeout(() => {
+                Swal.fire('Désolé', "Article en attente détecté. Veuillez mettre à jours l'article", 'error');
+            }, 600);
 
-            return item;
+            return false;
+        }
+
+        this.QtItems = _.map(this.Items, product => {
+            // Récuperer tous les meta utiliser pour le produit
+            let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: product.product_id });
+            let allPriceForItem = _.map(SCHEMAS, (schema) => parseInt(schema.price));
+            let allTakeForItem = _.map(SCHEMAS, (schema) => parseInt(schema.get));
+
+            // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
+            let take = _.sum(allTakeForItem);
+
+            // Récuperer le prix le plus grand pour chaque fournisseur ajouter
+            let price = _.max(allPriceForItem);
+            if (_.isUndefined(price) || product.quantity > take) {
+                product.stock = product.total = product.subtotal = product.price = 0;
+                this.error = true;
+                return product;
+            }
+            this.error = false;
+            const _marge = _.find(SCHEMAS, schema => { return schema.price === price; }).marge;
+            const _marge_dealer = _.find(SCHEMAS, schema => { return schema.price === price; }).marge_dealer;
+            const marge: number = parseInt(this.ownerClient.role_office, 10) === 2 ? _marge_dealer : _marge;
+            const benefit: number = (price * marge) / 100;
+            let total: number = (price + benefit) * take;
+            total = Math.round(total);
+
+            product.stock = _.clone(take);
+            product.total = total.toString();
+            product.subtotal = total.toString();
+            product.price = Math.round(total / product.quantity);
+
+            return product;
         });
 
         let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return item.total; });
-        this.Billing.total = _.sum(totalItemsArray);
         this.Billing.subtotal = _.sum(totalItemsArray);
+        this.Billing.total = _.sum(totalItemsArray);
+
+        let priceTax: number = (this.Billing.subtotal * this.Tax) / 100;
+        this.Billing.price_tax = priceTax;
+        this.Billing.total_tax = parseInt(this.Billing.subtotal) + priceTax;
 
         this.loading = false;
         this.cd.detectChanges();
@@ -121,7 +178,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     }
 
     ngOnChanges(changes: SimpleChanges): void | boolean {
-        console.log('Change fire!');
         if (!_.isUndefined(changes.order.currentValue) && !_.isEmpty(changes.order.currentValue)) {
             this.ID = changes.order.currentValue.id;
             this.Quotation = _.cloneDeep(changes.order.currentValue);
@@ -137,7 +193,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         return new Promise(resolve => {
             this.Wordpress.fz_product().include(ids).then(fzProducts => {
                 resolve(fzProducts);
-            });
+            }).catch(err => resolve([]));
         })
     }
 
@@ -145,33 +201,49 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         return new Promise(resolve => {
             this.Wordpress.users().include(ids).then(users => {
                 resolve(users);
-            });
+            }).catch(err => { resolve([]); });
         });
     }
 
+    /**
+     * Cette fonction permet de récupérer la valeur d'une propriété
+     * définie dans l'item meta "suppliers"
+     *
+     * @param property
+     */
     private getMeta(property: string): Array<any> {
         return _.map(this.Items, item => {
             let metas = item.meta_data;
-            let supplier: any = _.filter(metas, { key: 'suppliers' });
-            supplier = _.isArray(supplier) && !_.isEmpty(supplier) ? supplier[0] : supplier;
-            if (!_.isObject(supplier)) return 0;
+            let supplier: any = _.find(metas, { key: 'suppliers' });
+            if (_.isUndefined(supplier)) return [];
+            // récuperer la valeur du meta item
             let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
-            if (_.isNull(Value) || !_.isArray(Value)) return 0;
+            // Rétourner une tableau vide s'il est vide ou null
+            if (_.isNull(Value) || !_.isArray(Value)) return [];
+            // Récupere seulement la propriété définie
             return _.map(Value, data => data[property]);
         });
     }
 
-    private getSchema() {
-        _.map(this.Items, item => {
-            let metas = item.meta_data;
-            let supplier: any = _.filter(metas, { key: 'suppliers' });
-            supplier = _.isArray(supplier) && !_.isEmpty(supplier) ? supplier[0] : supplier;
-            if (!_.isObject(supplier)) return;
-            let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
-            if (_.isNull(Value) || !_.isArray(Value)) return;
+    /**
+     * Récupere tous les valeurs du "suppliers" des items dans un tableau
+     */
+    private loadSchema(): Promise<Array<any>> {
+        let container: Array<any> = [];
+        return new Promise((resolve) => {
+            _.map(this.Items, item => {
+                let metas = item.meta_data;
+                let supplier: any = _.find(metas, { key: 'suppliers' });
+                if (_.isUndefined(supplier)) return;
+                let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
+                if (_.isArray(Value) && !_.isEmpty(Value)) {
+                    container.push(Value);
+                }
+            });
 
-            this.supplierSchema.push(Value);
-        });
+            resolve(container);
+        })
+
     }
 
     public initQuotation(): void {

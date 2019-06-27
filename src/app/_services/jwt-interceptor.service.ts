@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/do';
+import 'rxjs/add/observable/throw';
 
 @Injectable()
 export class JwtInterceptorService implements HttpInterceptor {
@@ -19,7 +20,6 @@ export class JwtInterceptorService implements HttpInterceptor {
       if (err instanceof HttpErrorResponse) { // here you can even check for err.status == 404 | 401 etc
         if (err.status == 401 || err.status == 511 || err.status == 500) {
           setTimeout(() => {
-            //localStorage.removeItem('currentUser');
             location.reload();
             localStorage.removeItem('__fzCurrentUser');
           }, 1500);

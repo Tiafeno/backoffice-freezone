@@ -19,11 +19,11 @@ export class ProductNewComponent implements OnInit {
   public WordPress: any;
   public Categories: Array<any> = [];
   public tinyMCESettings: any = {
-    language_url : '/assets/js/langs/fr_FR.js',
+    language_url: '/assets/js/langs/fr_FR.js',
     menubar: false,
     content_css: [
-       '//fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
-       '//www.tinymce.com/css/codepen.min.css'
+      '//fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
+      '//www.tinymce.com/css/codepen.min.css'
     ],
     content_style: ".mce-content-body p { margin: 5px 0; }",
     inline: false,
@@ -34,22 +34,24 @@ export class ProductNewComponent implements OnInit {
     height: 320,
     toolbar: 'undo redo | bold italic backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',
     plugins: ['lists'],
- };
+  };
   constructor(
     private fzServices: FzServicesService,
     private apiWC: ApiWoocommerceService,
     private router: Router
   ) {
     this.Form = new FormGroup({
-      name:        new FormControl('', Validators.required),
+      name: new FormControl('', Validators.required),
       description: new FormControl(''),
-      sku:         new FormControl('', Validators.required),
-      categorie:   new FormControl('', Validators.required)
+      marge: new FormControl('', Validators.required),
+      marge_dealer: new FormControl('', Validators.required),
+      sku: new FormControl('', Validators.required),
+      categorie: new FormControl('', Validators.required)
     });
     this.WordPress = this.apiWC.getWoocommerce();
-   }
+  }
 
-   get f() { return this.Form.controls; }
+  get f() { return this.Form.controls; }
 
   ngOnInit() {
     Helpers.setLoading(true);
@@ -61,10 +63,9 @@ export class ProductNewComponent implements OnInit {
   }
 
   onSubmit(): void | boolean {
-    console.log(this.Form.value);
     if (this.Form.invalid || !this.Form.dirty) return false;
-    let Value:any = this.Form.value;
-    let ctgs: Array<any> = _.map(Value.categorie, ctg => { return {id: ctg }});
+    let Value: any = this.Form.value;
+    let ctgs: Array<any> = _.map(Value.categorie, ctg => { return { id: ctg } });
     let data: any = {
       name: Value.name,
       type: 'simple',
@@ -73,6 +74,10 @@ export class ProductNewComponent implements OnInit {
       on_sale: true,
       total_sales: 0,
       sku: Value.sku,
+      meta_data: [
+        { key: '_fz_marge', value: Value.marge },
+        { key: '_fz_marge_dealer', value: Value.marge_dealer }
+      ],
       regular_price: '0', // Important, string value
       description: Value.description,
       short_description: Value.description,
@@ -87,7 +92,7 @@ export class ProductNewComponent implements OnInit {
         Swal.fire('Désolé', response.message + '. Code: ' + response.code, 'error');
         return false;
       }
-      
+
       Swal.fire({
         title: "Succès",
         text: "Produit ajouter avec succès",
@@ -98,6 +103,6 @@ export class ProductNewComponent implements OnInit {
     });
   }
 
-  
+
 
 }

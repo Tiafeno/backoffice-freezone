@@ -57,11 +57,7 @@ export class SupplierDatatableComponent implements OnInit, AfterContentInit {
           }
         },
         { data: 'reference', render: (data, type, row) => {
-            return data;
-          }
-        },
-        { data: 'commission', render: (data, type, row) => {
-            return `${data}%`;
+            return `<b>${data}</b>`;
           }
         },
         { data: 'data', render: (data) => {

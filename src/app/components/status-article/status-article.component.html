@@ -1,0 +1,32 @@
+<form class="modal-content" [formGroup]="Form" (ngSubmit)="onSubmit()">
+  <div class="modal-header px-4 py-3 bg-primary-400">
+    <div>
+      <h5 class="modal-title text-white">Modifier le statut</h5>
+    </div>
+    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="modal-body p-4">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group mb-4">
+          <p class="font-strong">Statut</p>
+          <ng-select name="status" placeholder="Choississez un status"
+                     formControlName="status" bindLabel="value" bindValue="key"
+                     [hideSelected]="false" [multiple]="false" [items]="inputStatus">
+          </ng-select>
+        </div>
+      </div>
+    </div>
+    <div class="text-muted font-11" style="margin-top: 10px">
+      Sed tristique lacinia enim, sit amet consequat ante suscipit at. Quisque a eros vitae elit molestie tristique.
+    </div>
+
+  </div>
+  <div class="modal-footer justify-content-between bg-primary-50">
+    <div>
+      <button class="btn btn-primary btn-rounded mr-3" type="submit">Enregistrer</button>
+    </div>
+  </div>
+</form>

@@ -2,14 +2,14 @@ import { Component, OnInit, ViewEncapsulation, ViewChild, ChangeDetectorRef } fr
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { Router } from '@angular/router';
-import { AuthorizationService } from '../../../_services/authorization.service';
-import { HttpClient } from '@angular/common/http';
 import { config } from '../../../../environments/environment';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import Swal from 'sweetalert2';
 import { Helpers } from '../../../helpers';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { StatusQuotationSwitcherComponent } from '../../../components/status-quotation-switcher/status-quotation-switcher.component';
+import { AuthorizationService } from '../../../_services/authorization.service';
+import { FzSecurityService } from '../../../_services/fz-security.service';
 declare var $: any;
 @Component({
   selector: 'app-quotation--datatable',
@@ -28,14 +28,14 @@ export class QuotationDatatableComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private auth: AuthorizationService,
     private apiWP: ApiWordpressService,
     private apiWC: ApiWoocommerceService,
-    private Http: HttpClient,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private auth: AuthorizationService,
+    private security: FzSecurityService
   ) {
-    this.WPAPI = apiWP.getWPAPI();
-    this.WCAPI = apiWC.getWoocommerce();
+    this.WPAPI = this.apiWP.getWPAPI();
+    this.WCAPI = this.apiWC.getWoocommerce();
    }
 
   public reload(): void {
@@ -66,6 +66,9 @@ export class QuotationDatatableComponent implements OnInit {
       "sDom": 'rtip',
       processing: true,
       serverSide: true,
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/French.json"
+      },
       columns: [
         { data: 'ID', render: (data) => { return `n°${data}`} },
         {
@@ -110,33 +113,40 @@ export class QuotationDatatableComponent implements OnInit {
         $("#quotation-table tbody").on('click', '.remove-quotation', ev => {
           ev.preventDefault();
           let __quotation = getElementData(ev);
-          Swal.fire({
-            title: "Confirmation",
-            text: "Voulez vous vraiment supprimer cette commande?",
-            type: 'warning',
-            showCancelButton: true
-          }).then(result => {
-            if (result.value) {
-              Helpers.setLoading(true);
-              this.WPAPI.orders().id(__quotation.ID).delete({force: true, reassign: 1}).then(resp => {
-                Helpers.setLoading(false);
-                this.reload();
-                Swal.fire("Succès", "Client supprimer avec succès", 'success');
-              });
-            }
-          })
+          // Vérifier le niveau d'accès
+          if (this.security.hasAccess('s2')) {
+            Swal.fire({
+              title: "Confirmation",
+              text: "Voulez vous vraiment supprimer ce demande?",
+              type: 'warning',
+              showCancelButton: true
+            }).then(result => {
+              if (result.value) {
+                Helpers.setLoading(true);
+                this.WPAPI.orders().id(__quotation.ID).delete({force: true, reassign: 1}).then(resp => {
+                  Helpers.setLoading(false);
+                  this.reload();
+                  Swal.fire("Succès", "Client supprimer avec succès", 'success');
+                });
+              }
+            });
+          }
+          
         });
 
         $('#quotation-table tbody').on('click', '.status-switcher', e => {
           e.preventDefault();
           let __quotation = getElementData(e);
-          Helpers.setLoading(true);
-          this.WCAPI.get(`orders/${__quotation.ID}`, (err, data, res) => {
-            let response: any = JSON.parse(res);
-            this.qtSelected = _.clone(response);
-            Helpers.setLoading(false);
-            this.cd.detectChanges();
-          });
+          if (this.security.hasAccess('s3')) {
+            Helpers.setLoading(true);
+            this.WCAPI.get(`orders/${__quotation.ID}`, (err, data, res) => {
+              let response: any = JSON.parse(res);
+              this.qtSelected = _.clone(response);
+              Helpers.setLoading(false);
+              this.cd.detectChanges();
+            });
+          }
+          
         });
 
         $('#quotation-switcher-modal').on('hide.bs.modal', e => {
@@ -156,6 +166,13 @@ export class QuotationDatatableComponent implements OnInit {
           if (__fzCurrentUser && __fzCurrentUser.token) {
             xhr.setRequestHeader("Authorization",
               `Bearer ${__fzCurrentUser.token}`);
+          }
+        },
+        error: (jqXHR, textStatus, errorThrow) => {
+          let response: any = jqXHR.responseJSON;
+          if (response.code === "jwt_auth_invalid_token") {
+            this.auth.logout();
+            location.reload();
           }
         },
         type: 'POST',
