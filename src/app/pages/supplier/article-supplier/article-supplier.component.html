@@ -37,9 +37,11 @@
                 <td width="325"><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
                 </td>
                 <td><span class="badge"
-                          [ngClass]="{'badge-blue': article.product_status === 'publish', 'badge-pink': article.product_status === 'pending'}"
+                          [ngClass]="{'badge-blue': article.product_status === 'publish', 
+                          'badge-pink': article.product_status === 'draft',
+                          'badge-warning': article.product_status === 'pending'}"
                           (click)="onChangeStatus(article)" style="cursor: pointer">
-                  {{article.product_status === 'publish' ? 'PUBLIER' : 'DESACTIVER'}}</span>
+                  {{article.product_status === 'publish' ? 'PUBLIER' : (article.product_status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                 </td>
                 <td>{{article.price * 5 | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                 <td>{{article.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>

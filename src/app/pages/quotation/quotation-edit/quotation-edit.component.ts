@@ -103,11 +103,12 @@ export class QuotationEditComponent implements OnInit {
                   },
                   {
                      data: 'meta_data', render: (data) => {
-                        let meta: any = _.find(data, { key: 'suppliers' });
-                        if (!meta || _.isUndefined(meta)) return 'Non définie';
-                        let value: any = JSON.parse(meta.value);
+                        let metaSupplier: any = _.find(data, { key: 'suppliers' });
+                        if ( ! _.isObject(metaSupplier)) return 'Non définie';
+                        let value: any = JSON.parse(metaSupplier.value);
+                        value = _.filter(value, item => item.get !== 0);
                         let countSuppliers = Object.keys(value);
-
+                        if (_.isEmpty(countSuppliers)) return 'Non définie';
                         return `<span class="badge badge-default">${countSuppliers.length} Fournisseur(s)</span>`;
                      }
                   },
@@ -119,11 +120,13 @@ export class QuotationEditComponent implements OnInit {
 
                ],
                initComplete: () => {
+
+                  // Modifier une article
                   $('#quotation-edit-table tbody').on('click', '.edit-item', e => {
                      e.preventDefault();
                      this.designationTrigger = e.currentTarget;
-                     let el = $(e.currentTarget).parents('tr');
-                     let item = this.Table.row(el).data();
+                     const el = $(e.currentTarget).parents('tr');
+                     const item = this.Table.row(el).data();
                      this.Item = _.cloneDeep(item); // Contient l'item en cours de traitement
                      Helpers.setLoading(true);
                      this.WPAPI.fz_product().context('edit').param('meta_key', "product_id").param('meta_value', this.Item.product_id).then(_response => {
@@ -131,10 +134,11 @@ export class QuotationEditComponent implements OnInit {
                         this.__FZPRODUCTS__ = _.cloneDeep(__FZPRODUCTS__);// Collect tous les articles pour ce produit
                         // Vérfier si la liste des fournisseur disponible pour l'article est vide
                         if (_.isEmpty(__FZPRODUCTS__)) {
-                           Swal.fire('Désolé', "Aucun fournisseur ne posséde cette article", "warning");
+                           Swal.fire('Désolé', "Aucun fournisseur ne posséde cette article ou qu'il est encore en attente.", "warning");
                            Helpers.setLoading(false);
                            return false;
                         }
+                        // Récuperer les fournisseurs (utilisateur) qui possède cette article
                         let user_ids: Array<number> = _.map(this.__FZPRODUCTS__, (product) => { return parseInt(product.user_id); });
                         this.WPAPI.users().include(_.join(user_ids, ',')).roles('fz-supplier').context('edit').then(_users => {
                            let __USERS__: Array<any> = _.clone(_users);
@@ -190,22 +194,22 @@ export class QuotationEditComponent implements OnInit {
                                  }, // Produit
                                  {
                                     data: null, render: (data, type, row) => {
-                                       let value: number = 0;
-                                       let metaData: any = _.find(this.Item.meta_data, { key: "suppliers" });
-                                       if (metaData && !_.isEmpty(metaData.value)) {
+                                       let inputValue: number = 0;
+                                       const metaSuppliers: any = _.find(this.Item.meta_data, { key: "suppliers" });
+                                       if (metaSuppliers && !_.isEmpty(metaSuppliers.value)) {
                                           /**
                                            * @return Array
                                            */
-                                          let dataParser: Array<any> = JSON.parse(metaData.value); // [{supplier: 450, get: "2", product_id: 0, article_id: 0}] 
+                                          let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: "2", product_id: 0, article_id: 0}] 
                                           _.map(dataParser, (parse) => {
                                              if (row.id === parse.supplier) {
-                                                value = parseInt(parse.get);
+                                                inputValue = parseInt(parse.get);
                                              }
                                           });
                                        }
 
                                        let fzProduct: any = _.find(this.__FZPRODUCTS__, { user_id: row.id });
-                                       return `<input type="number" class="input-increment form-control" value="${value}" min="0" max="${fzProduct.total_sales}" 
+                                       return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" value="${inputValue}" min="0" max="${fzProduct.total_sales}" 
                           data-product="${fzProduct.product_id}" data-supplier="${row.id}" data-article="${fzProduct.id}">`;
                                     }
                                  }
@@ -242,13 +246,15 @@ export class QuotationEditComponent implements OnInit {
 
                                     let element = $(ev.currentTarget);
                                     let currentValue = $(element).val();
+                                    currentValue = parseInt(currentValue, 10);
                                     const elData: any = $(element).data();
                                     let countInputSet = 0;
 
                                     // Vérifier la quantité et la quantité ajouter pour les fournisseurs
-                                    $('input.input-increment').each((index, value) => {
+                                    $(`input.input-increment.prd_${elData.article}`).each((index, value) => {
                                        let inputVal: any = $(value).val();
-                                       inputVal = parseInt(inputVal);
+                                       let data: any = $(value).data();
+                                       inputVal = parseInt(inputVal, 10);
                                        countInputSet += inputVal;
                                     });
 
@@ -256,13 +262,16 @@ export class QuotationEditComponent implements OnInit {
                                        element.val(Math.abs(parseInt(currentValue) - 1));
                                        return false;
                                     };
-                                    this.objectMeta = _.reject(this.objectMeta, { supplier: elData.supplier });
+
+                                    this.objectMeta = _.reject(this.objectMeta, { article_id: elData.article });
                                     this.objectMeta.push({
                                        supplier: elData.supplier,
                                        get: parseInt(element.val()),
                                        product_id: parseInt(elData.product),
                                        article_id: elData.article
                                     });
+
+                                    console.log(this.objectMeta);
                                  });
 
                                  $('#quotation-view-supplier-modal').on('change', '.marge', ev => {
@@ -366,7 +375,7 @@ export class QuotationEditComponent implements OnInit {
     */
    onSaveQuotationPdt() {
       if (_.isEmpty(this.objectMeta)) return false;
-      this.objectMeta = _.filter(this.objectMeta, (meta) => meta.get !== 0);
+      //this.objectMeta = _.filter(this.objectMeta, (meta) => meta.get !== 0);
       Helpers.setLoading(true);
       this.loading = true;
       let lineItems: Array<any>;
@@ -375,6 +384,7 @@ export class QuotationEditComponent implements OnInit {
          let currentMetaData: Array<any> = _.cloneDeep(currentItem.meta_data); // Product meta
          // Rechercher les modifications pour ce produit
          let metas: any = _.filter(this.objectMeta, { product_id: currentItem.product_id });
+         if (_.isEmpty(metas)) return item;
 
          currentMetaData = _.map(currentMetaData, meta => {
             if (meta.key === 'status') {

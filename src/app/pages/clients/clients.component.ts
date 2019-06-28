@@ -88,6 +88,7 @@ export class ClientsComponent implements OnInit {
         {
           data: 'meta_data', render: (data, type, row) => {
             const roleOffice: any = _.find(data, {key : 'role_office'});
+            if (_.isUndefined(roleOffice)) return 'En attente';
             const status: string = roleOffice.value == 0 ? 'En attente' : (roleOffice.value == 1 ? 'Acheteur' : 'Revendeur');
             const style: string = status === 'En attente' ? 'pink' : (status === 'Acheteur' ? 'blue' : 'primary');
             return `<span class="badge badge-${style} switch-type uppercase" style="cursor: pointer;">${status}</span>`;

@@ -7,6 +7,7 @@ import {FilterSearchArticleComponent} from '../../../components/filter-search-ar
 import {ImportArticleComponent} from '../../../components/import-article/import-article.component';
 import {Helpers} from '../../../helpers';
 import {StatusArticleComponent} from '../../../components/status-article/status-article.component';
+import Swal from 'sweetalert2';
 
 declare var $: any;
 
@@ -55,6 +56,10 @@ export class ArticleSupplierComponent implements OnInit {
     this.findWord = _.clone($event.word);
   }
 
+  /**
+   * Cette evennement ce declanche quand on click sur modifier une article
+   * @param id 
+   */
   onEditArticle(id: number): void {
     Helpers.setLoading(true);
     this.WP.fz_product().id(id).context('edit').then(article => {
@@ -70,55 +75,74 @@ export class ArticleSupplierComponent implements OnInit {
   }
 
   /**
+   * Envoyer la filtre de recherche
    * @param $event {word: "", supplier: null, categorie: null}
    */
   onSubmit($event): void | boolean {
     if (_.isUndefined($event) || _.isEmpty($event)) return false;
     Helpers.setLoading(true);
+    const eventForm: any = $event.form;
 
-    if (!_.isUndefined($event.form.word)) {
-      this.Query.search($event.form.word);
+    if (!_.isUndefined(eventForm.word)) {
+      this.Query.search(eventForm.word);
     }
 
-    if (!_.isUndefined($event.form.categorie)) {
-      this.Query.param('product_cat', $event.form.categorie);
+    if (!_.isUndefined(eventForm.categorie)) {
+      this.Query.param('product_cat', eventForm.categorie);
     }
 
-    if (!_.isUndefined($event.form.supplier)) {
-      this.Query
-        .param('filter[meta_key]', 'user_id')
-        .param('filter[meta_value]', $event.form.supplier);
+    const status: string  = !_.isUndefined(eventForm.status) ? eventForm.status : 'any';
+    this.Query.param('status', _.isEmpty(status) ? 'any' : status);
+
+    if (!_.isUndefined(eventForm.supplier)) {
+      this.Query.param('filter[meta_key]', 'user_id')
+        .param('filter[meta_value]', eventForm.supplier);
     }
 
     this.Query.headers().then(headers => {
       this.Query.then((fzProducts) => {
         this.loadData(fzProducts, headers);
       });
+    }).catch(err => { 
+      Helpers.setLoading(false); 
+      Swal.fire('Désolé', "Veuillez vous reconnecter. Merci", 'error');
     });
-
   }
 
+  /**
+   * Actualisez la liste apres l'ajout d'un nouveau article
+   */
   onRefreshResults() {
     Helpers.setLoading(true);
     this.Query.page(this.currentPage).headers().then(headers => {
       this.Query.page(this.currentPage).then((fzProducts) => {
         this.loadData(fzProducts, headers);
+      }).catch(err => {
+        Swal.fire('Désolé', err.message, 'error');
       });
     });
   }
 
+  /**
+   * Cete fonction permet de changeer les resultats quand on change de page
+   * dans la pagination.
+   * @param $page 
+   */
   onChangePage($page: number): void {
     Helpers.setLoading(true);
     this.Query.page($page).headers().then(headers => {
       this.Query.page($page).then((fzProducts) => {
         this.currentPage = $page;
         this.loadData(fzProducts, headers);
+      }).catch(err => {
+        Swal.fire('Désolé', err.message, 'error');
       });
     });
   }
 
-  loadData(fzProducts: any, header?: any): void {
+  private loadData(fzProducts: any, header?: any): void {
     this.Paging = false;
+
     if (!_.isEmpty(fzProducts)) {
       const result: any = !_.isUndefined(header) ? header : null;
       if (!_.isNull(result)) {
