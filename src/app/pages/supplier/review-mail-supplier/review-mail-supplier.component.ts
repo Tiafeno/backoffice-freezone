@@ -43,7 +43,8 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       this.Form = new FormGroup({
          subject: new FormControl('', Validators.required),
          message: new FormControl('', Validators.required),
-         cc: new FormControl('')
+         mail_logistics_cc:  new FormControl(false),
+         mail_commercial_cc: new FormControl(false),
       });
       this.Fournisseur.data = {};
    }
@@ -64,7 +65,11 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          const Form: FormData = new FormData();
          Form.append('subject', Value.subject);
          Form.append('message', Value.message);
-         Form.append('cc', Value.cc);
+         const ccLists: Array<any> = [];
+         if (Value.mail_logistics_cc === true) ccLists.push('mail_logistics_cc');
+         if (Value.mail_commercial_cc === true) ccLists.push('mail_commercial_cc');
+
+         Form.append('cc', _.join(ccLists, ','));
          Helpers.setLoading(true);
          this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.ID}`, Form).subscribe(result => {
             Helpers.setLoading(false);
@@ -73,13 +78,18 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
                this.Form.patchValue({
                   subject: '',
                   message: '',
-                  cc: ''
+                  mail_logistics_cc: false,
+                  mail_commercial_cc: false
                });
                $('.modal').modal('hide');
                Swal.fire('Succès', response.data, 'success');
             } else {
                Swal.fire('Désolé', response.data, 'error');
             }
+         });
+      } else {
+         (<any>Object).values(this.Form.controls).forEach(element => {
+            element.markAsTouched();
          });
       }
    }

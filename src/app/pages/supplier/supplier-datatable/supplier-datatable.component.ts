@@ -64,8 +64,18 @@ export class SupplierDatatableComponent implements OnInit, AfterContentInit {
             return data.user_email;
           }
         },
-        { data: 'date_add', render: (data) => {
+        { data: 'phone', render: (data) => {
             return data;
+          }
+        },
+        { data: 'nif', render: (data) => {
+            const nif: string =_.isNull(data) || _.isEmpty(data) ? 'AUCUN' : data;
+            return `<span class="badge badge-success">${nif}</span>`;
+          }
+        },
+        { data: 'stat', render: (data) => {
+          const stat: string =_.isNull(data) || _.isEmpty(data) ? 'AUCUN' : data;
+            return `<span class="badge badge-success">${stat}</span>`;
           }
         },
         { data: null,

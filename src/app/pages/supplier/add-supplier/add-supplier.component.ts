@@ -57,6 +57,9 @@ export class AddSupplierComponent implements OnInit, AfterViewInit {
 
     public onSubmit(): void | boolean {
         if (this.formSupplier.invalid) {
+            (<any>Object).values(this.formSupplier.controls).forEach(control => {
+                control.markAsTouched();
+              });
             swal.fire('Désolé', "Veuillez remplire correctement le formulaire", "error");
             return false;
         }

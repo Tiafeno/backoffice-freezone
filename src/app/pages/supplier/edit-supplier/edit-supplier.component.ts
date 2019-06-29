@@ -23,11 +23,13 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
     ) {
         this.supplierForm = new FormGroup({
             company_name: new FormControl('', Validators.required),
+            nif: new FormControl(''),
+            stat: new FormControl(''),
             reference: new FormControl('', Validators.required),
             address: new FormControl('', Validators.required),
             phone: new FormControl('', Validators.required),
             first_name: new FormControl('', Validators.required),
-            last_name: new FormControl('', Validators.required),
+            last_name: new FormControl(''),
             mail_commercial_cc: new FormControl(''),
             mail_logistics_cc: new FormControl(''),
             email: new FormControl({ value: '', disabled: true }, [Validators.email, Validators.required])
@@ -54,6 +56,8 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
                 commercials = _.filter(commercials, com => !_.isEmpty(com));
                 this.supplierForm.patchValue({
                     company_name: user.company_name,
+                    nif: user.nif,
+                    stat: user.stat,
                     reference: user.reference,
                     address: user.address,
                     phone: user.phone,
@@ -73,6 +77,9 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
 
     onSubmitEdit(): void | any {
         if (this.supplierForm.invalid || !this.supplierForm.dirty) {
+            (<any>Object).values(this.supplierForm.controls).forEach(control => {
+                control.markAsTouched();
+              });
             return false;
         }
         Helpers.setLoading(true);
@@ -82,6 +89,8 @@ export class EditSupplierComponent implements OnInit, AfterViewInit {
         this.WPAPI.users().id(this.ID).update({
             address: this.supplierForm.value.address,
             company_name: this.supplierForm.value.company_name,
+            nif: this.supplierForm.value.nif,
+            stat: this.supplierForm.value.stat,
             phone: this.supplierForm.value.phone,
             last_name: this.supplierForm.value.last_name,
             first_name: this.supplierForm.value.first_name,

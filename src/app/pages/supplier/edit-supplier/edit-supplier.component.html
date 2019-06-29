@@ -21,7 +21,7 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
-                <label>Nom de la société</label>
+                <label>Nom de la société <span style="color: red">*</span></label>
                 <input class="form-control" formControlName="company_name" type="text" id="company_name"
                   name="company_name" placeholder="Nom de la société">
                 <div *ngIf="f.company_name.errors && f.company_name.dirty">
@@ -32,9 +32,26 @@
           </div>
 
           <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label>NIF</label>
+                  <input class="form-control" autocomplete="off" formControlName="nif" id="nif"
+                    name="nif" type="text" placeholder="NIF">
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label>STAT</label>
+                  <input class="form-control" autocomplete="off" formControlName="stat" id="stat"
+                    name="stat" type="text" placeholder="STAT">
+                </div>
+              </div>
+            </div>
+
+          <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
-                <label>Adresse email</label>
+                <label>Adresse email <span style="color: red">*</span></label>
                 <input class="form-control" autocomplete="off" formControlName="email" id="email"
                   name="email" type="text" placeholder="Email">
                 <div *ngIf="f.email.errors && f.email.dirty">
@@ -67,7 +84,7 @@
           <div class="row"> 
             <div class="col-md-6">
               <div class="form-group mb-4">
-                <label>Numéro de téléphone</label>
+                <label>Numéro de téléphone <span style="color: red">*</span></label>
                 <input class="form-control" formControlName="phone" type="text" id="phone" name="phone"
                   placeholder="Numero de téléphone">
 
@@ -91,7 +108,7 @@
             </div>
             <div class="col-sm-6">
               <div class="form-group mb-4">
-                <label>Prénom du responsable</label>
+                <label>Prénom du responsable <span style="color: red">*</span></label>
                 <input class="form-control" autocomplete="off" formControlName="first_name" id="first_name"
                   name="first_name" type="text" placeholder="Prénom">
                 <div *ngIf="f.first_name.errors && f.first_name.dirty">
@@ -104,7 +121,7 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
-                <label>Adresse physique</label>
+                <label>Adresse physique <span style="color: red">*</span></label>
                 <input class="form-control" autocomplete="off" formControlName="address" id="address" name="address"
                   type="text" placeholder="Adresse physique">
                 <div *ngIf="f.address.errors && f.address.dirty">
@@ -118,7 +135,7 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
-                <label>Reference</label>
+                <label>Reference <span style="color: red">*</span></label>
                 <input class="form-control" formControlName="reference" type="text" id="reference" name="reference"
                   placeholder="">
 
