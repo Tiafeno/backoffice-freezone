@@ -10,7 +10,11 @@
 
       <div class="ibox ibox-fullheight">
         <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
-          <p class="lead mb-4 font-bold">Modification</p>
+          <p class="lead mb-0 pb-0 font-bold">Modification</p>
+          <div class="mb-4" [ngClass]="{'badge badge-blue': roleOffice === 1 || roleOffice === 2, 'badge badge-pink': roleOffice === 0}">
+            {{roleOffice === 0 ? 'En attente' : (roleOffice === 1 ? 'Acheteur' : 'Revendeur')}}
+          </div>
+
 
           <div class="row">
             <div class="col-sm-6">

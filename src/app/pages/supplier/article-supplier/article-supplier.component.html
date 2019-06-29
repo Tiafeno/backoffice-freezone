@@ -29,7 +29,7 @@
                 <th>%R</th>
                 <th>Prix R</th>
                 <th>F.</th>
-                <th>Action</th>
+                <th></th>
               </tr>
               </thead>
               <tbody>
@@ -37,7 +37,7 @@
                 <td width="325"><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
                 </td>
                 <td><span class="badge"
-                          [ngClass]="{'badge-blue': article.product_status === 'publish', 
+                          [ngClass]="{'badge-blue': article.product_status === 'publish',
                           'badge-pink': article.product_status === 'draft',
                           'badge-warning': article.product_status === 'pending'}"
                           (click)="onChangeStatus(article)" style="cursor: pointer">

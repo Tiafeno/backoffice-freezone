@@ -24,8 +24,8 @@ export class ReviewSupplierComponent implements OnInit {
     moment.locale('fr');
 
     const getElementData = (ev: any): any => {
-      let el = $(ev.currentTarget).parents('tr');
-      let data = this.Table.row(el).data();
+      const el = $(ev.currentTarget).parents('tr');
+      const data = this.Table.row(el).data();
       return data;
     };
 
@@ -46,23 +46,23 @@ export class ReviewSupplierComponent implements OnInit {
           }
         },
         {
-          data: 'reference', render: (data, type, row) => {
-            return `<b>${data}</b>`; 
+          data: 'reference', render: (data) => {
+            return `<b>${data}</b>`;
           }
         },
         {
-          data: 'phone', render: (data, type, row) => {
+          data: 'phone', render: (data) => {
             return data;
           }
         },
         {
-          data: 'data', render: (data, type, row) => {
+          data: 'data', render: (data) => {
             return `<a href="mailto:${data.user_email}" >${data.user_email}</a>`;
           }
         },
         {
-          data: 'date_add', render: (data) => {
-            return moment(data).fromNow();;
+          data: 'firstname', render: (data, type, row) => {
+            return `${data} ${row.lastname}`;
           }
         },
         {
@@ -94,7 +94,7 @@ export class ReviewSupplierComponent implements OnInit {
           order: false,
         },
         beforeSend: function (xhr) {
-          let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+          const __fzCurrentUser: any = JSON.parse(localStorage.getItem('__fzCurrentUser'));
           if (__fzCurrentUser && __fzCurrentUser.token) {
             xhr.setRequestHeader("Authorization",
               `Bearer ${__fzCurrentUser.token}`);

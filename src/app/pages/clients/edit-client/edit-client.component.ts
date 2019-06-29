@@ -19,6 +19,7 @@ export class EditClientComponent implements OnInit {
   public Form: FormGroup;
   public billForm: FormGroup;
   public shipForm: FormGroup;
+  public roleOffice: number = 0;
   public Status: Array<any> = [
     { label: 'Particulier', value: 'particular' },
     { label: 'Entreprise / Société', value: 'company' },
@@ -104,6 +105,9 @@ export class EditClientComponent implements OnInit {
           cif: this.getMetaDataValue('cif'),
           client_status: this.getMetaDataValue('client_status')
         });
+
+        const role = this.getMetaDataValue('role_office');
+        this.roleOffice = _.isNull(role) ? 0 : parseInt(role, 10);
 
         this.billForm.patchValue( this.Customer.billing);
         this.shipForm.patchValue( this.Customer.shipping);

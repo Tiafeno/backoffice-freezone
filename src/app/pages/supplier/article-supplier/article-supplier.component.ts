@@ -58,7 +58,7 @@ export class ArticleSupplierComponent implements OnInit {
 
   /**
    * Cette evennement ce declanche quand on click sur modifier une article
-   * @param id 
+   * @param id
    */
   onEditArticle(id: number): void {
     Helpers.setLoading(true);
@@ -103,8 +103,8 @@ export class ArticleSupplierComponent implements OnInit {
       this.Query.then((fzProducts) => {
         this.loadData(fzProducts, headers);
       });
-    }).catch(err => { 
-      Helpers.setLoading(false); 
+    }).catch(err => {
+      Helpers.setLoading(false);
       Swal.fire('Désolé', "Veuillez vous reconnecter. Merci", 'error');
     });
   }
@@ -126,7 +126,7 @@ export class ArticleSupplierComponent implements OnInit {
   /**
    * Cete fonction permet de changeer les resultats quand on change de page
    * dans la pagination.
-   * @param $page 
+   * @param $page
    */
   onChangePage($page: number): void {
     Helpers.setLoading(true);
