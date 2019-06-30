@@ -45,9 +45,9 @@
                 </td>
                 <td>{{article.price * 5 | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                 <td>{{article.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                <td>{{article.marge}} %</td>
+                <td>{{article.marge}}</td>
                 <td>{{article.priceUF | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                <td>{{article.marge_dealer}} %</td>
+                <td>{{article.marge_dealer}}</td>
                 <td>{{article.price_dealer | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                 <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']"
                        routerLinkActive="active" class="badge badge-success">

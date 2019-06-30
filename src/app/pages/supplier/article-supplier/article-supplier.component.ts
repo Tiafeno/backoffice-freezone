@@ -8,6 +8,8 @@ import {ImportArticleComponent} from '../../../components/import-article/import-
 import {Helpers} from '../../../helpers';
 import {StatusArticleComponent} from '../../../components/status-article/status-article.component';
 import Swal from 'sweetalert2';
+import { AuthorizationService } from '../../../_services/authorization.service';
+import { FzSecurityService } from '../../../_services/fz-security.service';
 
 declare var $: any;
 
@@ -21,6 +23,7 @@ export class ArticleSupplierComponent implements OnInit {
   private WP: any;
   private WC: any;
   private Query: any;
+  private accessValue: boolean = true;
   public Products: any;
   public findWord: string = '';
   public Paging: any = false;
@@ -38,10 +41,13 @@ export class ArticleSupplierComponent implements OnInit {
   constructor(
     private apiWC: ApiWoocommerceService,
     private apiWP: ApiWordpressService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private authorisation: AuthorizationService,
+    private Security: FzSecurityService
   ) {
     this.WP = apiWP.getWPAPI();
     this.WC = apiWC.getWoocommerce();
+    this.accessValue = this.authorisation.getCurrentUserRole() === 'administrator' ? true : false;
   }
 
   ngOnInit() {
@@ -61,12 +67,15 @@ export class ArticleSupplierComponent implements OnInit {
    * @param id
    */
   onEditArticle(id: number): void {
-    Helpers.setLoading(true);
-    this.WP.fz_product().id(id).context('edit').then(article => {
-      this.Editor = _.clone(article);
-      this.cd.detectChanges();
-      Helpers.setLoading(false);
-    });
+    if (this.Security.hasAccess('s10', true)) {
+      Helpers.setLoading(true);
+      this.WP.fz_product().id(id).context('edit').then(article => {
+        this.Editor = _.clone(article);
+        this.cd.detectChanges();
+        Helpers.setLoading(false);
+      });
+    }
+    
   }
 
   onChangeStatus(article: any) {
@@ -156,6 +165,8 @@ export class ArticleSupplierComponent implements OnInit {
       const price = parseInt(product.price, 10);
       const priceMarge = (price * parseInt(product.marge, 10)) / 100;
       product.priceUF = priceMarge + price;
+      product.marge = this.accessValue ? product.marge + '%' : 'Restreint';
+      product.marge_dealer = this.accessValue ? product.marge_dealer + '%' : 'Restreint';
       return product;
     });
 

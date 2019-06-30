@@ -15,6 +15,7 @@ export class FzSecurityService {
     { code: 's7', name: "Supprimer une article" },
     { code: 's8', name: "Envoyer le devis par mail" },
     { code: 's9', name: "Ajouter un article" },
+    { code: 's10', name: "Modifier un article" },
   ];
   private access: Array<object> = [
     {
@@ -29,6 +30,7 @@ export class FzSecurityService {
         { code: 's7', access: true },
         { code: 's8', access: true },
         { code: 's9', access: true },
+        { code: 's10', access: true },
       ]
     },
     {
@@ -43,6 +45,7 @@ export class FzSecurityService {
         { code: 's7', access: false },
         { code: 's8', access: true },
         { code: 's9', access: false },
+        { code: 's10', access: false },
       ]
     }
   ];
