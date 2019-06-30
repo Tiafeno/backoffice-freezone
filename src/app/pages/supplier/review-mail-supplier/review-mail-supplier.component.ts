@@ -43,6 +43,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       this.Form = new FormGroup({
          subject: new FormControl('', Validators.required),
          message: new FormControl('', Validators.required),
+         articles: new FormControl('', Validators.required),
          mail_logistics_cc:  new FormControl(false),
          mail_commercial_cc: new FormControl(false),
       });
@@ -50,6 +51,15 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    }
 
    ngOnInit() {
+      $("#send-mail-modal").on('hide.bs.modal', e => {
+         this.Form.patchValue({
+            subject: '',
+            message: '',
+            articles: [],
+            mail_logistics_cc: false,
+            mail_commercial_cc: false
+         });
+      });
    }
 
    ngOnChanges(changes: SimpleChanges) {
@@ -68,7 +78,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          const ccLists: Array<any> = [];
          if (Value.mail_logistics_cc === true) ccLists.push('mail_logistics_cc');
          if (Value.mail_commercial_cc === true) ccLists.push('mail_commercial_cc');
-
+         Form.append('articles', Value.articles);
          Form.append('cc', _.join(ccLists, ','));
          Helpers.setLoading(true);
          this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.ID}`, Form).subscribe(result => {
@@ -78,6 +88,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
                this.Form.patchValue({
                   subject: '',
                   message: '',
+                  articles: [],
                   mail_logistics_cc: false,
                   mail_commercial_cc: false
                });
@@ -88,16 +99,18 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
             }
          });
       } else {
+         console.log(this.Form.value);
          (<any>Object).values(this.Form.controls).forEach(element => {
             element.markAsTouched();
          });
       }
    }
 
-   openDialog() {
+   openDialog(supplierid: number) {
       const args: any = {
          post_type: 'fz_product',
          post_status: 'publish',
+         posts_per_page: -1,
          meta_query: [
             {
                key: 'date_review',
@@ -107,7 +120,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
             },
             {
                key: 'user_id',
-               value: this.Fournisseur.ID,
+               value: supplierid,
                compare: '='
             }
          ]

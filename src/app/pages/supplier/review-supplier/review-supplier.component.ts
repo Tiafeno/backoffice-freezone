@@ -83,7 +83,7 @@ export class ReviewSupplierComponent implements OnInit {
         $('#supplier-review-table tbody').on('click', '.send-mail', ev => {
           ev.preventDefault();
           this.selectedSupplier = getElementData(ev);
-          this.Mail.openDialog();
+          this.Mail.openDialog(this.selectedSupplier.ID);
         });
       },
       ajax: {
