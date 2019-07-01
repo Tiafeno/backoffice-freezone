@@ -164,7 +164,7 @@ export class ArticleSupplierComponent implements OnInit {
     this.Products = _.map(this.Products, product => {
       const price = parseInt(product.price, 10);
       const priceMarge = (price * parseInt(product.marge, 10)) / 100;
-      product.priceUF = priceMarge + price;
+      product.priceUF = this.accessValue ? priceMarge + price : 0;
       product.marge = this.accessValue ? product.marge + '%' : 'Restreint';
       product.marge_dealer = this.accessValue ? product.marge_dealer + '%' : 'Restreint';
       return product;
