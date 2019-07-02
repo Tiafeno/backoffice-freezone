@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {FormGroup, FormControl, Validators} from '@angular/forms';
 import * as _ from 'lodash';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {environment} from '../../../../environments/environment';
 import {Helpers} from '../../../helpers';
 import {of} from 'rxjs/observable/of';
@@ -95,8 +95,16 @@ export class EditArticleComponent implements OnInit, OnChanges {
 
 
   loadPost(type: string, id?: number): Observable<any> {
-    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/${type}?include=${id}&status=any`;
-    return this.http.get<any>(URL);
+    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/${type}?include=${id}&status=publish`;
+    const results = this.http.get<any>(URL);
+    results.subscribe(resp => {}, error => {
+      if (error instanceof HttpErrorResponse) {
+        Swal.fire('Réquete invalide', error.message, 'error');
+        Helpers.setLoading(false);
+      }
+
+    });
+    return results;
   }
 
   loadSuppliers(): Observable<any> {
@@ -168,6 +176,9 @@ export class EditArticleComponent implements OnInit, OnChanges {
    * Initialiser et afficher la boite de dialogue pour la modification
    */
   initValues() {
+    if ( ! this.security.hasAccess('s10')) {
+      return;
+    }
     Helpers.setLoading(true);
     this.notice = null;
     const ObsProduct: Observable<any> = this.loadPost('product', parseInt(this.Article.product_id, 10));

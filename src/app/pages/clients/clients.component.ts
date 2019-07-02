@@ -9,6 +9,7 @@ import {Router} from '@angular/router';
 import {TypeClientSwitcherComponent} from "../../components/type-client-switcher/type-client-switcher.component";
 import Swal from 'sweetalert2';
 import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
+import { FzSecurityService } from '../../_services/fz-security.service';
 
 @Component({
   selector: 'app-clients',
@@ -23,6 +24,7 @@ export class ClientsComponent implements OnInit {
 
   @ViewChild(TypeClientSwitcherComponent) public SwitchType: TypeClientSwitcherComponent;
   constructor(
+    private Security: FzSecurityService,
     private apiWp: ApiWordpressService,
     private apiWc: ApiWoocommerceService,
     private router: Router,
@@ -130,24 +132,27 @@ export class ClientsComponent implements OnInit {
 
         $('#clients-table tbody').on('click', '.delete-customer', e => {
           e.preventDefault();
-          const __clt: any = getElementData(e);
-          Swal.fire({
-            title: 'Confirmation',
-            html: `<b>Action non récommandé</b>. Voulez vous vraiment supprimer le client < <b>${__clt.email}</b> >?`,
-            type: 'warning',
-            showCancelButton: true
-          }).then(result => {
-            if (result.value) {
-              this.fnDeleteCustomer(parseInt(__clt.id, 10));
-            }
-          });
-          
+          if (this.Security.hasAccess('s12', true)) {
+            const __clt: any = getElementData(e);
+            Swal.fire({
+              title: 'Confirmation',
+              html: `<b>Action non récommandé</b>. Voulez vous vraiment supprimer le client < <b>${__clt.email}</b> >?`,
+              type: 'warning',
+              showCancelButton: true
+            }).then(result => {
+              if (result.value) {
+                this.fnDeleteCustomer(parseInt(__clt.id, 10));
+              }
+            });
+          }
         });
 
         $('#clients-table tbody').on('click', '.switch-type', e => {
           e.preventDefault();
-          const __clt: any = getElementData(e);
-          this.SwitchType.fnOpen(__clt);
+          if (this.Security.hasAccess('s11', true)) {
+            const __clt: any = getElementData(e);
+            this.SwitchType.fnOpen(__clt);
+          }
         });
 
       },

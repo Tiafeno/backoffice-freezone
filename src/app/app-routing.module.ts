@@ -101,7 +101,6 @@ const routes: Routes = [
                     { path: 'lists', component: ClientsComponent },
                     {
                         path: ':id',
-                        canActivate: [NoCommercialAccessGuard],
                         children: [
                             { path: '', redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: EditClientComponent }
@@ -134,6 +133,7 @@ const routes: Routes = [
                     },
                     {
                         path: 'article/review',
+                        canActivate: [NoCommercialAccessGuard],
                         component: ReviewArticlesComponent
                     },
                     {

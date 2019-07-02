@@ -18,7 +18,7 @@ export class NoCommercialAccessGuard implements CanActivate {
       let inArray: Array<any> = _.filter(currentUser.data.roles, role => role === 'editor');
       if (_.isEmpty(inArray)) return true;
       Helpers.setLoading(false);
-      Swal.fire('Désolé', "Accès non-autorisé que seul l'administrateur pourra accéder", 'warning');
+      Swal.fire('Désolé', "Accès non-autorisé", 'warning');
       return false;
   }
 }

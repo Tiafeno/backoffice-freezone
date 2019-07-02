@@ -1,10 +1,30 @@
 <div class="mb-4">
   <div class="row">
       <div class="col-6" *ngIf="Client">
-          <h5 class="font-strong text-success mb-3">{{Client.first_name}} {{Client.last_name}} 
-            </h5>
-          <div class="text-light"> {{Client.email}} </div>
+          <h5 class="font-strong text-success">{{Client.first_name}} {{Client.last_name}} </h5>
+          <div class="mb-3"><span class="badge" 
+            [ngClass]="{'badge-pink': roleOffice === 0, 'badge-blue': roleOffice !== 0}">{{role}}</span></div>
+          <div class="text-light">{{Client.email}} </div>
+          <div class="text-light">{{meta.phone}}</div>
           <div class="text-light"> {{Client.date_created}} </div>
+      </div>
+      <div class="col-6" *ngIf="Client">
+        <div class="row mb-2">
+            <div class="col-6 text-muted">STAT:</div>
+            <div class="col-6">{{meta.stat}}</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 text-muted">NIF:</div>
+            <div class="col-6">{{meta.nif}}</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 text-muted">RC:</div>
+            <div class="col-6">{{meta.rc}}</div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-6 text-muted">CIF:</div>
+            <div class="col-6">{{meta.cif}}</div>
+        </div>
       </div>
   </div>
 </div>

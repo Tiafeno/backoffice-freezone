@@ -24,6 +24,12 @@ export class NewCustomerComponent implements OnInit, AfterViewInit {
     $('#customer-edit-modal').on('hide.bs.modal', e => {
       this.customer = 0;
     });
+    $('.redirect').click(function() {
+      $('#customer-edit-modal').modal('toggle');
+      $('.modal-backdrop').remove();
+      $('body').removeClass('modal-open');
+
+    });
   }
 
   ngAfterViewInit() {

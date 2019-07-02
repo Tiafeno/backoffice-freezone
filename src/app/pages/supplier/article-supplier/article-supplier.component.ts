@@ -23,7 +23,7 @@ export class ArticleSupplierComponent implements OnInit {
   private WP: any;
   private WC: any;
   private Query: any;
-  private accessValue: boolean = true;
+  private adminAccess: boolean = true;
   public Products: any;
   public findWord: string = '';
   public Paging: any = false;
@@ -47,7 +47,7 @@ export class ArticleSupplierComponent implements OnInit {
   ) {
     this.WP = apiWP.getWPAPI();
     this.WC = apiWC.getWoocommerce();
-    this.accessValue = this.authorisation.getCurrentUserRole() === 'administrator' ? true : false;
+    this.adminAccess = this.authorisation.getCurrentUserRole() === 'administrator' ? true : false;
   }
 
   ngOnInit() {
@@ -79,8 +79,12 @@ export class ArticleSupplierComponent implements OnInit {
   }
 
   onChangeStatus(article: any) {
-    this.articleEdit = _.clone(article);
-    $('#status-product-modal').modal('show');
+    if (this.adminAccess) {
+      this.articleEdit = _.clone(article);
+      $('#status-product-modal').modal('show');
+    } else {
+      Swal.fire('Accès', "Accès non-aurotisé", 'error');
+    }
   }
 
   /**
@@ -149,6 +153,7 @@ export class ArticleSupplierComponent implements OnInit {
     });
   }
 
+  public isNumber(val) { return typeof val === 'number'; }
   private loadData(fzProducts: any, header?: any): void {
     this.Paging = false;
 
@@ -164,9 +169,11 @@ export class ArticleSupplierComponent implements OnInit {
     this.Products = _.map(this.Products, product => {
       const price = parseInt(product.price, 10);
       const priceMarge = (price * parseInt(product.marge, 10)) / 100;
-      product.priceUF = this.accessValue ? priceMarge + price : 0;
-      product.marge = this.accessValue ? product.marge + '%' : 'Restreint';
-      product.marge_dealer = this.accessValue ? product.marge_dealer + '%' : 'Restreint';
+      product.priceUF =  priceMarge + price;
+      product.marge = this.adminAccess ? product.marge + '%' : "Restreint";
+      product.marge_dealer = this.adminAccess ? product.marge_dealer + '%' : "Restreint";
+      product.price = this.adminAccess ? parseInt(product.price, 10) : 'Restreint';
+
       return product;
     });
 

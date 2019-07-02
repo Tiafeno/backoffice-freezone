@@ -80,11 +80,18 @@ export class QuotationEditComponent implements OnInit {
       Helpers.setLoading(true);
       this.route.parent.params.subscribe(params => {
          this.ID = parseInt(params.id);
-         this.WCAPI.get(`orders/${this.ID}`, (err, data, res) => {
+         this.WCAPI.get(`orders/${this.ID}`, async (err, data, res) =>  {
             Helpers.setLoading(false);
             this.__ORDER__ = JSON.parse(res);
             this.__ITEMS__ = this.__ORDER__.line_items.line_items;
-            this.WPAPI.users().id(this.__ORDER__.line_items.user_id).context('edit').then(user => { this.Author = _.clone(user); });
+            // Récuperer les informations du client
+            await this.WPAPI
+               .users()
+               .id(this.__ORDER__.line_items.user_id)
+               .context('edit')
+               .then(user => { this.Author = _.clone(user); });
+
+            // Crée la liste des produits dans la commande
             this.Table = $('#quotation-edit-table').DataTable({
                fixedHeader: true,
                responsive: false,
@@ -141,6 +148,7 @@ export class QuotationEditComponent implements OnInit {
                         // Récuperer les fournisseurs (utilisateur) qui possède cette article
                         let user_ids: Array<number> = _.map(this.__FZPRODUCTS__, (product) => { return parseInt(product.user_id); });
                         this.WPAPI.users().include(_.join(user_ids, ',')).roles('fz-supplier').context('edit').then(_users => {
+                           const clientRoleOffice: number = parseInt(this.Author.role_office, 10);
                            let __USERS__: Array<any> = _.clone(_users);
                            this.qtSupplierTable = $('#quotation-supplier-table').DataTable({
                               // Installer le plugin WP Rest Filter (https://fr.wordpress.org/plugins/wp-rest-filter/)
@@ -179,9 +187,14 @@ export class QuotationEditComponent implements OnInit {
                                  }, // statut product
                                  {
                                     data: 'id', render: data => {
-                                       let userId: any = data;
-                                       let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-                                       return this.currencyFormat(pdt.price);
+                                       const userId: any = data;
+                                       const pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
+                                       const marge: number = parseInt(pdt.marge, 10);
+                                       const margeDealer: number = parseInt(pdt.marge_dealer, 10);
+                                       const price: number = parseInt(pdt.price, 10);
+                                       const currentMarge: number = clientRoleOffice === 2 ? margeDealer : marge;
+                                       const rest: number = (price * currentMarge) / 100;
+                                       return this.currencyFormat(price + rest);
                                     }
                                  }, // price product
                                  {
@@ -251,7 +264,7 @@ export class QuotationEditComponent implements OnInit {
                                     let countInputSet = 0;
 
                                     // Vérifier la quantité et la quantité ajouter pour les fournisseurs
-                                    $(`input.input-increment.prd_${elData.article}`).each((index, value) => {
+                                    $(`input.input-increment`).each((index, value) => {
                                        let inputVal: any = $(value).val();
                                        let data: any = $(value).data();
                                        inputVal = parseInt(inputVal, 10);
