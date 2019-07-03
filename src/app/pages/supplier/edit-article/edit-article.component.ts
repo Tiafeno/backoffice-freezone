@@ -8,18 +8,18 @@ import {
   Output,
   ChangeDetectorRef
 } from '@angular/core';
-import {FormGroup, FormControl, Validators} from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import * as _ from 'lodash';
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {environment} from '../../../../environments/environment';
-import {Helpers} from '../../../helpers';
-import {of} from 'rxjs/observable/of';
-import {Observable} from 'rxjs/Observable';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
+import { Helpers } from '../../../helpers';
+import { of } from 'rxjs/observable/of';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/zip';
 import Swal from 'sweetalert2';
-import {ApiWordpressService} from '../../../_services/api-wordpress.service';
+import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as moment from 'moment';
-import {FzSecurityService} from '../../../_services/fz-security.service';
+import { FzSecurityService } from '../../../_services/fz-security.service';
 
 declare var $: any;
 
@@ -52,14 +52,14 @@ export class EditArticleComponent implements OnInit, OnChanges {
     this.canEdit = this.security.hasAccess('s6', false);
     this.Form = new FormGroup({
       title: new FormControl('', Validators.required),
-      price: new FormControl({value: 0, disabled: !this.canEdit}, Validators.required),
-      priceDealer: new FormControl({value: 0, disabled: !this.canEdit}, Validators.required),
-      marge: new FormControl({value: 0}, Validators.required),
-      margeDealer: new FormControl({value: 0}, Validators.required),
-      product: new FormControl({value: null, disabled: true}, Validators.required),
+      price: new FormControl({ value: 0, disabled: !this.canEdit }, Validators.required),
+      priceDealer: new FormControl({ value: 0, disabled: !this.canEdit }, Validators.required),
+      marge: new FormControl({ value: 0 }, Validators.required),
+      margeDealer: new FormControl({ value: 0 }, Validators.required),
+      product: new FormControl({ value: null, disabled: true }, Validators.required),
       user_id: new FormControl(null, Validators.required),
-      stock: new FormControl({value: null, disabled: !this.canEdit}, Validators.required),
-      priceUf: new FormControl({value: '', disabled: true})
+      stock: new FormControl({ value: null, disabled: !this.canEdit }, Validators.required),
+      priceUf: new FormControl({ value: '', disabled: true })
     });
     this.WP = this.apiWP.getWPAPI();
   }
@@ -72,7 +72,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
   }
 
   onSelectProduct($event) {
-    this.Form.patchValue({title: $event.title.rendered});
+    this.Form.patchValue({ title: $event.title.rendered });
   }
 
   onChangeMarge(newValue) {
@@ -80,7 +80,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
     if (formValue.price) {
       const per_price: number = parseInt(formValue.price, 10) * parseInt(newValue, 10) / 100;
       const priceUf: number = per_price + parseInt(formValue.price, 10);
-      this.Form.patchValue({priceUf: priceUf});
+      this.Form.patchValue({ priceUf: priceUf });
     }
   }
 
@@ -89,7 +89,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
     if (formValue.price) {
       const per_price: number = parseInt(newValue, 10) * parseInt(formValue.marge, 10) / 100;
       const priceUf: number = per_price + parseInt(newValue, 10);
-      this.Form.patchValue({priceUf: priceUf});
+      this.Form.patchValue({ priceUf: priceUf });
     }
   }
 
@@ -97,7 +97,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
   loadPost(type: string, id?: number): Observable<any> {
     const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/${type}?include=${id}&status=publish`;
     const results = this.http.get<any>(URL);
-    results.subscribe(resp => {}, error => {
+    results.subscribe(resp => { }, error => {
       if (error instanceof HttpErrorResponse) {
         Swal.fire('Réquete invalide', error.message, 'error');
         Helpers.setLoading(false);
@@ -176,7 +176,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
    * Initialiser et afficher la boite de dialogue pour la modification
    */
   initValues() {
-    if ( ! this.security.hasAccess('s10')) {
+    if (!this.security.hasAccess('s10')) {
       return;
     }
     Helpers.setLoading(true);
@@ -187,7 +187,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
     Zip.subscribe(results => {
       this.Products = results[0];
       this.Suppliers = results[1];
-      const currentSupplierEdit = _.find(this.Suppliers, {id: this.Article.user_id});
+      const currentSupplierEdit = _.find(this.Suppliers, { id: this.Article.user_id });
       this.supplierReference = currentSupplierEdit.reference;
       this.cd.detectChanges();
       const per_price: number = parseInt(this.Article.price, 10) * parseInt(this.Article.marge, 10) / 100;
@@ -233,7 +233,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
       }).then(result => {
         if (result.value) {
           Helpers.setLoading(true);
-          this.WP.fz_product().id(id).delete({force: true, reassign: 1}).then(resp => {
+          this.WP.fz_product().id(id).delete({ force: true, reassign: 1 }).then(resp => {
             this.refresh.emit();
             Helpers.setLoading(false);
             Swal.fire('Succès', 'Article supprimer avec succès', 'success');

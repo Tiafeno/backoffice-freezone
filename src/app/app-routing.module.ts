@@ -57,6 +57,7 @@ import { NoCommercialAccessGuard } from './guards/no-commercial-access.guard';
 import { FzSecurityService } from './_services/fz-security.service';
 import {StatusArticleComponent} from './components/status-article/status-article.component';
 import {TypeClientSwitcherComponent} from "./components/type-client-switcher/type-client-switcher.component";
+import { FaqPageComponent } from './pages/faq/faq-page/faq-page.component';
 
 
 const routes: Routes = [
@@ -93,6 +94,10 @@ const routes: Routes = [
             {
                 path: 'sav',
                 component: SavComponent
+            },
+            {
+                path: 'faq',
+                component: FaqPageComponent
             },
             {
                 path: 'client',
@@ -241,6 +246,7 @@ const routes: Routes = [
         SavComponent,
         StatusArticleComponent,
         TypeClientSwitcherComponent,
+        FaqPageComponent,
         MomentsPipe
     ],
     imports: [

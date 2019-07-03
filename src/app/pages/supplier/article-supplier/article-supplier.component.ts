@@ -118,7 +118,7 @@ export class ArticleSupplierComponent implements OnInit {
       });
     }).catch(err => {
       Helpers.setLoading(false);
-      Swal.fire('Désolé', "Veuillez vous reconnecter. Merci", 'error');
+      Swal.fire('Désolé', "Votre session a expiré. Veuillez vous reconnecter. Merci", 'error');
     });
   }
 
