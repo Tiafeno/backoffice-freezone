@@ -6,6 +6,7 @@ import { Helpers } from '../../../helpers';
 import * as _ from 'lodash';
 import { NgIf } from '@angular/common';
 import Swal from 'sweetalert2';
+import { AuthorizationService } from '../../../_services/authorization.service';
 
 @Component({
   selector: 'app-edit-client',
@@ -19,6 +20,7 @@ export class EditClientComponent implements OnInit {
   public Form: FormGroup;
   public billForm: FormGroup;
   public shipForm: FormGroup;
+  public roleOffice: number = 0;
   public Status: Array<any> = [
     { label: 'Particulier', value: 'particular' },
     { label: 'Entreprise / Société', value: 'company' },
@@ -27,7 +29,8 @@ export class EditClientComponent implements OnInit {
   private Woocommerce: any;
   constructor(
     private apiWc: ApiWoocommerceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private auth: AuthorizationService
   ) {
     this.Form = new FormGroup({
       first_name: new FormControl(''),
@@ -56,12 +59,13 @@ export class EditClientComponent implements OnInit {
       postcode: new FormControl('', Validators.required),
       company: new FormControl(''),
       country: new FormControl('', Validators.required),
-      email: new FormControl('', Validators.required),
+      email: new FormControl({value: ''}, Validators.required),
       first_name: new FormControl(''),
       last_name: new FormControl(''),
       phone: new FormControl(''),
       state: new FormControl(''),
     });
+    
 
     this.shipForm = new FormGroup({
       address_1: new FormControl('', Validators.required),
@@ -75,6 +79,12 @@ export class EditClientComponent implements OnInit {
       state: new FormControl(''),
     });
 
+    if (this.auth.getCurrentUserRole() === 'editor') {
+      this.billForm.disable();
+      this.Form.disable();
+      this.shipForm.disable();
+    }
+    
     this.Woocommerce = this.apiWc.getWoocommerce();
   }
 
@@ -104,6 +114,9 @@ export class EditClientComponent implements OnInit {
           cif: this.getMetaDataValue('cif'),
           client_status: this.getMetaDataValue('client_status')
         });
+
+        const role = this.getMetaDataValue('role_office');
+        this.roleOffice = _.isNull(role) ? 0 : parseInt(role, 10);
 
         this.billForm.patchValue( this.Customer.billing);
         this.shipForm.patchValue( this.Customer.shipping);

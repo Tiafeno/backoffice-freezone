@@ -134,17 +134,23 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.QtItems = _.map(this.Items, product => {
             // Récuperer tous les meta utiliser pour le produit
             let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: product.product_id });
-            let allPriceForItem = _.map(SCHEMAS, (schema) => parseInt(schema.price));
-            let allTakeForItem = _.map(SCHEMAS, (schema) => parseInt(schema.get));
+            const allPriceForItem = _.map(SCHEMAS, (schema) => parseInt(schema.price));
+            
+            const metaDataSuppliers: any = _.find(product.meta_data, {key: 'suppliers'} as any);
+            const metaDataSuppliersValue =  JSON.parse(metaDataSuppliers.value);
+            const allTakeForItem = _.map(metaDataSuppliersValue, (supplier) => parseInt(supplier.get, 10));
 
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
-            let take = _.sum(allTakeForItem);
-
+            const take = _.sum(allTakeForItem);
+            if (take === 0) {
+                $('.modal').modal('hide');
+                Helpers.setLoading(this.loading = false);
+                Swal.fire('Désolé', "Fournisseur non definie détecté", 'error');
+            }
             // Récuperer le prix le plus grand pour chaque fournisseur ajouter
-            let price = _.max(allPriceForItem);
+            const price = _.max(allPriceForItem);
             if (_.isUndefined(price) || product.quantity > take) {
                 product.stock = product.total = product.subtotal = product.price = 0;
-                this.error = true;
                 return product;
             }
             this.error = false;

@@ -15,6 +15,10 @@ export class FzSecurityService {
     { code: 's7', name: "Supprimer une article" },
     { code: 's8', name: "Envoyer le devis par mail" },
     { code: 's9', name: "Ajouter un article" },
+    { code: 's10', name: "Modifier un article" },
+    { code: 's11', name: "Modifier le type du client" },
+    { code: 's12', name: "Supprimer un client" },
+    { code: 's13', name: "Modifier le statut du client" },
   ];
   private access: Array<object> = [
     {
@@ -29,6 +33,10 @@ export class FzSecurityService {
         { code: 's7', access: true },
         { code: 's8', access: true },
         { code: 's9', access: true },
+        { code: 's10', access: true },
+        { code: 's11', access: true },
+        { code: 's12', access: true },
+        { code: 's13', access: true },
       ]
     },
     {
@@ -43,6 +51,10 @@ export class FzSecurityService {
         { code: 's7', access: false },
         { code: 's8', access: true },
         { code: 's9', access: false },
+        { code: 's10', access: false },
+        { code: 's11', access: false },
+        { code: 's12', access: false },
+        { code: 's13', access: false },
       ]
     }
   ];
@@ -59,7 +71,7 @@ export class FzSecurityService {
     if (_.isUndefined(access) || _.isEmpty(access)) return true;
 
     if ( ! access.access && fireSwal) {
-      Swal.fire("Accès", "Accès non-autorisé que seul l'administrateur pourra accéder", "warning");
+      Swal.fire("Accès", "Accès non-autorisé", "warning");
     }
     return access.access;
   }

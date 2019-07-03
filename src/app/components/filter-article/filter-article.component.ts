@@ -12,6 +12,11 @@ declare var $: any;
 export class FilterArticleComponent implements OnInit, OnChanges {
   public Categories: Array<any> = [];
   public Suppliers: Array<any> = [];
+  public Status: Array<any> = [
+    { label: "Publier", value: 'publish' },
+    { label: "En attente", value: 'pending' },
+    { label: "Désactiver", value: 'draft' },
+  ];
   public filterForm: any = {};
   @Output() search = new EventEmitter();
   // @Input() set word(word: string) {
@@ -38,12 +43,13 @@ export class FilterArticleComponent implements OnInit, OnChanges {
 
   public async init() {
     Helpers.setLoading(true);
-    this.Categories = await this.fzServices.getCategories();
-    this.Suppliers = await this.fzServices.getSuppliers();
+    const categories = await this.fzServices.getCategories();
+    this.Categories = _.isArray(categories) ? categories : [];
+
+    const suppliers = await this.fzServices.getSuppliers();
+    this.Suppliers = _.isArray(suppliers) ? suppliers : [];
     Helpers.setLoading(false);
   }
-
-  
 
   public onAdd($event) {
     this.search.emit({ form: this.filterForm });

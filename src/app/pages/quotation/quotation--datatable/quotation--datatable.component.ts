@@ -58,7 +58,7 @@ export class QuotationDatatableComponent implements OnInit {
     };
     const quotationTable = $('#quotation-table');
     this.Table = quotationTable.DataTable({
-      pageLength: 10,
+      pageLength: 20,
       page: 1,
       ordering: false, // Activer ou désactiver l'affichage d'ordre
       fixedHeader: true,

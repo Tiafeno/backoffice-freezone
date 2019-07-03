@@ -57,6 +57,7 @@ import { NoCommercialAccessGuard } from './guards/no-commercial-access.guard';
 import { FzSecurityService } from './_services/fz-security.service';
 import {StatusArticleComponent} from './components/status-article/status-article.component';
 import {TypeClientSwitcherComponent} from "./components/type-client-switcher/type-client-switcher.component";
+import { FaqPageComponent } from './pages/faq/faq-page/faq-page.component';
 
 
 const routes: Routes = [
@@ -95,13 +96,16 @@ const routes: Routes = [
                 component: SavComponent
             },
             {
+                path: 'faq',
+                component: FaqPageComponent
+            },
+            {
                 path: 'client',
                 children: [
                     { path: '', redirectTo: 'lists', pathMatch: 'full' },
                     { path: 'lists', component: ClientsComponent },
                     {
                         path: ':id',
-                        canActivate: [NoCommercialAccessGuard],
                         children: [
                             { path: '', redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: EditClientComponent }
@@ -134,6 +138,7 @@ const routes: Routes = [
                     },
                     {
                         path: 'article/review',
+                        canActivate: [NoCommercialAccessGuard],
                         component: ReviewArticlesComponent
                     },
                     {
@@ -241,6 +246,7 @@ const routes: Routes = [
         SavComponent,
         StatusArticleComponent,
         TypeClientSwitcherComponent,
+        FaqPageComponent,
         MomentsPipe
     ],
     imports: [

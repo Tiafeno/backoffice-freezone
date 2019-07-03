@@ -45,4 +45,8 @@ export class ApiWordpressService {
     return this.wpEndPoint;
   }
 
+  public getWordpress(): WPAPI {
+    return this.getWPAPI();
+  }
+
 }

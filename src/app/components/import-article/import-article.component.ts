@@ -79,8 +79,6 @@ export class ImportArticleComponent implements OnInit {
         const element: any = $event.currentTarget;
         const key: string = $(element).val();
         this.Columns[key] = index;
-
-        console.log(this.Columns);
     }
 
     onSubmit(): void | boolean {
@@ -105,11 +103,11 @@ export class ImportArticleComponent implements OnInit {
                     Form.append('regular_price', '0');
                     Form.append('price', column[this.Columns.Price]);
                     Form.append('price_dealer', column[this.Columns.PriceDealer]);
-                    Form.append('description', column[this.Columns.Description]);
-                    Form.append('short_description', '');
-                    Form.append('mark', column[this.Columns.Mark]);
                     Form.append('marge', column[this.Columns.Marge]);
                     Form.append('marge_dealer', column[this.Columns.MargeDealer]);
+                    Form.append('description', '');
+                    Form.append('short_description', '');
+                    Form.append('mark', column[this.Columns.Mark]);
                     Form.append('reference', column[this.Columns.SupplierRef]);
                     Form.append('quantity', '1');
                     Form.append('categories', column[this.Columns.Categorie]);

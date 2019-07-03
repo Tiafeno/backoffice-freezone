@@ -23,9 +23,13 @@ export class FzServicesService {
    }
 
   public getCategories(): Promise<any> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       this.Woocommerce.get('products/categories?per_page=100', (err, data, res) => {
-        resolve(JSON.parse(res));
+        const response: any = JSON.parse(res);
+        if (!_.isUndefined(response.code)) {
+          reject(response.message);
+        }
+        resolve(response);
       })
     })
   }
@@ -48,8 +52,12 @@ export class FzServicesService {
   }
 
   public getSuppliers(): Promise<any> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       this.Wordpress.users().roles('fz-supplier').then(users => {
+        const response: any = users;
+        if (!_.isUndefined(response.code)) {
+          reject(response.message);
+        }
         resolve(users);
       })
     })

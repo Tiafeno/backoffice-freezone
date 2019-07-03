@@ -7,6 +7,9 @@ import {FilterSearchArticleComponent} from '../../../components/filter-search-ar
 import {ImportArticleComponent} from '../../../components/import-article/import-article.component';
 import {Helpers} from '../../../helpers';
 import {StatusArticleComponent} from '../../../components/status-article/status-article.component';
+import Swal from 'sweetalert2';
+import { AuthorizationService } from '../../../_services/authorization.service';
+import { FzSecurityService } from '../../../_services/fz-security.service';
 
 declare var $: any;
 
@@ -20,6 +23,7 @@ export class ArticleSupplierComponent implements OnInit {
   private WP: any;
   private WC: any;
   private Query: any;
+  private adminAccess: boolean = true;
   public Products: any;
   public findWord: string = '';
   public Paging: any = false;
@@ -37,10 +41,13 @@ export class ArticleSupplierComponent implements OnInit {
   constructor(
     private apiWC: ApiWoocommerceService,
     private apiWP: ApiWordpressService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private authorisation: AuthorizationService,
+    private Security: FzSecurityService
   ) {
     this.WP = apiWP.getWPAPI();
     this.WC = apiWC.getWoocommerce();
+    this.adminAccess = this.authorisation.getCurrentUserRole() === 'administrator' ? true : false;
   }
 
   ngOnInit() {
@@ -55,70 +62,101 @@ export class ArticleSupplierComponent implements OnInit {
     this.findWord = _.clone($event.word);
   }
 
+  /**
+   * Cette evennement ce declanche quand on click sur modifier une article
+   * @param id
+   */
   onEditArticle(id: number): void {
-    Helpers.setLoading(true);
-    this.WP.fz_product().id(id).context('edit').then(article => {
-      this.Editor = _.clone(article);
-      this.cd.detectChanges();
-      Helpers.setLoading(false);
-    });
+    if (this.Security.hasAccess('s10', true)) {
+      Helpers.setLoading(true);
+      this.WP.fz_product().id(id).context('edit').then(article => {
+        this.Editor = _.clone(article);
+        this.cd.detectChanges();
+        Helpers.setLoading(false);
+      });
+    }
+    
   }
 
   onChangeStatus(article: any) {
-    this.articleEdit = _.clone(article);
-    $('#status-product-modal').modal('show');
+    if (this.adminAccess) {
+      this.articleEdit = _.clone(article);
+      $('#status-product-modal').modal('show');
+    } else {
+      Swal.fire('Accès', "Accès non-aurotisé", 'error');
+    }
   }
 
   /**
+   * Envoyer la filtre de recherche
    * @param $event {word: "", supplier: null, categorie: null}
    */
   onSubmit($event): void | boolean {
     if (_.isUndefined($event) || _.isEmpty($event)) return false;
     Helpers.setLoading(true);
+    const eventForm: any = $event.form;
 
-    if (!_.isUndefined($event.form.word)) {
-      this.Query.search($event.form.word);
+    if (!_.isUndefined(eventForm.word)) {
+      this.Query.search(eventForm.word);
     }
 
-    if (!_.isUndefined($event.form.categorie)) {
-      this.Query.param('product_cat', $event.form.categorie);
+    if (!_.isUndefined(eventForm.categorie)) {
+      this.Query.param('product_cat', eventForm.categorie);
     }
 
-    if (!_.isUndefined($event.form.supplier)) {
-      this.Query
-        .param('filter[meta_key]', 'user_id')
-        .param('filter[meta_value]', $event.form.supplier);
+    const status: string  = !_.isUndefined(eventForm.status) ? eventForm.status : 'any';
+    this.Query.param('status', _.isEmpty(status) ? 'any' : status);
+
+    if (!_.isUndefined(eventForm.supplier)) {
+      this.Query.param('filter[meta_key]', 'user_id')
+        .param('filter[meta_value]', eventForm.supplier);
     }
 
     this.Query.headers().then(headers => {
       this.Query.then((fzProducts) => {
         this.loadData(fzProducts, headers);
       });
+    }).catch(err => {
+      Helpers.setLoading(false);
+      Swal.fire('Désolé', "Votre session a expiré. Veuillez vous reconnecter. Merci", 'error');
     });
-
   }
 
+  /**
+   * Actualisez la liste apres l'ajout d'un nouveau article
+   */
   onRefreshResults() {
     Helpers.setLoading(true);
     this.Query.page(this.currentPage).headers().then(headers => {
       this.Query.page(this.currentPage).then((fzProducts) => {
         this.loadData(fzProducts, headers);
+      }).catch(err => {
+        Swal.fire('Désolé', err.message, 'error');
       });
     });
   }
 
+  /**
+   * Cete fonction permet de changeer les resultats quand on change de page
+   * dans la pagination.
+   * @param $page
+   */
   onChangePage($page: number): void {
     Helpers.setLoading(true);
     this.Query.page($page).headers().then(headers => {
       this.Query.page($page).then((fzProducts) => {
         this.currentPage = $page;
         this.loadData(fzProducts, headers);
+      }).catch(err => {
+        Swal.fire('Désolé', err.message, 'error');
       });
     });
   }
 
-  loadData(fzProducts: any, header?: any): void {
+  public isNumber(val) { return typeof val === 'number'; }
+  private loadData(fzProducts: any, header?: any): void {
     this.Paging = false;
+
     if (!_.isEmpty(fzProducts)) {
       const result: any = !_.isUndefined(header) ? header : null;
       if (!_.isNull(result)) {
@@ -131,7 +169,11 @@ export class ArticleSupplierComponent implements OnInit {
     this.Products = _.map(this.Products, product => {
       const price = parseInt(product.price, 10);
       const priceMarge = (price * parseInt(product.marge, 10)) / 100;
-      product.priceUF = priceMarge + price;
+      product.priceUF =  priceMarge + price;
+      product.marge = this.adminAccess ? product.marge + '%' : "Restreint";
+      product.marge_dealer = this.adminAccess ? product.marge_dealer + '%' : "Restreint";
+      product.price = this.adminAccess ? parseInt(product.price, 10) : 'Restreint';
+
       return product;
     });
 

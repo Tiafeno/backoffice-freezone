@@ -15,7 +15,7 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
-                <label>Nom de la société</label>
+                <label>Nom de la société <span style="color: red">*</span></label>
                 <input class="form-control" formControlName="company_name" type="text" id="company_name"
                   name="company_name" placeholder="">
                 <div *ngIf="f.company_name.errors && f.company_name.dirty">
@@ -52,7 +52,7 @@
             
             <div class="col-sm-6">
               <div class="form-group mb-4">
-                <label>Prénom du responsable</label>
+                <label>Prénom du responsable <span style="color: red">*</span></label>
                 <input class="form-control" autocomplete="off" formControlName="first_name" id="first_name"
                   name="first_name" type="text" placeholder="">
                 <div *ngIf="f.first_name.errors && f.first_name.dirty">
@@ -78,7 +78,7 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
-                <label>Reference</label>
+                <label>Reference <span style="color: red">*</span></label>
                 <input class="form-control" formControlName="reference" type="text" id="reference" name="reference"
                   placeholder="">
 
@@ -92,7 +92,7 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
-                <label>Adresse email principal</label>
+                <label>Adresse email principal <span style="color: red">*</span></label>
                 <input class="form-control" autocomplete="off" formControlName="email" id="email" name="email"
                   type="text" placeholder="">
                 <div *ngIf="f.email.errors && f.email.dirty">
@@ -125,7 +125,7 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
-                <label>Mot de passe</label>
+                <label>Mot de passe <span style="color: red">*</span></label>
                 <div class="input-group">
                   <input class="form-control" autocomplete="off" formControlName="pwd" id="pwd" name="pwd" type="text"
                     placeholder="">
