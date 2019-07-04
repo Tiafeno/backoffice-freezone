@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, NgForm, FormControl, Validators } from '@angular/forms';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ActivatedRoute } from '@angular/router';
@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import { NgIf } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AuthorizationService } from '../../../_services/authorization.service';
+import { ResponsibleComponent } from '../../../components/responsible/responsible.component';
 
 @Component({
   selector: 'app-edit-client',
@@ -14,7 +15,9 @@ import { AuthorizationService } from '../../../_services/authorization.service';
   styleUrls: ['./edit-client.component.css']
 })
 export class EditClientComponent implements OnInit {
-  private customerID: number = 0;
+  public customerID: number = 0;
+  public responsible: any = null;
+  private Woocommerce: any;
   public Customer: any = null;
   public MetaData: Array<any> = [];
   public Form: FormGroup;
@@ -25,8 +28,8 @@ export class EditClientComponent implements OnInit {
     { label: 'Particulier', value: 'particular' },
     { label: 'Entreprise / Société', value: 'company' },
   ];
-
-  private Woocommerce: any;
+  
+  @ViewChild(ResponsibleComponent) private Responsible: ResponsibleComponent;
   constructor(
     private apiWc: ApiWoocommerceService,
     private route: ActivatedRoute,
@@ -37,7 +40,7 @@ export class EditClientComponent implements OnInit {
       last_name: new FormControl('', Validators.required),
       address: new FormControl('', Validators.required), // Meta data
       phone: new FormControl('', Validators.required), // Meta data
-      email: new FormControl({value: '', disabled: true}, Validators.required), // Meta data
+      email: new FormControl({ value: '', disabled: true }, Validators.required), // Meta data
       stat: new FormControl(''), // Meta data
       nif: new FormControl(''), // Meta data
       rc: new FormControl(''), // Meta data
@@ -59,13 +62,13 @@ export class EditClientComponent implements OnInit {
       postcode: new FormControl('', Validators.required),
       company: new FormControl(''),
       country: new FormControl('', Validators.required),
-      email: new FormControl({value: ''}, Validators.required),
+      email: new FormControl({ value: '' }, Validators.required),
       first_name: new FormControl(''),
       last_name: new FormControl(''),
       phone: new FormControl(''),
       state: new FormControl(''),
     });
-    
+
 
     this.shipForm = new FormGroup({
       address_1: new FormControl('', Validators.required),
@@ -84,7 +87,7 @@ export class EditClientComponent implements OnInit {
       this.Form.disable();
       this.shipForm.disable();
     }
-    
+
     this.Woocommerce = this.apiWc.getWoocommerce();
   }
 
@@ -107,7 +110,7 @@ export class EditClientComponent implements OnInit {
           last_name: this.Customer.last_name,
           address: this.getMetaDataValue('address'),
           phone: this.getMetaDataValue('phone'),
-          email:this.Customer.email,
+          email: this.Customer.email,
           stat: this.getMetaDataValue('stat'),
           nif: this.getMetaDataValue('nif'),
           rc: this.getMetaDataValue('rc'),
@@ -118,15 +121,17 @@ export class EditClientComponent implements OnInit {
         const role = this.getMetaDataValue('role_office');
         this.roleOffice = _.isNull(role) ? 0 : parseInt(role, 10);
 
-        this.billForm.patchValue( this.Customer.billing);
-        this.shipForm.patchValue( this.Customer.shipping);
+        this.billForm.patchValue(this.Customer.billing);
+        this.shipForm.patchValue(this.Customer.shipping);
+
+        this.responsible = this.getMetaDataValue('responsible');
         Helpers.setLoading(false);
       });
     });
   }
 
   private getMetaDataValue(_key: any): string {
-    const result: any = _.find(this.MetaData, {key: _key});
+    const result: any = _.find(this.MetaData, { key: _key });
     return _.isUndefined(result) ? null : result.value;
   }
 
@@ -134,7 +139,7 @@ export class EditClientComponent implements OnInit {
     if (this.Form.valid && this.billForm.valid && this.shipForm.valid) {
       const Value: any = this.Form.value;
 
-
+      const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'client_status'];
       this.MetaData = _.map(this.Customer.meta_data, (meta) => {
         if (meta.key === 'address') meta.value = Value.address;
         if (meta.key === 'phone') meta.value = Value.phone;
@@ -146,7 +151,12 @@ export class EditClientComponent implements OnInit {
 
         return meta;
       });
-
+      _.forEach(itemMeta, ($value, $key) => {
+        let exist = _.find(this.Customer.meta_data, { key: $value });
+        if (_.isUndefined(exist) && !_.isEmpty(Value[$value])) {
+          this.MetaData.push({ key: $value, value: Value[$value] });
+        }
+      });
 
       let data: any = {
         first_name: Value.first_name,

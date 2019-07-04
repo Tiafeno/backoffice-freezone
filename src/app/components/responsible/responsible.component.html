@@ -1,0 +1,22 @@
+<div class="ibox">
+  <div class="ibox-body">
+    <form [formGroup]="Form" (ngSubmit)="onSave()">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group mb-4">
+            <label class="font-light">Commercial responsable</label>
+            <ng-select name="commercial" placeholder="Ajouter un commercial" formControlName="commercial" [loading]='loading'
+              bindLabel="email" bindValue="id" [hideSelected]="false" [multiple]="false" [items]="Commercials" required>
+              <ng-template ng-option-tmp let-item="item">
+                {{item.email}}
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

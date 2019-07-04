@@ -19,6 +19,7 @@ export class FzSecurityService {
     { code: 's11', name: "Modifier le type du client" },
     { code: 's12', name: "Supprimer un client" },
     { code: 's13', name: "Modifier le statut du client" },
+    { code: 's14', name: "Ajouter ou Remplacer les images des articles" },
   ];
   private access: Array<object> = [
     {
@@ -37,6 +38,7 @@ export class FzSecurityService {
         { code: 's11', access: true },
         { code: 's12', access: true },
         { code: 's13', access: true },
+        { code: 's14', access: true },
       ]
     },
     {
@@ -55,6 +57,26 @@ export class FzSecurityService {
         { code: 's11', access: false },
         { code: 's12', access: false },
         { code: 's13', access: false },
+        { code: 's14', access: false },
+      ]
+    },
+    {
+      role: 'author',
+      access: [
+        { code: 's1', access: true },
+        { code: 's2', access: false },
+        { code: 's3', access: false },
+        { code: 's4', access: false },
+        { code: 's5', access: false },
+        { code: 's6', access: false },
+        { code: 's7', access: false },
+        { code: 's8', access: true },
+        { code: 's9', access: false },
+        { code: 's10', access: false },
+        { code: 's11', access: false },
+        { code: 's12', access: false },
+        { code: 's13', access: false },
+        { code: 's14', access: true },
       ]
     }
   ];

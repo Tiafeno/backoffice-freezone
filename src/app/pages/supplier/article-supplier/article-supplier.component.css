@@ -1,3 +1,6 @@
 .form-control {
     font-family: inherit;
 }
+.update-thumbnail {
+    cursor: pointer;
+}
