@@ -2,7 +2,6 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ApiWordpressService } from '../../_services/api-wordpress.service';
 import * as _ from 'lodash';
-import { Helpers } from '../../helpers';
 import Swal from 'sweetalert2';
 import { AuthorizationService } from '../../_services/authorization.service';
 

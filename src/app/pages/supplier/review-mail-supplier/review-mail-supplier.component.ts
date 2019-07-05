@@ -107,32 +107,16 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    }
 
    openDialog(supplierid: number) {
-      const args: any = {
-         post_type: 'fz_product',
-         post_status: 'publish',
-         posts_per_page: -1,
-         meta_query: [
-            {
-               key: 'date_review',
-               value: moment().subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
-               compare: '<',
-               type: 'DATETIME'
-            },
-            {
-               key: 'user_id',
-               value: supplierid,
-               compare: '='
-            }
-         ]
-      };
       const Form: FormData = new FormData();
-      Form.append('args', JSON.stringify(args));
+      Form.append('supplierid', supplierid.toString());
       Helpers.setLoading(true);
-      this.Http.post<any>(`${config.apiUrl}/fz_product/query`, Form).subscribe(resp => {
+      this.Http.post<any>(`${config.apiUrl}/fz_product/review_articles`, Form).subscribe(resp => {
          Helpers.setLoading(false);
          const response: any = _.clone(resp);
          const data: any = response.data;
-         this.pendingArticle = data;
+         this.pendingArticle = _.clone(data);
+         const reviewArticles: Array<number> = _.map(data, (item) => { return item.ID; });
+         this.Form.patchValue({ articles: reviewArticles });
          $('#send-mail-modal').modal('show');
       });
    }

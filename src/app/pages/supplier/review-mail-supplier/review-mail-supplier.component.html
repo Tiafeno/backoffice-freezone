@@ -54,17 +54,6 @@
           </div>
         </div>
 
-        <div class="form-group mb-4 row">
-          <label class="col-sm-2 col-form-label">Articles:</label>
-          <div class="col-sm-10">
-            <ng-select name="articles" placeholder="Selectionnez" formControlName="articles"
-              bindLabel="post_title" bindValue="ID" [hideSelected]="true" [multiple]="true" [items]="pendingArticle">
-              <ng-template ng-option-tmp let-item="item">
-                {{item.post_title}}
-              </ng-template>
-            </ng-select>
-          </div>
-        </div>
 
         <div class="form-group mb-4">
           <label class="font-light">Message</label>

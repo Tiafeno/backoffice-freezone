@@ -19,7 +19,7 @@ export class AuthorizationService {
           if (user && user.token) {
             // Verifier si l'utilisateur est valide
             // Seul les utilisateur valide sont les administrateurs et les éditeurs
-            let roles: Array<string> = user.data.roles;
+            const roles: Array<string> = user.data.roles;
             if (_.indexOf(roles, 'administrator') > -1 || _.indexOf(roles, 'editor') > -1 ||
             _.indexOf(roles, 'author') > -1) {
               localStorage.setItem('__fzCurrentUser', JSON.stringify(user));

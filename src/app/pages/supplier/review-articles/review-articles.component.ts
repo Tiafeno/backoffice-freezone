@@ -7,7 +7,7 @@ import { config } from '../../../../environments/environment';
 import { Helpers } from '../../../helpers';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { EditArticleComponent } from '../edit-article/edit-article.component';
-declare var $:any;
+declare var $: any;
 
 @Component({
   selector: 'app-review-articles',
@@ -35,8 +35,8 @@ export class ReviewArticlesComponent implements OnInit {
     moment.locale('fr');
 
     const getElementData = (ev: any): any => {
-      let el = $(ev.currentTarget).parents('tr');
-      let data = this.Table.row(el).data();
+      const el = $(ev.currentTarget).parents('tr');
+      const data = this.Table.row(el).data();
       return data;
     };
 
@@ -51,8 +51,8 @@ export class ReviewArticlesComponent implements OnInit {
       processing: true,
       serverSide: true,
       columns: [
-        { data: 'name', render: (data) => { 
-            return `<span>${data}</span>`; 
+        { data: 'name', render: (data) => {
+            return `<span>${data}</span>`;
           }
         },
         { data: 'total_sales', render: (data, type, row) => {
@@ -84,13 +84,13 @@ export class ReviewArticlesComponent implements OnInit {
       initComplete: (setting, json) => {
         $('#articles-review-table tbody').on('click', '.remove-article', ev => {
           ev.preventDefault();
-          let __article: any = getElementData(ev);
+          const __article: any = getElementData(ev);
           this.Editor.onRemoveArticle(__article.ID);
         });
 
         $('#articles-review-table tbody').on('click', '.edit-article', e => {
           e.preventDefault();
-          let __article: any = getElementData(e);
+          const __article: any = getElementData(e);
           Helpers.setLoading(true);
           this.WPAPI.fz_product().id(__article.ID).then(article => {
             this.editArticle = _.clone(article);
@@ -106,7 +106,7 @@ export class ReviewArticlesComponent implements OnInit {
           order: false,
         },
         beforeSend: function (xhr) {
-          let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+          const __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
           if (__fzCurrentUser && __fzCurrentUser.token) {
             xhr.setRequestHeader("Authorization",
               `Bearer ${__fzCurrentUser.token}`);
