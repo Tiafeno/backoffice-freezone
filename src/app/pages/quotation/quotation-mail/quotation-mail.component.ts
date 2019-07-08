@@ -58,7 +58,7 @@ export class QuotationMailComponent implements OnInit, OnChanges {
     if (changes.order.currentValue) {
       this.Order = _.clone(changes.order.currentValue);
       this.Form.patchValue({
-        subject: `Devis #${this.Order.id} - Demande de confirmation`,
+        subject: `Devis #${this.Order.id} - Demande de confirmation pour votre demande sur Freezone`,
         content: "Bonjour, <br><br> <p>Vous trouverez ci-joint votre devis.<p><p>Nous vous remercions d'avoir choisi notre solution!<br><br> Cordialement."
       });
     }

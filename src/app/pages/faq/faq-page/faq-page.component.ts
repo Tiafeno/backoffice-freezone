@@ -109,7 +109,7 @@ export class FaqPageComponent implements OnInit {
       }).then(result => {
         if (result.value) {
           Helpers.setLoading(true);
-          this.wordpress.posts().id(articleId).delete().then(resp => {
+          this.wordpress.posts().id(articleId).delete({force: true}).then(resp => {
             Helpers.setLoading(false);
             this.ngOnInit();
             Swal.fire('Succès', "Supprimer avec succès", 'success');

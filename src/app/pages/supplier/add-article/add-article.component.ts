@@ -1,17 +1,17 @@
-import {Component, OnInit, EventEmitter, ChangeDetectorRef, Output} from '@angular/core';
-import {FormGroup, FormControl, Validators} from '@angular/forms';
-import {Helpers} from '../../../helpers';
+import { Component, OnInit, EventEmitter, ChangeDetectorRef, Output } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { Helpers } from '../../../helpers';
 import * as _ from 'lodash';
-import {FzServicesService} from '../../../_services/fz-services.service';
-import {debounceTime, switchMap, catchError, map} from 'rxjs/operators';
-import {Observable} from 'rxjs/Observable';
-import {of} from 'rxjs/observable/of';
-import {environment} from '../../../../environments/environment';
-import {HttpClient} from '@angular/common/http';
-import {ApiWordpressService} from '../../../_services/api-wordpress.service';
+import { FzServicesService } from '../../../_services/fz-services.service';
+import { debounceTime, switchMap, catchError, map } from 'rxjs/operators';
+import { Observable } from 'rxjs/Observable';
+import { of } from 'rxjs/observable/of';
+import { environment } from '../../../../environments/environment';
+import { HttpClient } from '@angular/common/http';
+import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as moment from 'moment';
-import {ApiWoocommerceService} from '../../../_services/api-woocommerce.service';
-import {FzSecurityService} from "../../../_services/fz-security.service";
+import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
+import { FzSecurityService } from "../../../_services/fz-security.service";
 import Swal from "sweetalert2";
 
 declare var $: any;
@@ -41,8 +41,9 @@ export class AddArticleComponent implements OnInit {
     this.Form = new FormGroup({
       title: new FormControl('', Validators.required),
       mark: new FormControl('', Validators.required),
-      price: new FormControl(null, Validators.required),
-      priceDealer: new FormControl(null, Validators.required),
+      price: new FormControl(0, Validators.required),
+      priceUf: new FormControl(0, Validators.required),
+      priceDealer: new FormControl(0, Validators.required),
       marge: new FormControl(null, Validators.required),
       margeDealer: new FormControl(null, Validators.required),
       product_cat: new FormControl(null, Validators.required),
@@ -78,10 +79,9 @@ export class AddArticleComponent implements OnInit {
 
   async init() {
     this.Suppliers = await this.fzServices.getSuppliers();
-    if ( ! this.Security.hasAccess('s9', false)) {
+    if (!this.Security.hasAccess('s9', false)) {
       $('#add-article-supplier-modal').modal('hide');
       Swal.fire('Désolé', "Vous n'avez pas l'autorisation nécessaire pour ajouter un article", "error");
-
     }
     Helpers.setLoading(false);
   }
@@ -93,11 +93,39 @@ export class AddArticleComponent implements OnInit {
     );
   }
 
+  public onChangeMargeDealer(newValue) {
+    const Value: any = this.Form.value;
+    const price: number = parseInt(Value.price);
+    if (!_.isNaN(price) && price !== 0) {
+      let marge: number = parseInt(Value.margeDealer);
+      let rest: number = Math.round((price * marge) / 100);
+
+      this.Form.patchValue({ 
+        priceDealer:  rest + price
+      });
+      this.detector.detectChanges();
+    }
+  }
+
+  public onChangeMarge(newValue) {
+    const Value: any = this.Form.value;
+    const price: number = parseInt(Value.price);
+    if (!_.isNaN(price) && price !== 0) {
+      let marge: number = parseInt(Value.marge);
+      let rest: number = Math.round((price * marge) / 100);
+
+      this.Form.patchValue({ 
+        priceUf:  rest + price
+      });
+      this.detector.detectChanges();
+    }
+  }
+
   onSubmit(): void {
     const Value: any = this.Form.value;
     if (this.Form.valid) {
       Helpers.setLoading(true);
-      const categories: Array<any> = _.map(Value.product_cat, (cat) => { return {id: cat}; });
+      const categories: Array<any> = _.map(Value.product_cat, (cat) => { return { id: cat }; });
       const argsProduct = {
         type: 'simple',
         status: 'publish',
@@ -107,15 +135,11 @@ export class AddArticleComponent implements OnInit {
         short_description: '',
         categories: categories,
         attributes: [
-          {
-            name: 'brands',
-            options: Value.mark,
-            visible: true
-          }
+          { name: 'brands', options: Value.mark, visible: true }
         ],
         meta_data: [
-          {key: '_fz_marge', value: Value.marge},
-          {key: '_fz_marge_dealer', value: Value.margeDealer}
+          { key: '_fz_marge', value: Value.marge },
+          { key: '_fz_marge_dealer', value: Value.margeDealer }
         ],
         images: []
       };

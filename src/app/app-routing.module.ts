@@ -59,6 +59,8 @@ import {StatusArticleComponent} from './components/status-article/status-article
 import {TypeClientSwitcherComponent} from "./components/type-client-switcher/type-client-switcher.component";
 import { FaqPageComponent } from './pages/faq/faq-page/faq-page.component';
 import { ResponsibleComponent } from './components/responsible/responsible.component';
+import { SettingsComponent } from './pages/settings/settings.component';
+import { UserManagerComponent } from './components/user-manager/user-manager.component';
 
 
 const routes: Routes = [
@@ -152,6 +154,11 @@ const routes: Routes = [
                     },
 
                 ]
+            },
+            {
+                path: 'settings',
+                canActivate: [NoCommercialAccessGuard],
+                component: SettingsComponent
             },
             {
                 path: 'product',
@@ -249,6 +256,8 @@ const routes: Routes = [
         TypeClientSwitcherComponent,
         FaqPageComponent,
         ResponsibleComponent,
+        SettingsComponent,
+        UserManagerComponent,
         MomentsPipe
     ],
     imports: [

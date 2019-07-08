@@ -31,36 +31,55 @@
             </div>
           </div>
         </div>
-        <div class="text-muted mb-2 mt-3">Fournisseur</div>
+      <div class="text-muted mb-2 mt-3">Fournisseur</div>
+
       <div class="row">
-        <div class="col-md-6">
-          <div class="form-group mb-4">
-            <label>Prix de revient</label>
-            <input class="form-control" formControlName="price" type="number" id="price" name="price"
-                   placeholder="Ajouter un prix en AR">
-            <div *ngIf="f.price.errors && f.price.dirty">
-              <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
+        <div class="col-12">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label>Prix de revient</label>
+                <input class="form-control" formControlName="price" type="number" id="price" name="price"
+                       placeholder="Ajouter un prix en AR">
+                <div *ngIf="f.price.errors && f.price.dirty">
+                  <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="form-group mb-4">
-            <label>Marge</label>
-            <input class="form-control" formControlName="marge" type="number" id="marge" name="marge"
-                   placeholder="Ajouter une marge">
-            <div *ngIf="f.marge.errors && f.marge.dirty">
-              <label id="marge-error" class="help-block error">Ce champ est obligatoire.</label>
+
+        <div class="col-12">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Prix de vente UF</label>
+                <input class="form-control" onkeypress="return false;" formControlName="priceUf" type="number" id="price_uf" name="price_uf"
+                       placeholder="">
+                <p class="help-block font-11"></p>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label>Marge</label>
+                <input class="form-control" formControlName="marge" (ngModelChange)="onChangeMarge($event)" type="number" id="marge" name="marge"
+                       placeholder="Ajouter une marge">
+                <div *ngIf="f.marge.errors && f.marge.dirty">
+                  <label id="marge-error" class="help-block error">Ce champ est obligatoire.</label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
       <div class="text-muted mb-2 mt-3">Revendeur</div>
       <div class="row">
         <div class="col-md-6">
           <div class="form-group mb-4">
             <label>Prix R.</label>
-            <input class="form-control" formControlName="priceDealer" type="number" id="price_dealer" name="price_dealer"
-                   placeholder="Ajouter un prix en AR">
+            <input class="form-control" onkeypress="return false;" formControlName="priceDealer" type="number" id="price_dealer" name="price_dealer"
+                   placeholder="">
             <div *ngIf="f.priceDealer.errors && f.priceDealer.dirty">
               <label id="price-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
@@ -69,7 +88,7 @@
         <div class="col-md-6">
           <div class="form-group mb-4">
             <label>Marge R.</label>
-            <input class="form-control" formControlName="margeDealer" type="number" id="marge_dealer" name="marge_dealer"
+            <input class="form-control" formControlName="margeDealer" type="number" (ngModelChange)="onChangeMargeDealer($event)" id="marge_dealer" name="marge_dealer"
                    placeholder="Ajouter une marge">
             <div *ngIf="f.margeDealer.errors && f.margeDealer.dirty">
               <label id="marge-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
@@ -77,6 +96,7 @@
           </div>
         </div>
       </div>
+
 
       <div class="row">
         <div class="col-md-6">

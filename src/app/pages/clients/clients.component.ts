@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild, NgZone} from '@angular/core';
+import {Component, OnInit, ViewChild, NgZone, ChangeDetectorRef} from '@angular/core';
 import {ApiWordpressService} from "../../_services/api-wordpress.service";
 import {config} from "../../../environments/environment";
 import {Helpers} from "../../helpers";
@@ -21,6 +21,9 @@ export class ClientsComponent implements OnInit {
   private WPAPI: any;
   private WCAPI: any;
   public Table: any;
+  public Responsibles: Array<any> = [];
+  public responsible: any = null;
+  public responsibleLoading: boolean = false;
 
   @ViewChild(TypeClientSwitcherComponent) public SwitchType: TypeClientSwitcherComponent;
   constructor(
@@ -28,7 +31,8 @@ export class ClientsComponent implements OnInit {
     private apiWp: ApiWordpressService,
     private apiWc: ApiWoocommerceService,
     private router: Router,
-    private zone: NgZone
+    private zone: NgZone,
+    private cd: ChangeDetectorRef
   ) {
     this.WPAPI = this.apiWp.getWPAPI();
     this.WCAPI = this.apiWc.getWoocommerce();
@@ -38,7 +42,7 @@ export class ClientsComponent implements OnInit {
     this.Table.ajax.reload(null, false);
   }
 
-  public fnDeleteCustomer(customerid: number) {
+  private fnDeleteCustomer(customerid: number) {
     Helpers.setLoading(true);
     this.WCAPI.delete(`customers/${customerid}?force=true&reassing=1`, (err, data, res) => {
       const response: any = JSON.parse(res);
@@ -60,6 +64,11 @@ export class ClientsComponent implements OnInit {
       const data: any = this.Table.row(el).data();
       return data;
     };
+    this.responsibleLoading = true;
+    this.WPAPI.users().param('roles', 'editor').context('edit').then(resp => {
+      this.Responsibles = _.clone(resp);
+      this.responsibleLoading = false;
+    });
 
     const productsTable = $('#clients-table');
     this.Table = productsTable.DataTable({
@@ -124,12 +133,14 @@ export class ClientsComponent implements OnInit {
         }
       ],
       initComplete: (setting, json) => {
+        // Modifier un client
         $('#clients-table tbody').on('click', '.edit-customer', e => {
           e.preventDefault();
           const __clt: any = getElementData(e);
           this.zone.run(() => { this.router.navigate(['/client', __clt.id, 'edit'])});
         });
 
+        // Supprimer un client
         $('#clients-table tbody').on('click', '.delete-customer', e => {
           e.preventDefault();
           if (this.Security.hasAccess('s12', true)) {
@@ -147,6 +158,7 @@ export class ClientsComponent implements OnInit {
           }
         });
 
+        // Acheteur ou Revendeur
         $('#clients-table tbody').on('click', '.switch-type', e => {
           e.preventDefault();
           if (this.Security.hasAccess('s11', true)) {
@@ -154,13 +166,17 @@ export class ClientsComponent implements OnInit {
             this.SwitchType.fnOpen(__clt);
           }
         });
-
       },
       ajax: {
         url: `${config.apiUrl}/clients/`,
         dataType: 'json',
-        data: {
-          order: false,
+        data: (data) => {
+          return {
+            responsible: !_.isNull(this.responsible) ? this.responsible : null,
+            order: false,
+            length: data.length,
+            start: data.start
+          }
         },
         beforeSend: function (xhr) {
           const __fzCurrentUser: any = JSON.parse(localStorage.getItem('__fzCurrentUser'));

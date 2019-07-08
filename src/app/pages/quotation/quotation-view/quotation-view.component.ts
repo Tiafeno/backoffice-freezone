@@ -99,8 +99,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.supplierSchema = await this.loadSchema();
         this.supplierSchema = _.flatten(this.supplierSchema);
         this.supplierSchema = _.map(this.supplierSchema, schema => {
-            let supplierId: number = parseInt(schema.supplier);
-            let article: any = _.find(ARTICLES, { user_id: supplierId });
+            const articleId: number = parseInt(schema.article_id);
+            const article: any = _.find(ARTICLES, { id: articleId });
             if (_.isUndefined(article)) return schema;
             // "marge" appartient au produit woocommerce
             // Cette valeur est herité depuis le post type 'product'
@@ -169,7 +169,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             return product;
         });
 
-        let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return item.total; });
+        let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return parseInt(item.total, 10); });
         this.Billing.subtotal = _.sum(totalItemsArray);
         this.Billing.total = _.sum(totalItemsArray);
 

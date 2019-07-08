@@ -1,0 +1,69 @@
+<div class="ibox">
+  <div class="ibox-head">
+    <div class="ibox-title">UTILISATEURS</div>
+    <div class="ibox-tools">
+      <a (click)="onAdd()"><i class="ti-plus"></i></a>
+    </div>
+  </div>
+  <div class="ibox-body">
+    <ul class="media-list media-list-divider mr-2 scroller" data-height="580px">
+      <li class="media align-items-center" *ngFor="let user of Users">
+        <div class="media-body d-flex align-items-center">
+          <div class="flex-1">
+            <div class="media-heading">{{user.first_name}} {{user.last_name}}</div>
+            <small class="text-muted">{{user.email}}</small>
+          </div>
+          <button (click)="onEdit(user.id)" type="button" class="btn btn-sm btn-outline-secondary btn-rounded">Modifier</button>
+          <button (click)="onRemove(user.id)" type="button" class="btn btn-sm btn-outline-danger btn-rounded ml-2">Supprimer</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- New question dialog-->
+<div class="modal fade" id="user-dialog">
+  <div class="modal-dialog" style="width:400px;" role="document">
+    <div class="modal-content timeout-modal">
+      <div class="modal-body">
+        <button class="close" data-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center mt-3 mb-4"><i class="ti-lock timeout-icon"></i></div>
+        <div class="text-center h4 mb-3">Modifier/Ajouter un utilisateur</div>
+        <div id="timeout-activate-box">
+          <form id="timeout-form" [formGroup]="Form" (ngSubmit)="onSubmitForm()">
+            <div class="form-group pl-3 pr-3 mb-4">
+              <input class="form-control form-control-line" type="text" formControlName="first_name" placeholder="Prénom">
+            </div>
+            <div class="form-group pl-3 pr-3 mb-4">
+              <input class="form-control form-control-line" type="text" formControlName="last_name" placeholder="Nom">
+            </div>
+            <div class="form-group pl-3 pr-3 mb-4">
+              <div class="form-group mb-4">
+                <label class="font-light">Rôle</label>
+                <ng-select name="role"  placeholder="Veuillez selectionner" formControlName="role"
+                  bindLabel="label" bindValue="value" [hideSelected]="false" [multiple]="false" 
+                  [items]="Roles"
+                  required>
+                  <ng-template ng-option-tmp let-item="item">
+                    {{item.label}}
+                  </ng-template>
+                </ng-select>
+              </div>
+            </div>
+            <div class="form-group pl-3 pr-3 mb-4">
+              <input class="form-control form-control-line" type="text" formControlName="email" placeholder="Adresse E-mail">
+            </div>
+            <div class="form-group pl-3 pr-3 mb-4">
+              <input class="form-control form-control-line" type="password" formControlName="pwd" placeholder="Mot de passe">
+              <span class="help-block" *ngIf="type === 'edit'">Laisser vide si vous ne voulez pas modifier le mot de passe de l'utilisateur</span>
+            </div>
+            <div class="form-group text-center">
+              <button class="btn btn-primary btn-fix btn-air" type="submit">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End New question dialog-->

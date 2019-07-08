@@ -4,6 +4,20 @@
       <h5 class="font-strong mb-4">LES CLIENTS</h5>
       <div class="flexbox mb-4">
         <div class="flexbox">
+            <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group mb-4">
+                    <label class="font-light">Filtre responsable</label>
+                    <ng-select name="responsible" (change)="reload()" placeholder="Veuillez selectionner" [(ngModel)]="responsible"
+                      bindLabel="email" bindValue="id" [hideSelected]="false" [loading]="responsibleLoading" [multiple]="false" [items]="Responsibles"
+                      required>
+                      <ng-template ng-option-tmp let-item="item">
+                        {{item.email}}
+                      </ng-template>
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
         </div>
         <div class="flexbox">
           <div class="input-group-icon input-group-icon-left mr-3">

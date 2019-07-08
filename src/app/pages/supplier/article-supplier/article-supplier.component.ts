@@ -217,7 +217,7 @@ export class ArticleSupplierComponent implements OnInit {
       this.Products = _.map(this.Products, product => {
          const price = parseInt(product.price, 10);
          const priceMarge = (price * parseInt(product.marge, 10)) / 100;
-         product.priceUF = priceMarge + price;
+         product.priceUF = Math.round(priceMarge + price);
          product.marge = this.adminAccess ? product.marge + '%' : "Restreint";
          product.marge_dealer = this.adminAccess ? product.marge_dealer + '%' : "Restreint";
          product.price = this.adminAccess ? parseInt(product.price, 10) : 'Restreint';

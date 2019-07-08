@@ -50,7 +50,7 @@
                     {{article.product_status === 'publish' ? 'PUBLIER' : (article.product_status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                   </td>
 
-                  <td *ngIf="isNumber(article.price)">{{article.price * 5 | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                  <td *ngIf="isNumber(article.price)">{{article.price * 5 | currency:'FMG':'symbole':'4.2-2':'fr'}}</td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
 
                   <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>

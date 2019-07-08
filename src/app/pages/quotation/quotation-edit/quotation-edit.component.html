@@ -47,18 +47,6 @@
       </div>
       <div class="modal-body p-4">
         <div>
-          <div class="row">
-            <div class="col-6" *ngIf="canChangeMarge">
-                <label>Marge <b>%</b>:</label>
-                <input type="text" class="form-control marge" style="background-color: lavender;" [value]="itemMarge" [attr.data-product]="Item.product_id">
-            </div>
-
-            <div class="col-6" *ngIf="canChangeMargeDealer">
-              <label>Marge Revendeur <b>%</b>:</label>
-              <input type="text" class="form-control marge-dealer" style="background-color: lavender;" [value]="itemMargeDealer" [attr.data-product]="Item.product_id">
-            </div>
-            
-          </div>
           <table class="table table-hover" id="quotation-supplier-table">
             <thead class="thead-default thead-lg">
               <tr>

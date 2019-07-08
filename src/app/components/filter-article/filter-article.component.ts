@@ -13,6 +13,7 @@ export class FilterArticleComponent implements OnInit, OnChanges {
   public Categories: Array<any> = [];
   public Suppliers: Array<any> = [];
   public Status: Array<any> = [
+    { label: "Tous", value: '' },
     { label: "Publier", value: 'publish' },
     { label: "En attente", value: 'pending' },
     { label: "Désactiver", value: 'draft' },
@@ -45,9 +46,11 @@ export class FilterArticleComponent implements OnInit, OnChanges {
     Helpers.setLoading(true);
     const categories = await this.fzServices.getCategories();
     this.Categories = _.isArray(categories) ? categories : [];
+    this.Categories.unshift({id: 0, name: 'Tous'});
 
     const suppliers = await this.fzServices.getSuppliers();
     this.Suppliers = _.isArray(suppliers) ? suppliers : [];
+    this.Suppliers.unshift({id: 0, company_name: 'Tous'});
     Helpers.setLoading(false);
   }
 

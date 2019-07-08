@@ -53,13 +53,13 @@ export class EditArticleComponent implements OnInit, OnChanges {
     this.Form = new FormGroup({
       title: new FormControl('', Validators.required),
       price: new FormControl({ value: 0, disabled: !this.canEdit }, Validators.required),
-      priceDealer: new FormControl({ value: 0, disabled: !this.canEdit }, Validators.required),
+      priceDealer: new FormControl({ value: 0, disabled: false }, Validators.required),
       marge: new FormControl({ value: 0 }, Validators.required),
       margeDealer: new FormControl({ value: 0 }, Validators.required),
       product: new FormControl({ value: null, disabled: true }, Validators.required),
       user_id: new FormControl(null, Validators.required),
       stock: new FormControl({ value: null, disabled: !this.canEdit }, Validators.required),
-      priceUf: new FormControl({ value: '', disabled: true })
+      priceUf: new FormControl({ value: '', disabled: false })
     });
     this.WP = this.apiWP.getWPAPI();
   }
@@ -80,7 +80,16 @@ export class EditArticleComponent implements OnInit, OnChanges {
     if (formValue.price) {
       const per_price: number = parseInt(formValue.price, 10) * parseInt(newValue, 10) / 100;
       const priceUf: number = per_price + parseInt(formValue.price, 10);
-      this.Form.patchValue({ priceUf: priceUf });
+      this.Form.patchValue({ priceUf: Math.round(priceUf) });
+    }
+  }
+
+  onChangeMargeDealer(newValue) {
+    const formValue: any = this.Form.value;
+    if (formValue.price) {
+      const per_price: number = parseInt(formValue.price, 10) * parseInt(newValue, 10) / 100;
+      const priceR: number = per_price + parseInt(formValue.price, 10);
+      this.Form.patchValue({ priceDealer: Math.round(priceR) });
     }
   }
 
@@ -89,7 +98,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
     if (formValue.price) {
       const per_price: number = parseInt(newValue, 10) * parseInt(formValue.marge, 10) / 100;
       const priceUf: number = per_price + parseInt(newValue, 10);
-      this.Form.patchValue({ priceUf: priceUf });
+      this.Form.patchValue({ priceUf: Math.round(priceUf) });
     }
   }
 
@@ -110,9 +119,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
   loadSuppliers(): Observable<any> {
     const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/users?roles=fz-supplier`;
     const postCache = this.postResponseCache.get(URL);
-    if (postCache) {
-      return of(postCache);
-    }
+    if (postCache) { return of(postCache);}
     const response = this.http.get<any>(URL);
     response.subscribe(suppliers => this.postResponseCache.set(URL, suppliers));
 
@@ -147,7 +154,6 @@ export class EditArticleComponent implements OnInit, OnChanges {
       this.add_notice('Le formulaire est invalide', 'danger');
       return false;
     }
-
     if (!this.Form.dirty) {
       this.add_notice('Aucune modifications n\'ont été apportées', 'warning');
       return false;
@@ -163,7 +169,6 @@ export class EditArticleComponent implements OnInit, OnChanges {
       price_dealer: Values.priceDealer,
       marge: Values.marge,
       marge_dealer: Values.margeDealer,
-      user_id: parseInt(Values.user_id, 10),
       total_sales: parseInt(Values.stock, 10),
       date_review: moment().format('YYYY-MM-DD HH:mm:ss')
     }).then(() => {
@@ -190,18 +195,25 @@ export class EditArticleComponent implements OnInit, OnChanges {
       const currentSupplierEdit = _.find(this.Suppliers, { id: this.Article.user_id });
       this.supplierReference = currentSupplierEdit.reference;
       this.cd.detectChanges();
-      const per_price: number = parseInt(this.Article.price, 10) * parseInt(this.Article.marge, 10) / 100;
-      const priceUf: number = per_price + parseInt(this.Article.price, 10);
+
+      const price: number = parseInt(this.Article.price, 10);
+
+      const per_price: number = (price * parseInt(this.Article.marge, 10)) / 100;
+      const priceUf: number = per_price + price;
+
+      const per_price_dealer : number = (price * parseInt(this.Article.marge_dealer, 10)) / 100;
+      const priceDealer: number = per_price_dealer + price;
+
       this.Form.patchValue({
         title: this.Article.title.rendered,
         price: this.Article.price,
-        priceDealer: this.Article.price_dealer,
+        priceDealer: Math.round(priceDealer),
         marge: this.Article.marge,
         margeDealer: this.Article.marge_dealer,
         product: this.Products[0].title.rendered,
         user_id: this.Article.user_id,
         stock: this.Article.total_sales,
-        priceUf: priceUf
+        priceUf: Math.round(priceUf)
       } as any);
 
       this.Form.controls.user_id.disable();
