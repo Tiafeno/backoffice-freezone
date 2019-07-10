@@ -149,8 +149,12 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             }
             // Récuperer le prix le plus grand pour chaque fournisseur ajouter
             const price = _.max(allPriceForItem);
+            // Vérifier le prix et la quantité ajouter
             if (_.isUndefined(price) || product.quantity > take) {
                 product.stock = product.total = product.subtotal = product.price = 0;
+
+                $('.modal').modal('hide');
+                Swal.fire('Désolé', 'Quantité ajouter incorrect', 'error');
                 return product;
             }
             this.error = false;

@@ -4,7 +4,6 @@ import { ApiWoocommerceService } from '../../../_services/api-woocommerce.servic
 import { ActivatedRoute } from '@angular/router';
 import { Helpers } from '../../../helpers';
 import * as _ from 'lodash';
-import { NgIf } from '@angular/common';
 import Swal from 'sweetalert2';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { ResponsibleComponent } from '../../../components/responsible/responsible.component';
@@ -61,7 +60,6 @@ export class EditClientComponent implements OnInit {
       city: new FormControl('', Validators.required),
       postcode: new FormControl('', Validators.required),
       company: new FormControl(''),
-      country: new FormControl('', Validators.required),
       email: new FormControl({ value: '' }, Validators.required),
       first_name: new FormControl(''),
       last_name: new FormControl(''),
@@ -78,7 +76,6 @@ export class EditClientComponent implements OnInit {
       last_name: new FormControl('', Validators.required),
       postcode: new FormControl('', Validators.required),
       company: new FormControl(''),
-      country: new FormControl(''),
       state: new FormControl(''),
     });
 
@@ -151,6 +148,7 @@ export class EditClientComponent implements OnInit {
 
         return meta;
       });
+      // Crée si la meta data n'existe pas
       _.forEach(itemMeta, ($value, $key) => {
         let exist = _.find(this.Customer.meta_data, { key: $value });
         if (_.isUndefined(exist) && !_.isEmpty(Value[$value])) {

@@ -1,10 +1,10 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import * as _ from 'lodash';
 import { Helpers } from '../../../helpers';
 import * as moment from 'moment';
-declare var $:any;
+declare var $: any;
 
 @Component({
   selector: 'app-customer-edit',
@@ -15,7 +15,6 @@ export class CustomerEditComponent implements OnInit, OnChanges {
   public ID: number = 0;
   public hasAddress: boolean = false;
 
-  
   public roleOffice: number;
   public clientStatus: string;
   public role: string = '';
@@ -29,7 +28,8 @@ export class CustomerEditComponent implements OnInit, OnChanges {
   @Input() customer;
   constructor(
     private route: ActivatedRoute,
-    private apiWC: ApiWoocommerceService
+    private apiWC: ApiWoocommerceService,
+    private cd: ChangeDetectorRef
   ) {
     this.Woocommerce = this.apiWC.getWoocommerce();
    }
@@ -41,6 +41,13 @@ export class CustomerEditComponent implements OnInit, OnChanges {
       if (_.isUndefined(params.id)) return false;
       this.ID = params.id;
       this.initCustomer();
+    });
+
+    $('#customer-edit-modal').on('hide.bs.modal', e => {
+      this.hasAddress = false;
+      this.meta = {};
+      this.Client = {};
+      this.cd.detectChanges();
     });
   }
 

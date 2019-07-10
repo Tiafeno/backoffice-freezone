@@ -102,10 +102,11 @@ export class QuotationEditComponent implements OnInit {
                   { data: 'quantity' },
                   {
                      data: 'meta_data', render: (data) => {
-                        let meta: any = _.find(data, { key: 'status' });
-                        let status: string = parseInt(meta.value) === 0 ? 'En attente' : (parseInt(meta.value) === 1 ? "Traitée" : "Rejeté");
-
-                        return `<span class="badge badge-success">${status}</span>`;
+                        const meta: any = _.find(data, { key: 'status' });
+                        const intStatus: number = parseInt(meta.value, 10);
+                        const status: string =  intStatus === 0 ? 'En attente' : (intStatus === 1 ? "Traitée" : "Rejeté");
+                        const style: string = intStatus === 0 ? 'warning' : (intStatus === 1 ? "success" : "danger");
+                        return `<span class="badge badge-${style}">${status}</span>`;
                      }
                   },
                   {
