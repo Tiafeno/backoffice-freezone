@@ -55,12 +55,12 @@ export class EditClientComponent implements OnInit {
      * state
      */
     this.billForm = new FormGroup({
-      address_1: new FormControl('', Validators.required),
+      address_1: new FormControl(''),
       address_2: new FormControl(''),
-      city: new FormControl('', Validators.required),
-      postcode: new FormControl('', Validators.required),
+      city: new FormControl(''),
+      postcode: new FormControl(''),
       company: new FormControl(''),
-      email: new FormControl({ value: '' }, Validators.required),
+      email: new FormControl(''),
       first_name: new FormControl(''),
       last_name: new FormControl(''),
       phone: new FormControl(''),
@@ -69,12 +69,12 @@ export class EditClientComponent implements OnInit {
 
 
     this.shipForm = new FormGroup({
-      address_1: new FormControl('', Validators.required),
+      address_1: new FormControl(''),
       address_2: new FormControl(''),
-      city: new FormControl('', Validators.required),
+      city: new FormControl(''),
       first_name: new FormControl(''),
-      last_name: new FormControl('', Validators.required),
-      postcode: new FormControl('', Validators.required),
+      last_name: new FormControl(''),
+      postcode: new FormControl(''),
       company: new FormControl(''),
       state: new FormControl(''),
     });
@@ -135,7 +135,7 @@ export class EditClientComponent implements OnInit {
   onSubmit() {
     if (this.Form.valid && this.billForm.valid && this.shipForm.valid) {
       const Value: any = this.Form.value;
-
+      
       const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'client_status'];
       this.MetaData = _.map(this.Customer.meta_data, (meta) => {
         if (meta.key === 'address') meta.value = Value.address;
@@ -177,7 +177,13 @@ export class EditClientComponent implements OnInit {
           Swal.fire('Désolé', response.message, 'error');
           return false;
         }
-        Swal.fire('Succès', "Information mise à jour avec succès", 'success');
+
+        const responsible: any = this.getMetaDataValue("responsible");
+        if (_.isNull(responsible) || _.isEmpty(responsible)) {
+          Swal.fire('Succès', "Information mise à jour aves succès. Veuillez ajouter une commercial pour ce client.", 'info')
+        } else {
+          Swal.fire('Succès', "Information mise à jour avec succès", 'success');
+        }
         Helpers.setLoading(false);
       });
     } else {

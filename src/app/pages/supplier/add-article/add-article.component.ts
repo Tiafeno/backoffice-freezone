@@ -6,7 +6,7 @@ import { FzServicesService } from '../../../_services/fz-services.service';
 import { debounceTime, switchMap, catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
-import { environment } from '../../../../environments/environment';
+import { environment, config } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as moment from 'moment';
@@ -24,6 +24,7 @@ declare var $: any;
 export class AddArticleComponent implements OnInit {
   private WP: any;
   private WC: any;
+  private sellerPrice: number = 0.85;
   public Form: FormGroup;
   public Suppliers: Array<any> = [];
   public Categories: Array<any> = [];
@@ -95,7 +96,7 @@ export class AddArticleComponent implements OnInit {
 
   public onChangeMargeDealer(newValue) {
     const Value: any = this.Form.value;
-    const price: number = parseInt(Value.price);
+    const price: number = Math.round(parseInt(Value.price) / this.sellerPrice);
     if (!_.isNaN(price) && price !== 0) {
       let marge: number = parseInt(Value.margeDealer);
       let rest: number = Math.round((price * marge) / 100);
@@ -109,7 +110,7 @@ export class AddArticleComponent implements OnInit {
 
   public onChangeMarge(newValue) {
     const Value: any = this.Form.value;
-    const price: number = parseInt(Value.price);
+    const price: number = Math.round(parseInt(Value.price) / this.sellerPrice);
     if (!_.isNaN(price) && price !== 0) {
       let marge: number = parseInt(Value.marge);
       let rest: number = Math.round((price * marge) / 100);
@@ -125,72 +126,24 @@ export class AddArticleComponent implements OnInit {
     const Value: any = this.Form.value;
     if (this.Form.valid) {
       Helpers.setLoading(true);
-      const categories: Array<any> = _.map(Value.product_cat, (cat) => { return { id: cat }; });
-      const argsProduct = {
-        type: 'simple',
-        status: 'publish',
-        name: Value.title,
-        regular_price: '0',
-        description: '',
-        short_description: '',
-        categories: categories,
-        attributes: [
-          { name: 'brands', options: Value.mark, visible: true }
-        ],
-        meta_data: [
-          { key: '_fz_marge', value: Value.marge },
-          { key: '_fz_marge_dealer', value: Value.margeDealer }
-        ],
-        images: []
-      };
-      this.WC.get(`products?search=${Value.title}`, (err, data, res) => {
-        const response: any = JSON.parse(res);
-        if (_.isEmpty(response) && _.isArray(response)) {
-          this.WC.post('products', argsProduct, (errno, data_, res_) => {
-            const product: any = JSON.parse(res_);
-            const args: any = {
-              status: 'publish',
-              title: Value.title,
-              content: '',
-              price: parseInt(Value.price, 10),
-              price_dealer: parseInt(Value.priceDealer, 10),
-              total_sales: parseInt(Value.stock, 10),
-              user_id: parseInt(Value.user_id, 10),
-              product_id: product.id,
-              product_cat: Value.product_cat,
-              date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
-              date_review: moment().format('YYYY-MM-DD HH:mm:ss')
-            };
-            this.insert(args);
-          });
-        } else {
-          const args: any = {
-            status: 'publish',
-            title: response.name,
-            content: '',
-            price: parseInt(Value.price, 10),
-            price_dealer: parseInt(Value.priceDealer, 10),
-            total_sales: parseInt(Value.stock, 10),
-            user_id: parseInt(Value.user_id, 10),
-            product_id: response.id,
-            product_cat: Value.product_cat,
-            date_add: moment().format('YYYY-MM-DD HH:mm:ss'),
-            date_review: moment().format('YYYY-MM-DD HH:mm:ss')
-          };
-          this.insert(args);
-        }
+      const Form: FormData = new FormData();
+      Form.append('name', Value.title);
+      Form.append('price_dealer', Value.priceDealer);
+      Form.append('price', Value.price);
+      Form.append('total_sales', Value.stock);
+      Form.append('user_id', Value.user_id);
+      Form.append('product_cat', Value.product_cat);
+      Form.append('mark', Value.mark);
+      Form.append('marge', Value.marge);
+      Form.append('marge_dealer', Value.margeDealer);
+
+      this.http.post<any>(`${config.apiUrl}/create/article`, Form).subscribe(response => {
+        Helpers.setLoading(false);
+        $('.modal').modal('hide');
+        this.Form.reset();
+        this.refresh.emit();
       });
-
     }
-  }
-
-  protected insert(args: any) {
-    this.WP.fz_product().create(args).then(() => {
-      Helpers.setLoading(false);
-      this.refresh.emit();
-      $('#add-article-supplier-modal').modal('hide');
-      this.Form.reset();
-    });
   }
 
 }

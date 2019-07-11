@@ -21,7 +21,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public Billing: any = {};
     public billingAdress: any = {}; // adresse de facturation
     public shippingAdress: any = {}; // adresse de facturation
-    public loading: boolean = false;
     public ownerClient: any = {};
 
     private Woocommerce: any;
@@ -29,8 +28,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     private supplierSchema: Array<any> = [];
     private error: boolean = false;
     private Tax: number = 20; // Tax de 20%
+    private sellerPrice = 0.85;
 
-    @Input() order: any;
+    @Input() public order: any;
 
     constructor(
         private apiWC: ApiWoocommerceService,
@@ -87,7 +87,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
      * Cette fonction sera exécuter quand la boit de dialogue s'affiche
      */
     public async onShowModal() {
-        this.loading = true;
         this.error = false;
         this.cd.detectChanges();
         Helpers.setLoading(true);
@@ -106,7 +105,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             // Cette valeur est herité depuis le post type 'product'
             schema.marge = parseInt(article.marge);
             schema.marge_dealer = parseInt(article.marge_dealer, 10);
-            schema.price = parseInt(article.price);
+
+            let price = parseInt(article.price);
+            schema.price = price;
 
             return schema;
         });
@@ -115,14 +116,14 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         _.map(ARTICLES, (a) => {
             let dateReview: any = moment(a.date_review);
             let dateLimit: any = moment().subtract(2, 'day');
-            if ( dateLimit > dateReview ) {
+            if ( dateLimit > dateReview &&  this.order.status !== 'completed') {
                 this.error = true;
             }
         });
 
         if (this.error) {
             $('.modal').modal('hide');
-            Helpers.setLoading(this.loading = false);
+            Helpers.setLoading(false);
             this.cd.detectChanges();
             setTimeout(() => {
                 Swal.fire('Désolé', "Article en attente détecté. Veuillez mettre à jours l'article", 'error');
@@ -134,7 +135,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.QtItems = _.map(this.Items, product => {
             // Récuperer tous les meta utiliser pour le produit
             let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: product.product_id });
-            const allPriceForItem = _.map(SCHEMAS, (schema) => parseInt(schema.price));
+            const allPriceForItem = _.map(SCHEMAS, (schema) => schema.price);
             
             const metaDataSuppliers: any = _.find(product.meta_data, {key: 'suppliers'} as any);
             const metaDataSuppliersValue =  JSON.parse(metaDataSuppliers.value);
@@ -144,8 +145,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             const take = _.sum(allTakeForItem);
             if (take === 0) {
                 $('.modal').modal('hide');
-                Helpers.setLoading(this.loading = false);
+                Helpers.setLoading(false);
                 Swal.fire('Désolé', "Fournisseur non definie détecté", 'error');
+                return product;
             }
             // Récuperer le prix le plus grand pour chaque fournisseur ajouter
             const price = _.max(allPriceForItem);
@@ -161,7 +163,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             const _marge = _.find(SCHEMAS, schema => { return schema.price === price; }).marge;
             const _marge_dealer = _.find(SCHEMAS, schema => { return schema.price === price; }).marge_dealer;
             const marge: number = parseInt(this.ownerClient.role_office, 10) === 2 ? _marge_dealer : _marge;
-            const benefit: number = (price * marge) / 100;
+            const sellerPrice: number = Math.round(price / this.sellerPrice); // Ajouter le prix revendeur
+            const benefit: number = (sellerPrice * marge) / 100;
             let total: number = (price + benefit) * take;
             total = Math.round(total);
 
@@ -181,7 +184,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.Billing.price_tax = priceTax;
         this.Billing.total_tax = parseInt(this.Billing.subtotal) + priceTax;
 
-        this.loading = false;
         this.cd.detectChanges();
 
         Helpers.setLoading(false);

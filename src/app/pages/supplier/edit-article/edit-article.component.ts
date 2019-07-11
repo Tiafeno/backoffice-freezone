@@ -40,6 +40,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
   public dateReview: string;
   public dateReviewFromNow: string;
   public canEdit = true;
+  private sellerPrice: number = 0.85;
   @Input() Article: any;
   @Output() refresh = new EventEmitter<any>();
 
@@ -77,8 +78,9 @@ export class EditArticleComponent implements OnInit, OnChanges {
 
   onChangeMarge(newValue) {
     const formValue: any = this.Form.value;
+    const currentPriceSeller : number  = Math.round(parseInt(formValue.price, 10) / this.sellerPrice);
     if (formValue.price) {
-      const per_price: number = parseInt(formValue.price, 10) * parseInt(newValue, 10) / 100;
+      const per_price: number = currentPriceSeller * parseInt(newValue, 10) / 100;
       const priceUf: number = per_price + parseInt(formValue.price, 10);
       this.Form.patchValue({ priceUf: Math.round(priceUf) });
     }
@@ -86,19 +88,30 @@ export class EditArticleComponent implements OnInit, OnChanges {
 
   onChangeMargeDealer(newValue) {
     const formValue: any = this.Form.value;
+    const currentPriceSeller : number  = Math.round(parseInt(formValue.price, 10) / this.sellerPrice);
     if (formValue.price) {
-      const per_price: number = parseInt(formValue.price, 10) * parseInt(newValue, 10) / 100;
+      const per_price: number = currentPriceSeller * parseInt(newValue, 10) / 100;
       const priceR: number = per_price + parseInt(formValue.price, 10);
       this.Form.patchValue({ priceDealer: Math.round(priceR) });
     }
   }
 
+  /**
+   * Cette evenement ce declanche quand on change le prix de revient
+   * @param newValue 
+   */
   onChangePrice(newValue) {
     const formValue: any = this.Form.value;
+    const currentPriceSeller: number = Math.round(parseInt(newValue, 10) / this.sellerPrice);
     if (formValue.price) {
-      const per_price: number = parseInt(newValue, 10) * parseInt(formValue.marge, 10) / 100;
-      const priceUf: number = per_price + parseInt(newValue, 10);
-      this.Form.patchValue({ priceUf: Math.round(priceUf) });
+
+      const per_price_uf: number =  currentPriceSeller * parseInt(formValue.marge, 10) / 100;
+      const priceUf: number = per_price_uf + parseInt(newValue, 10);
+
+      const per_price_r: number =  currentPriceSeller * parseInt(formValue.margeDealer, 10) / 100;
+      const priceR: number = per_price_r + parseInt(newValue, 10);
+
+      this.Form.patchValue({ priceUf: Math.round(priceUf), priceDealer: Math.round(priceR) });
     }
   }
 

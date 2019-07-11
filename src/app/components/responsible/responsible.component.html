@@ -6,7 +6,7 @@
           <div class="form-group mb-4">
             <label class="font-light">Commercial responsable</label>
             <ng-select name="commercial" placeholder="Ajouter un commercial" formControlName="commercial" [loading]='loading'
-              bindLabel="email" bindValue="id" [hideSelected]="false" [multiple]="false" [items]="Commercials" required>
+              bindLabel="email" bindValue="id" [hideSelected]="false" [multiple]="false" [items]="Commercials">
               <ng-template ng-option-tmp let-item="item">
                 {{item.email}}
               </ng-template>

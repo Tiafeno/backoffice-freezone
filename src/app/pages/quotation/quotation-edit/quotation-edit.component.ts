@@ -37,6 +37,7 @@ export class QuotationEditComponent implements OnInit {
    public itemMargeDealer: string = '0';
    public objectMeta: Array<any> = [];
    public loading: boolean = false;
+   public sellerPrice: number = 0.85;
 
    @ViewChild(QuotationViewComponent) QuotationView: QuotationViewComponent;
    @ViewChild(EditArticleComponent) EditArticle: EditArticleComponent;
@@ -190,9 +191,11 @@ export class QuotationEditComponent implements OnInit {
                                     data: 'id', render: data => {
                                        const userId: any = data;
                                        const pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
+
                                        const marge: number = parseInt(pdt.marge, 10);
                                        const margeDealer: number = parseInt(pdt.marge_dealer, 10);
-                                       const price: number = parseInt(pdt.price, 10);
+
+                                       const price: number = parseInt(pdt.price, 10) / this.sellerPrice;
                                        const currentMarge: number = clientRoleOffice === 2 ? margeDealer : marge;
                                        const rest: number = (price * currentMarge) / 100;
                                        return this.currencyFormat(price + rest);

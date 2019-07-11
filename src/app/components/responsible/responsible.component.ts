@@ -25,7 +25,7 @@ export class ResponsibleComponent implements OnInit {
    ) {
       this.isAdmin = this.auth.getCurrentUserRole() === 'administrator' ? true : false;
       this.Form = new FormGroup({
-         commercial: new FormControl({ value: null, disabled: !this.isAdmin }, Validators.required)
+         commercial: new FormControl({ value: null, disabled: !this.isAdmin })
       });
       this.Wordpress = this.apiWP.getWordpress();
    }
@@ -34,7 +34,8 @@ export class ResponsibleComponent implements OnInit {
       this.loading = true;
       this.Wordpress.users().param('roles', 'editor').context('edit').then(resp => {
          this.Commercials = _.clone(resp);
-         const value: any = _.isEmpty(this.responsible)||_.isNull(this.responsible) ? null : parseInt(this.responsible);
+         this.Commercials.unshift({ email: "Aucun", id: '' });
+         const value: any = _.isEmpty(this.responsible) || _.isNull(this.responsible) ? null : parseInt(this.responsible);
          this.Form.patchValue({ commercial: value });
          this.loading = false;
       });
