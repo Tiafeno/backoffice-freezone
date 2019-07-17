@@ -24,7 +24,6 @@ declare var $: any;
 export class AddArticleComponent implements OnInit {
   private WP: any;
   private WC: any;
-  private sellerPrice: number = 0.85;
   public Form: FormGroup;
   public Suppliers: Array<any> = [];
   public Categories: Array<any> = [];
@@ -37,16 +36,19 @@ export class AddArticleComponent implements OnInit {
     private http: HttpClient,
     private detector: ChangeDetectorRef,
     private apiWP: ApiWordpressService,
-    private apiWC: ApiWoocommerceService
+    private apiWC: ApiWoocommerceService,
+    private services: FzServicesService
   ) {
     this.Form = new FormGroup({
       title: new FormControl('', Validators.required),
       mark: new FormControl('', Validators.required),
       price: new FormControl(0, Validators.required),
-      priceUf: new FormControl(0, Validators.required),
+      pricePro: new FormControl(0, Validators.required),
       priceDealer: new FormControl(0, Validators.required),
-      marge: new FormControl(null, Validators.required),
+      priceParticular: new FormControl(0, Validators.required),
+      margePro: new FormControl(null, Validators.required),
       margeDealer: new FormControl(null, Validators.required),
+      margeParticular: new FormControl(null, Validators.required),
       product_cat: new FormControl(null, Validators.required),
       user_id: new FormControl(null, Validators.required),
       stock: new FormControl(1, Validators.required)
@@ -66,9 +68,7 @@ export class AddArticleComponent implements OnInit {
       });
   }
 
-  get f() {
-    return this.Form.controls;
-  }
+  get f() { return this.Form.controls; }
 
   ngOnInit() {
     moment.locale('fr');
@@ -94,30 +94,32 @@ export class AddArticleComponent implements OnInit {
     );
   }
 
-  public onChangeMargeDealer(newValue) {
+  public onChangeMargeDealer($event: any) {
     const Value: any = this.Form.value;
-    const price: number = Math.round(parseInt(Value.price) / this.sellerPrice);
-    if (!_.isNaN(price) && price !== 0) {
-      let marge: number = parseInt(Value.margeDealer);
-      let rest: number = Math.round((price * marge) / 100);
-
-      this.Form.patchValue({ 
-        priceDealer:  rest + price
-      });
+    const price: number = parseInt(Value.price);
+    if ( ! _.isNaN(price) && price !== 0) {
+      const benefit = this.services.getBenefit(price, Value.margeDealer);
+      this.Form.patchValue({ priceDealer: benefit });
       this.detector.detectChanges();
     }
   }
 
-  public onChangeMarge(newValue) {
+  public onChangeMargeParticular($event: any) {
     const Value: any = this.Form.value;
-    const price: number = Math.round(parseInt(Value.price) / this.sellerPrice);
-    if (!_.isNaN(price) && price !== 0) {
-      let marge: number = parseInt(Value.marge);
-      let rest: number = Math.round((price * marge) / 100);
+    const price: number = parseInt(Value.price);
+    if ( ! _.isNaN(price) && price !== 0) {
+      const benefit = this.services.getBenefit(price, Value.margeParticular);
+      this.Form.patchValue({ priceParticular: benefit });
+      this.detector.detectChanges();
+    }
+  }
 
-      this.Form.patchValue({ 
-        priceUf:  rest + price
-      });
+  public onChangeMarge($event: any) {
+    const Value: any = this.Form.value;
+    const price: number = parseInt(Value.price, 10);
+    if ( ! _.isNaN(price) && price !== 0) {
+      const benefit = this.services.getBenefit(price, Value.margePro);
+      this.Form.patchValue({ pricePro: benefit });
       this.detector.detectChanges();
     }
   }
@@ -128,14 +130,14 @@ export class AddArticleComponent implements OnInit {
       Helpers.setLoading(true);
       const Form: FormData = new FormData();
       Form.append('name', Value.title);
-      Form.append('price_dealer', Value.priceDealer);
       Form.append('price', Value.price);
       Form.append('total_sales', Value.stock);
       Form.append('user_id', Value.user_id);
       Form.append('product_cat', Value.product_cat);
       Form.append('mark', Value.mark);
-      Form.append('marge', Value.marge);
+      Form.append('marge', Value.margePro);
       Form.append('marge_dealer', Value.margeDealer);
+      Form.append('marge_particular', Value.margeParticular);
 
       this.http.post<any>(`${config.apiUrl}/create/article`, Form).subscribe(response => {
         Helpers.setLoading(false);

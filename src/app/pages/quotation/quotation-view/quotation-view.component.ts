@@ -5,6 +5,7 @@ import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
 import * as moment from 'moment';
+import { FzServicesService } from '../../../_services/fz-services.service';
 declare var $: any;
 
 @Component({
@@ -28,14 +29,13 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     private supplierSchema: Array<any> = [];
     private error: boolean = false;
     private Tax: number = 20; // Tax de 20%
-    private sellerPrice = 0.85;
-
     @Input() public order: any;
 
     constructor(
         private apiWC: ApiWoocommerceService,
         private apiWP: ApiWordpressService,
-        private cd: ChangeDetectorRef
+        private cd: ChangeDetectorRef,
+        private services: FzServicesService
     ) {
         this.Woocommerce = this.apiWC.getWoocommerce();
         this.Wordpress = this.apiWP.getWPAPI();
@@ -163,10 +163,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             const _marge = _.find(SCHEMAS, schema => { return schema.price === price; }).marge;
             const _marge_dealer = _.find(SCHEMAS, schema => { return schema.price === price; }).marge_dealer;
             const marge: number = parseInt(this.ownerClient.role_office, 10) === 2 ? _marge_dealer : _marge;
-            const sellerPrice: number = Math.round(price / this.sellerPrice); // Ajouter le prix revendeur
-            const benefit: number = (sellerPrice * marge) / 100;
-            let total: number = (price + benefit) * take;
-            total = Math.round(total);
+            const _price: number = this.services.getBenefit(price, marge);
+            let total: number = Math.round(_price * take);
 
             product.stock = _.clone(take);
             product.total = total.toString();

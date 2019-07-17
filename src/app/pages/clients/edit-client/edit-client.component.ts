@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, NgForm, FormControl, Validators } from '@angular/forms';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ActivatedRoute } from '@angular/router';
@@ -15,6 +15,7 @@ import { ResponsibleComponent } from '../../../components/responsible/responsibl
 })
 export class EditClientComponent implements OnInit {
   public customerID: number = 0;
+  public role: string = '';
   public responsible: any = null;
   private Woocommerce: any;
   public Customer: any = null;
@@ -24,15 +25,17 @@ export class EditClientComponent implements OnInit {
   public shipForm: FormGroup;
   public roleOffice: number = 0;
   public Status: Array<any> = [
-    { label: 'Particulier', value: 'particular' },
-    { label: 'Entreprise / Société', value: 'company' },
+    { label: 'En attente', value: 'pending' },
+    { label: 'Revendeur', value: 'dealer' },
+    { label: 'Professionnel (UF)', value: 'professional' },
   ];
   
   @ViewChild(ResponsibleComponent) private Responsible: ResponsibleComponent;
   constructor(
     private apiWc: ApiWoocommerceService,
     private route: ActivatedRoute,
-    private auth: AuthorizationService
+    private auth: AuthorizationService,
+    private cd: ChangeDetectorRef
   ) {
     this.Form = new FormGroup({
       first_name: new FormControl(''),
@@ -44,7 +47,9 @@ export class EditClientComponent implements OnInit {
       nif: new FormControl(''), // Meta data
       rc: new FormControl(''), // Meta data
       cif: new FormControl(''), // Meta data
-      client_status: new FormControl(null, Validators.required), // Meta data
+      cin: new FormControl(''), // Meta data
+      date_cin: new FormControl(''), // Meta data
+      company_status: new FormControl('', Validators.required), // Meta data
     });
 
     /**
@@ -90,7 +95,8 @@ export class EditClientComponent implements OnInit {
 
   get f() { return this.Form.controls; }
   get bf() { return this.billForm.controls; }
-  get clientStatus() { return this.Form.get('client_status'); }
+  get companyStatus() { return this.Form.get('company_status'); }
+  get clientRole() { return this.role; }
 
   ngOnInit() {
     this.route.parent.params.subscribe(params => {
@@ -100,20 +106,32 @@ export class EditClientComponent implements OnInit {
         const customer: any = JSON.parse(res);
         this.Customer = _.clone(customer);
         this.MetaData = _.clone(customer.meta_data);
-
-        // Ajouter les valeurs dans le formulaire
+        this.role = _.isArray(customer.role) ? customer.role[0] : customer.role;
         this.Form.patchValue({
           first_name: this.Customer.first_name,
-          last_name: this.Customer.last_name,
+          last_name:  this.Customer.last_name,
           address: this.getMetaDataValue('address'),
-          phone: this.getMetaDataValue('phone'),
-          email: this.Customer.email,
-          stat: this.getMetaDataValue('stat'),
-          nif: this.getMetaDataValue('nif'),
-          rc: this.getMetaDataValue('rc'),
-          cif: this.getMetaDataValue('cif'),
-          client_status: this.getMetaDataValue('client_status')
+          phone:   this.getMetaDataValue('phone'),
+          email:   this.Customer.email,
         });
+        // Ajouter les valeurs dans le formulaire
+        if (this.role === 'fz-company') {
+          const companyStatus: string = this.getMetaDataValue('company_status');
+          this.Form.patchValue({
+            stat: this.getMetaDataValue('stat'),
+            nif: this.getMetaDataValue('nif'),
+            rc:  this.getMetaDataValue('rc'),
+            cif: this.getMetaDataValue('cif'),
+            company_status: companyStatus
+          });
+        }
+
+        if (this.role === 'fz-particular') {
+          this.Form.patchValue({
+            cin: this.getMetaDataValue('cin'),
+            date_cin: this.getMetaDataValue('date_cin'),
+          });
+        }
 
         const role = this.getMetaDataValue('role_office');
         this.roleOffice = _.isNull(role) ? 0 : parseInt(role, 10);
@@ -122,6 +140,7 @@ export class EditClientComponent implements OnInit {
         this.shipForm.patchValue(this.Customer.shipping);
 
         this.responsible = this.getMetaDataValue('responsible');
+        this.cd.detectChanges();
         Helpers.setLoading(false);
       });
     });
@@ -135,8 +154,13 @@ export class EditClientComponent implements OnInit {
   onSubmit() {
     if (this.Form.valid && this.billForm.valid && this.shipForm.valid) {
       const Value: any = this.Form.value;
+
+      if (Value.company_status === 'pending') {
+        Swal.fire('Avertissement', "Vous n'avez pas encore definie le client en professionnel ou revendeur", 'warning');
+        return false;
+      }
       
-      const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'client_status'];
+      const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'company_status'];
       this.MetaData = _.map(this.Customer.meta_data, (meta) => {
         if (meta.key === 'address') meta.value = Value.address;
         if (meta.key === 'phone') meta.value = Value.phone;
@@ -144,7 +168,7 @@ export class EditClientComponent implements OnInit {
         if (meta.key === 'nif') meta.value = Value.nif;
         if (meta.key === 'rc') meta.value = Value.rc;
         if (meta.key === 'cif') meta.value = Value.cif;
-        if (meta.key === 'client_status') meta.value = Value.client_status;
+        if (meta.key === 'company_status') meta.value = Value.company_status;
 
         return meta;
       });
@@ -171,13 +195,16 @@ export class EditClientComponent implements OnInit {
       data.billing.last_name = _.isEmpty(billing.last_name) ? Value.last_name : billing.last_name;
 
       Helpers.setLoading(true);
+
+      // Mettre à jour le client
       this.Woocommerce.put(`customers/${this.customerID}`, data, (err, data, res) => {
         const response: any = JSON.parse(res);
+
         if (!_.isUndefined(response.code)) {
           Swal.fire('Désolé', response.message, 'error');
           return false;
         }
-
+        
         const responsible: any = this.getMetaDataValue("responsible");
         if (_.isNull(responsible) || _.isEmpty(responsible)) {
           Swal.fire('Succès', "Information mise à jour aves succès. Veuillez ajouter une commercial pour ce client.", 'info')

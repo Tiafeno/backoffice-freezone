@@ -2,8 +2,6 @@ import {
   Component,
   OnInit,
   Input,
-  OnChanges,
-  SimpleChanges,
   EventEmitter,
   Output,
   ChangeDetectorRef
@@ -20,6 +18,7 @@ import Swal from 'sweetalert2';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as moment from 'moment';
 import { FzSecurityService } from '../../../_services/fz-security.service';
+import { FzServicesService } from '../../../_services/fz-services.service';
 
 declare var $: any;
 
@@ -28,7 +27,7 @@ declare var $: any;
   templateUrl: './edit-article.component.html',
   styleUrls: ['./edit-article.component.css']
 })
-export class EditArticleComponent implements OnInit, OnChanges {
+export class EditArticleComponent implements OnInit {
   public ID = 0;
   private WP: any;
   public Form: FormGroup;
@@ -40,13 +39,29 @@ export class EditArticleComponent implements OnInit, OnChanges {
   public dateReview: string;
   public dateReviewFromNow: string;
   public canEdit = true;
-  private sellerPrice: number = 0.85;
-  @Input() Article: any;
+
+  private _article: any;
+
+  @Input()
+  set article(article: any) {
+    this._article = _.clone(article);
+    if (_.isObject(article)) {
+      this.ID = article.id;
+      this.initValues();
+    }
+    this.cd.detectChanges();
+  }
+
+  get article(): any {
+    return this._article;
+  }
+
   @Output() refresh = new EventEmitter<any>();
 
   constructor(
     private http: HttpClient,
     private security: FzSecurityService,
+    private services: FzServicesService,
     private apiWP: ApiWordpressService,
     private cd: ChangeDetectorRef
   ) {
@@ -55,12 +70,15 @@ export class EditArticleComponent implements OnInit, OnChanges {
       title: new FormControl('', Validators.required),
       price: new FormControl({ value: 0, disabled: !this.canEdit }, Validators.required),
       priceDealer: new FormControl({ value: 0, disabled: false }, Validators.required),
+      pricePro: new FormControl({ value: '', disabled: false }),
+      priceParticular: new FormControl({ value: '', disabled: false }),
       marge: new FormControl({ value: 0 }, Validators.required),
       margeDealer: new FormControl({ value: 0 }, Validators.required),
+      margeParticular: new FormControl({ value: 0 }, Validators.required),
       product: new FormControl({ value: null, disabled: true }, Validators.required),
       user_id: new FormControl(null, Validators.required),
       stock: new FormControl({ value: null, disabled: !this.canEdit }, Validators.required),
-      priceUf: new FormControl({ value: '', disabled: false })
+
     });
     this.WP = this.apiWP.getWPAPI();
   }
@@ -78,21 +96,31 @@ export class EditArticleComponent implements OnInit, OnChanges {
 
   onChangeMarge(newValue) {
     const formValue: any = this.Form.value;
-    const currentPriceSeller : number  = Math.round(parseInt(formValue.price, 10) / this.sellerPrice);
+    const currentPrice: number = parseInt(formValue.price, 10);
     if (formValue.price) {
-      const per_price: number = currentPriceSeller * parseInt(newValue, 10) / 100;
-      const priceUf: number = per_price + parseInt(formValue.price, 10);
-      this.Form.patchValue({ priceUf: Math.round(priceUf) });
+      const _pricePro: number = this.services.getBenefit(currentPrice, newValue);
+      this.Form.patchValue({ pricePro: _pricePro });
+      this.cd.detectChanges();
     }
   }
 
   onChangeMargeDealer(newValue) {
     const formValue: any = this.Form.value;
-    const currentPriceSeller : number  = Math.round(parseInt(formValue.price, 10) / this.sellerPrice);
+    const currentPrice: number = parseInt(formValue.price, 10);
     if (formValue.price) {
-      const per_price: number = currentPriceSeller * parseInt(newValue, 10) / 100;
-      const priceR: number = per_price + parseInt(formValue.price, 10);
-      this.Form.patchValue({ priceDealer: Math.round(priceR) });
+      const priceR: number = this.services.getBenefit(currentPrice, newValue);
+      this.Form.patchValue({ priceDealer: priceR });
+      this.cd.detectChanges();
+    }
+  }
+
+  onChangeMargeParticular(newValue) {
+    const formValue: any = this.Form.value;
+    const currentPrice: number = parseInt(formValue.price, 10);
+    if (formValue.price) {
+      const _priceParticular: number = this.services.getBenefit(currentPrice, newValue);
+      this.Form.patchValue({ priceParticular: _priceParticular });
+      this.cd.detectChanges();
     }
   }
 
@@ -102,22 +130,25 @@ export class EditArticleComponent implements OnInit, OnChanges {
    */
   onChangePrice(newValue) {
     const formValue: any = this.Form.value;
-    const currentPriceSeller: number = Math.round(parseInt(newValue, 10) / this.sellerPrice);
+    const currentPrice: number = parseInt(newValue, 10);
     if (formValue.price) {
 
-      const per_price_uf: number =  currentPriceSeller * parseInt(formValue.marge, 10) / 100;
-      const priceUf: number = per_price_uf + parseInt(newValue, 10);
+      const pricePro: number = this.services.getBenefit(currentPrice, formValue.marge);
+      const priceR: number = this.services.getBenefit(currentPrice, formValue.margeDealer);
+      const priceParticular: number = this.services.getBenefit(currentPrice, formValue.margeParticular);
 
-      const per_price_r: number =  currentPriceSeller * parseInt(formValue.margeDealer, 10) / 100;
-      const priceR: number = per_price_r + parseInt(newValue, 10);
-
-      this.Form.patchValue({ priceUf: Math.round(priceUf), priceDealer: Math.round(priceR) });
+      this.Form.patchValue({
+        pricePro: pricePro,
+        priceDealer: priceR,
+        priceParticular: priceParticular
+      });
+      this.cd.detectChanges();
     }
   }
 
 
   loadPost(type: string, id?: number): Observable<any> {
-    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/${type}?include=${id}&status=publish`;
+    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/${type}?include=${id}&status=any`;
     const results = this.http.get<any>(URL);
     results.subscribe(resp => { }, error => {
       if (error instanceof HttpErrorResponse) {
@@ -132,7 +163,7 @@ export class EditArticleComponent implements OnInit, OnChanges {
   loadSuppliers(): Observable<any> {
     const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/users?roles=fz-supplier`;
     const postCache = this.postResponseCache.get(URL);
-    if (postCache) { return of(postCache);}
+    if (postCache) { return of(postCache); }
     const response = this.http.get<any>(URL);
     response.subscribe(suppliers => this.postResponseCache.set(URL, suppliers));
 
@@ -141,16 +172,6 @@ export class EditArticleComponent implements OnInit, OnChanges {
 
   get f() {
     return this.Form.controls;
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (!_.isUndefined(changes.Article.currentValue) && !_.isEmpty(changes.Article.currentValue)) {
-      const cV: any = changes.Article.currentValue;
-      this.ID = _.isUndefined(cV.id) ? (_.isUndefined(cV.ID) ? 0 : cV.ID) : cV.id;
-      if (this.ID) {
-        this.initValues();
-      }
-    }
   }
 
   add_notice(msg: string, classes?: string) {
@@ -179,9 +200,9 @@ export class EditArticleComponent implements OnInit, OnChanges {
     this.WP.fz_product().id(this.ID).update({
       title: Values.title,
       price: Values.price,
-      price_dealer: Values.priceDealer,
-      marge: Values.marge,
+      marge: Values.marge, // Professional marge
       marge_dealer: Values.margeDealer,
+      marge_particular: Values.margeParticular,
       total_sales: parseInt(Values.stock, 10),
       date_review: moment().format('YYYY-MM-DD HH:mm:ss')
     }).then(() => {
@@ -199,40 +220,39 @@ export class EditArticleComponent implements OnInit, OnChanges {
     }
     Helpers.setLoading(true);
     this.notice = null;
-    const ObsProduct: Observable<any> = this.loadPost('product', parseInt(this.Article.product_id, 10));
+    const ObsProduct: Observable<any> = this.loadPost('product', parseInt(this._article.product_id, 10));
     const ObsSuppliers: Observable<any> = this.loadSuppliers();
     const Zip = Observable.zip(ObsProduct, ObsSuppliers);
     Zip.subscribe(results => {
       this.Products = results[0];
       this.Suppliers = results[1];
-      const currentSupplierEdit = _.find(this.Suppliers, { id: this.Article.user_id });
+      const currentSupplierEdit = _.find(this.Suppliers, { id: this._article.user_id });
       this.supplierReference = currentSupplierEdit.reference;
       this.cd.detectChanges();
 
-      const price: number = parseInt(this.Article.price, 10);
-
-      const per_price: number = (price * parseInt(this.Article.marge, 10)) / 100;
-      const priceUf: number = per_price + price;
-
-      const per_price_dealer : number = (price * parseInt(this.Article.marge_dealer, 10)) / 100;
-      const priceDealer: number = per_price_dealer + price;
+      const price: number = parseInt(this._article.price, 10);
+      const pricePro: number = this.services.getBenefit(price, this._article.marge);
+      const priceDealer: number = this.services.getBenefit(price, this._article.marge_dealer);
+      const priceParticular: number = this.services.getBenefit(price, this._article.marge_particular);
 
       this.Form.patchValue({
-        title: this.Article.title.rendered,
-        price: this.Article.price,
+        title: this._article.title.rendered,
+        price: this._article.price,
         priceDealer: Math.round(priceDealer),
-        marge: this.Article.marge,
-        margeDealer: this.Article.marge_dealer,
+        pricePro: Math.round(pricePro),
+        priceParticular: Math.round(priceParticular),
+        marge: this._article.marge,
+        margeDealer: this._article.marge_dealer,
+        margeParticular: this._article.marge_particular,
         product: this.Products[0].title.rendered,
-        user_id: this.Article.user_id,
-        stock: this.Article.total_sales,
-        priceUf: Math.round(priceUf)
+        user_id: this._article.user_id,
+        stock: this._article.total_sales
       } as any);
 
       this.Form.controls.user_id.disable();
 
-      this.dateReview = moment(this.Article.date_review).format('LLL');
-      this.dateReviewFromNow = moment(this.Article.date_review).fromNow();
+      this.dateReview = moment(this._article.date_review).format('LLL');
+      this.dateReviewFromNow = moment(this._article.date_review).fromNow();
 
       this.cd.detectChanges();
     }, error => {

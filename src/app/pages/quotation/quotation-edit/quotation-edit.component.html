@@ -2,12 +2,12 @@
   <div class="flexbox-b mb-5 mt-5">
     <span class="mr-4 static-badge badge-pink"><i class="la la-shopping-cart font-36"></i></span>
     <div>
-      <h5 class="font-strong">Devis #{{ID}}</h5>
+      <h5 class="font-strong">Demande #{{ID}}</h5>
       <div class="text-light" *ngIf="Author">Par {{Author.nickname}}, {{__ORDER__.date_created}}</div>
     </div>
   </div>
 </div>
-<!-- Affiche les produits dans le devis -->
+<!-- Affiche les produits dans la demande -->
 <div class="ibox-body">
   <div class="">
     <table class="table table-hover" id="quotation-edit-table">
@@ -17,7 +17,7 @@
           <th>QTÉ</th>
           <th>ÉTAT</th>
           <th>FOURNISSEUR</th>
-          <th class="pr-4" style="width:91px;">#</th>
+          <th class="pr-4" style="width:91px;"></th>
         </tr>
       </thead>
     </table>
@@ -26,7 +26,7 @@
 <div class="ibox-footer">
   <div>
     <div class="btn-group mb-3">
-      <button class="btn btn-info mr-3" data-toggle="modal" data-target="#quotation-view-modal">Afficher le devis</button>
+      <button class="btn btn-info mr-3" data-toggle="modal" data-target="#quotation-view-modal">Afficher la demande</button>
       <a class="btn btn-secondary" [routerLink]="['/dashboard']" routerLinkActive="active" >Retour</a>
     </div>
   </div>
@@ -54,9 +54,9 @@
                 <th>REFERENCE</th>
                 <th>QTÉ</th>
                 <th>ÉTAT</th>
-                <th>PRIX UNITAIRE</th>
+                <th>PRIX</th>
                 <th>ARTICLE</th>
-                <th class="pr-4" style="width:91px;">#</th>
+                <th class="pr-4" style="width:91px;"></th>
               </tr>
             </thead>
           </table>
@@ -92,6 +92,6 @@
 
 <div class="modal fade" id="edit-article-supplier-modal">
   <div class="modal-dialog" role="document">
-    <app-edit-article [Article]="Editor" (refresh)="closeSupplierView()"></app-edit-article>
+    <app-edit-article [article]="Editor" (refresh)="closeSupplierView()"></app-edit-article>
   </div>
 </div>

@@ -11,10 +11,6 @@
       <div class="ibox ibox-fullheight">
         <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
           <p class="lead mb-0 pb-0 font-bold">Modification</p>
-          <div class="badge mb-4"
-            [ngClass]="{'badge-blue': roleOffice === 1 || roleOffice === 2, 'badge-pink': roleOffice === 0}">
-            {{roleOffice === 0 ? 'En attente' : (roleOffice === 1 ? 'Acheteur' : 'Revendeur')}}
-          </div>
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
@@ -69,27 +65,27 @@
           <div class="row">
             <div class="col-md-12">
               <div class="form-group mb-4">
-                <label class="font-light">Statut du client</label>
-                <ng-select name="client_status" placeholder="Veuillez selectionner" formControlName="client_status"
+                <label class="font-light">Professionnel ou Revendeur ?</label>
+                <ng-select name="company_status" placeholder="Veuillez selectionner" formControlName="company_status"
                   bindLabel="label" bindValue="value" [hideSelected]="false" [multiple]="false" [items]="Status"
                   required>
                   <ng-template ng-option-tmp let-item="item">
                     {{item.label}}
                   </ng-template>
                 </ng-select>
-                <div *ngIf="f.client_status.errors && f.client_status.dirty">
+                <div *ngIf="f.company_status.errors && f.company_status.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>
               </div>
             </div>
           </div>
 
-          <div *ngIf="clientStatus.value === 'company'">
+          <div *ngIf="clientRole === 'fz-company'">
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">STAT</label>
-                  <input class="form-control" autocomplete="off" formControlName="stat" id="stat" name="stat"
+                  <input class="form-control" autocomplete="off" formControlName="stat" id="stat"
                     type="text" placeholder="">
                 </div>
               </div>
@@ -97,7 +93,7 @@
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">NIF</label>
-                  <input class="form-control" autocomplete="off" formControlName="nif" id="nif" name="nif" type="text"
+                  <input class="form-control" autocomplete="off" formControlName="nif" id="nif" type="text"
                     placeholder="">
                 </div>
               </div>
@@ -107,7 +103,7 @@
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">RC</label>
-                  <input class="form-control" autocomplete="off" formControlName="rc" id="rc" name="rc" type="text"
+                  <input class="form-control" autocomplete="off" formControlName="rc" id="rc" type="text"
                     placeholder="">
                 </div>
               </div>
@@ -115,12 +111,33 @@
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">CIF</label>
-                  <input class="form-control" autocomplete="off" formControlName="cif" id="cif" name="cif" type="text"
+                  <input class="form-control" autocomplete="off" formControlName="cif" id="cif" type="text"
                     placeholder="">
                 </div>
               </div>
             </div>
           </div>
+
+          <div *ngIf="clientRole === 'fz-particular'">
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="form-group mb-4">
+                    <label class="font-light">CIN</label>
+                    <input class="form-control" autocomplete="off" formControlName="cin" id="cin"
+                      type="text" placeholder="">
+                  </div>
+                </div>
+  
+                <div class="col-sm-6">
+                  <div class="form-group mb-4">
+                    <label class="font-light">Date de délivrance</label>
+                    <input class="form-control" autocomplete="off" formControlName="date_cin" id="date_cin" type="text"
+                      placeholder="">
+                  </div>
+                </div>
+              </div>
+
+            </div>
 
           <!--- Billing & Shipping form here... -->
           <div class="row mt-4 mb-2">

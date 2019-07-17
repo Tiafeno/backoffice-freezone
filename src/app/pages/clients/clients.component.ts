@@ -97,17 +97,18 @@ export class ClientsComponent implements OnInit {
           }
         },
         {
-          data: 'meta_data', render: (data, type, row) => {
-            const roleOffice: any = _.find(data, {key : 'role_office'});
-            if (_.isUndefined(roleOffice)) return 'En attente';
-            const status: string = roleOffice.value == 0 ? 'En attente' : (roleOffice.value == 1 ? 'Acheteur' : 'Revendeur');
-            const style: string = status === 'En attente' ? 'pink' : (status === 'Acheteur' ? 'blue' : 'primary');
+          data: 'role', render: (data, type, row) => {
+            // const companyStatus: any = _.find(data, {key : 'company_status'});
+            // if (_.isUndefined(companyStatus)) return 'N/A';
+
+            // const status: string = companyStatus.value == 'dealer' ? 'Revendeur' : (companyStatus.value == 'professional' ? 'Professionnel' : 'N/A');
+            // const style: string = status === 'N/A' ? 'default' : (status === 'dealer' ? 'blue' : 'primary');
+            // return `<span class="badge badge-${style} switch-type uppercase" style="cursor: pointer;">${status}</span>`;
+
+            const role: any = _.isArray(data) ? data[0] : data;
+            const status: string = role === 'fz-company' ? 'Entreprise' : 'Particulier';
+            const style: string = role === 'fz-company' ? 'blue' : 'success';
             return `<span class="badge badge-${style} switch-type uppercase" style="cursor: pointer;">${status}</span>`;
-          }
-        },
-        {
-          data: 'reference', render: (data) => {
-            return _.isEmpty(data) ? 'Non renseigner' : data;
           }
         },
         {
@@ -125,8 +126,8 @@ export class ClientsComponent implements OnInit {
                         <i class="fab-icon-active la la-close"></i>
                      </button>
                      <ul class="fab-menu">
-                     <li><button class="btn btn-pink btn-icon-only btn-circle btn-air delete-customer"><i class="la la-trash"></i></button></li>
-                        <li><button class="btn btn-primary btn-icon-only btn-circle btn-air edit-customer"><i class="la la-edit"></i></button></li>
+                      <li><button class="btn btn-primary btn-icon-only btn-circle btn-air edit-customer"><i class="la la-edit"></i></button></li>
+                      <li><button class="btn btn-pink btn-icon-only btn-circle btn-air delete-customer"><i class="la la-trash"></i></button></li>
                      </ul>
                   </div>`;
           }
@@ -158,7 +159,7 @@ export class ClientsComponent implements OnInit {
           }
         });
 
-        // Acheteur ou Revendeur
+        // Professionnel ou Revendeur
         $('#clients-table tbody').on('click', '.switch-type', e => {
           e.preventDefault();
           if (this.Security.hasAccess('s11', true)) {

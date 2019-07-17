@@ -61,6 +61,9 @@ import { FaqPageComponent } from './pages/faq/faq-page/faq-page.component';
 import { ResponsibleComponent } from './components/responsible/responsible.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { UserManagerComponent } from './components/user-manager/user-manager.component';
+import { SavEditComponent } from './pages/sav/sav-edit/sav-edit.component';
+import { SavMailComponent } from './pages/sav/sav-mail/sav-mail.component';
+import { QuotationTreatyComponent } from './pages/quotation/quotation-treaty/quotation-treaty.component';
 
 
 const routes: Routes = [
@@ -96,7 +99,21 @@ const routes: Routes = [
             },
             {
                 path: 'sav',
-                component: SavComponent
+                children: [
+                    { path: '', redirectTo: 'lists', pathMatch: 'full' },
+                    { path: 'lists', component: SavComponent },
+                    { 
+                        path: ':id',
+                        children: [
+                            { path: '', redirectTo: 'edit', pathMatch: 'full' },
+                            { path: 'edit', component: SavEditComponent },
+                            { 
+                                path: 'mail',
+                                component: SavMailComponent
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 path: 'faq',
@@ -258,6 +275,9 @@ const routes: Routes = [
         ResponsibleComponent,
         SettingsComponent,
         UserManagerComponent,
+        SavEditComponent,
+        SavMailComponent,
+        QuotationTreatyComponent,
         MomentsPipe
     ],
     imports: [

@@ -20,7 +20,7 @@ export class FzServicesService {
   ) {
     this.Woocommerce = this.apiWc.getWoocommerce();
     this.Wordpress = this.apiWp.getWPAPI();
-   }
+  }
 
   public getCategories(): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -30,15 +30,6 @@ export class FzServicesService {
           reject(response.message);
         }
         resolve(response);
-      })
-    })
-  }
-
-  public filterProducts(item: string = ''): Promise<any> {
-    return new Promise(resolve => {
-      if (_.isEmpty(item)) resolve([]);
-      this.Woocommerce.get(`products?search=${item}`, (err, data, res) => {
-        resolve(JSON.parse(res));
       })
     })
   }
@@ -61,6 +52,43 @@ export class FzServicesService {
         resolve(users);
       })
     })
+  }
+
+  public filterProducts(item: string = ''): Promise<any> {
+    return new Promise(resolve => {
+      if (_.isEmpty(item)) resolve([]);
+      this.Woocommerce.get(`products?search=${item}`, (err, data, res) => {
+        resolve(JSON.parse(res));
+      });
+    });
+  }
+
+  public getBenefit(price: any, marge: any): number {
+    const benefit: number = (parseInt(price) * parseInt(marge)) / 100;
+    const priceDealer: number = benefit + parseInt(price);
+    return this.manageAlgorithm(priceDealer); // @return number
+  }
+
+  public manageAlgorithm(_value: number): number {
+    if (_.isNumber(_value)) {
+      const value = Math.round(_value);
+      const valueS = value.toString();
+      let position: number = (valueS.length - 1) - 1;
+      if (valueS.charAt(position) !== '0' || valueS.charAt(position + 1) !== '0') {
+        let $value = this.setCharAt(valueS, position, 0);
+        $value = this.setCharAt($value, position + 1, 0)
+
+        return parseInt($value) + 100;
+      } else {
+        return value;
+      }
+    }
+    return 0;
+  }
+
+  public setCharAt(str: string, index: number, chr: any) {
+    if (index > str.length - 1) return str;
+    return str.substr(0, index) + chr + str.substr(index + 1);
   }
 
   loadCategories(): Observable<any[]> {

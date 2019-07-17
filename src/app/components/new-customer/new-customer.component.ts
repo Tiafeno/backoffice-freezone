@@ -34,7 +34,7 @@ export class NewCustomerComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     Helpers.setLoading(true);
-    this.WPAPI.users().roles('fz-particular').context('edit').then(resp => {
+    this.WPAPI.users().roles('fz-particular,fz-company').context('edit').then(resp => {
       if (_.isArray(resp)) {
         this.users = _.clone(resp);
       }

@@ -10,12 +10,7 @@
     <div class="">
         <div class="ibox-body">
             <div class="row mb-5 pb-3">
-                <div class="col-6">
-                    <h5 class="font-strong mb-3">FACTURE DE</h5>
-                    <h5 class="font-strong text-success mb-3">Freezone</h5>
-                </div>
                 <div class="col-6 text-right">
-                    <h5 class="font-strong mb-3">FACTURE À</h5>
                     <h5 class="font-strong text-success mb-3">{{billingAdress.first_name}} {{billingAdress.last_name}}</h5>
                     <div class="text-light">{{billingAdress.address_1}}, {{billingAdress.postcode}} {{billingAdress.city}}.</div>
                     <div class="text-light">{{billingAdress.email}}</div>
@@ -102,6 +97,6 @@
 </div>
 <div class="modal-footer justify-content-between bg-primary-50">
   <div>
-    <button class="btn btn-primary btn-rounded mr-3" [disabled]="order.status === 'completed'" (click)="onSendMail()">Envoyer par email</button>
+    <button class="btn btn-primary btn-rounded mr-3" [disabled]="order && order.status === 'completed'" (click)="onSendMail()">Envoyer par email</button>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import * as _ from 'lodash';
 import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
@@ -9,45 +9,48 @@ declare var $:any;
   templateUrl: './status-quotation-switcher.component.html',
   styleUrls: ['./status-quotation-switcher.component.css']
 })
-export class StatusQuotationSwitcherComponent implements OnInit, OnChanges {
+export class StatusQuotationSwitcherComponent implements OnInit {
   public Form: FormGroup;
-  public Order: any;
+  public _quotation: any = '';
   private WC: any;
   public loading: boolean = false;
   public warning: boolean = false;
-  @Input() quotation;
+
+  @Input() 
+  set quotation(val: any) {
+    this._quotation = _.clone(val);
+    if (_.isObject(val)) {
+      $('#quotation-switcher-modal').modal('show');
+      this.Form.patchValue({ status: parseInt(val.position) });
+    }
+    this.cd.detectChanges();
+  }
+
+  get quotation(): any { return this._quotation; }
 
   constructor(
-    private apiWC: ApiWoocommerceService
+    private apiWC: ApiWoocommerceService,
+    private cd: ChangeDetectorRef
   ) {
+    this.WC = this.apiWC.getWoocommerce();
     this.Form = new FormGroup({
       status: new FormControl('', Validators.required)
     });
-    this.WC = this.apiWC.getWoocommerce();
    }
 
   ngOnInit() {
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (_.isObject(changes.quotation.currentValue)) {
-      let currentvalue: any = changes.quotation.currentValue;
-      this.Order = _.clone(currentvalue);
-      this.Form.patchValue({ status: currentvalue.position });
-      $('#quotation-switcher-modal').modal('show');
-    }
+    
   }
 
   onUpdate(): void | boolean {
-    if (this.Form.invalid || !this.Form.dirty)  { 
+    if (this.Form.invalid || !this.Form.dirty || _.isEmpty(this._quotation))  { 
       this.warning = true;
       return false;
     }
     this.warning = false;
     let Value: any = this.Form.value;
     this.loading = true;
-    this.WC.put(`orders/${this.Order.id}`, {position: Value.status}, (err, data, res) => {
-      let response: any = JSON.parse(res);
+    this.WC.put(`orders/${this._quotation.id}`, {position: Value.status}, (err, data, res) => {
       this.loading = false;
       $('#quotation-switcher-modal').modal('hide');
     })

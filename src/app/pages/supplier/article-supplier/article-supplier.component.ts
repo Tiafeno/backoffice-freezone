@@ -87,7 +87,6 @@ export class ArticleSupplierComponent implements OnInit {
             Helpers.setLoading(false);
          });
       }
-
    }
 
    onChangeStatus(article: any) {
@@ -120,7 +119,8 @@ export class ArticleSupplierComponent implements OnInit {
       this.Query.param('status', _.isEmpty(status) ? 'any' : status);
 
       if (!_.isUndefined(eventForm.supplier)) {
-         this.Query.param('filter[meta_key]', 'user_id')
+         this.Query
+            .param('filter[meta_key]', 'user_id')
             .param('filter[meta_value]', eventForm.supplier);
       }
 
@@ -166,7 +166,6 @@ export class ArticleSupplierComponent implements OnInit {
                   });
                })
             });
-
       }
    }
 
@@ -215,12 +214,17 @@ export class ArticleSupplierComponent implements OnInit {
       }
       this.Products = _.isEmpty(fzProducts) ? [] : fzProducts;
       this.Products = _.map(this.Products, product => {
+         const _marge = parseInt(product.marge, 10);
+         const _margeDealer = parseInt(product.marge_dealer, 10);
          const price = parseInt(product.price, 10);
-         const priceMarge = (price * parseInt(product.marge, 10)) / 100;
-         product.priceUF = Math.round(priceMarge + price);
-         product.marge = this.adminAccess ? product.marge + '%' : "Restreint";
-         product.marge_dealer = this.adminAccess ? product.marge_dealer + '%' : "Restreint";
-         product.price = this.adminAccess ? parseInt(product.price, 10) : 'Restreint';
+         const priceMargeDealer = (price * _margeDealer) / 100;
+         const priceMarge = (price * _marge) / 100;
+
+         product.priceUF = Math.round(price + priceMarge);
+         product.price_dealer = Math.round(price + priceMargeDealer);
+         product.marge = this.adminAccess ? _marge + '%' : "Restreint";
+         product.price = this.adminAccess ? price : 'Restreint';
+         product.marge_dealer = this.adminAccess ? _margeDealer + '%' : "Restreint";
 
          return product;
       });
@@ -238,9 +242,7 @@ export class ArticleSupplierComponent implements OnInit {
          afterPageOnClick: (data, pagination) => {
             this.onChangePage(parseInt(pagination, 10));
          },
-         afterRender: (data, pagination) => {
-
-         }
+         afterRender: (data, pagination) => {}
       });
       this.cd.detectChanges();
       this.onLoadLists();

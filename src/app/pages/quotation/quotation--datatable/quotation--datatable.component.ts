@@ -10,6 +10,7 @@ import { ApiWoocommerceService } from '../../../_services/api-woocommerce.servic
 import { StatusQuotationSwitcherComponent } from '../../../components/status-quotation-switcher/status-quotation-switcher.component';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { FzSecurityService } from '../../../_services/fz-security.service';
+import { QuotationTreatyComponent } from '../quotation-treaty/quotation-treaty.component';
 declare var $: any;
 @Component({
   selector: 'app-quotation--datatable',
@@ -25,6 +26,11 @@ export class QuotationDatatableComponent implements OnInit {
   public WCAPI: any;
 
   @ViewChild(StatusQuotationSwitcherComponent) QuotationSwitcher: StatusQuotationSwitcherComponent;
+  @ViewChild(QuotationTreatyComponent) QuotationTreaty: QuotationTreatyComponent;
+
+  setQtSelected(order: any) {
+    this.qtSelected = _.clone(order);
+  }
 
   constructor(
     private router: Router,
@@ -40,6 +46,7 @@ export class QuotationDatatableComponent implements OnInit {
 
   public reload(): void {
     this.Table.ajax.reload(null, false);
+    this.QuotationTreaty.reload();
   }
 
   onChangePosition($event): void | boolean {
@@ -164,7 +171,7 @@ export class QuotationDatatableComponent implements OnInit {
         data: (d) => {
           d.columns = false;
           d.order = false;
-          d.position = this.queryPosition;
+          d.position = _.isNull(this.queryPosition) || _.isEmpty(this.queryPosition) ? [0, 2] : this.queryPosition;
         },
         beforeSend: function (xhr) {
           let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
