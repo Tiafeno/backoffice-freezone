@@ -64,6 +64,7 @@ import { UserManagerComponent } from './components/user-manager/user-manager.com
 import { SavEditComponent } from './pages/sav/sav-edit/sav-edit.component';
 import { SavMailComponent } from './pages/sav/sav-mail/sav-mail.component';
 import { QuotationTreatyComponent } from './pages/quotation/quotation-treaty/quotation-treaty.component';
+import { ModuloReviewSuppliersComponent } from './components/modulo-review-suppliers/modulo-review-suppliers.component';
 
 
 const routes: Routes = [
@@ -278,6 +279,7 @@ const routes: Routes = [
         SavEditComponent,
         SavMailComponent,
         QuotationTreatyComponent,
+        ModuloReviewSuppliersComponent,
         MomentsPipe
     ],
     imports: [

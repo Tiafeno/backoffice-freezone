@@ -6,6 +6,13 @@
       <span class="nav-label">Tableau de board</span>
     </a>
   </li>
+
+  <li routerLinkActive="active">
+    <a [routerLink]="['/supplier', 'review']" routerLinkActive="active">
+      <i class="sidebar-item-icon ti-reload"></i>
+      Fournisseurs en attente
+    </a>
+  </li>
   <li routerLinkActive="active">
     <a href="href=&quot;javascript:;&quot;">
       <i class="sidebar-item-icon ti-layout-tab-window"></i>
@@ -14,7 +21,6 @@
     </a>
     <ul class="nav-2-level collapse" routerLinkActive="in">
       <li><a routerLink="/supplier/lists" routerLinkActive="active">Tous les fournisseurs</a></li>
-      <li><a [routerLink]="['/supplier', 'review']" routerLinkActive="active">Attente de MAJ</a></li>
       <li><a routerLink="/supplier/new" routerLinkActive="active">Ajouter</a></li>
     </ul>
   </li>

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -38,7 +38,8 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       plugins: ['lists'],
    };
    constructor(
-      private Http: HttpClient
+      private Http: HttpClient,
+      private cd: ChangeDetectorRef
    ) {
       this.Form = new FormGroup({
          subject: new FormControl('', Validators.required),
@@ -52,13 +53,9 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
 
    ngOnInit() {
       $("#send-mail-modal").on('hide.bs.modal', e => {
-         this.Form.patchValue({
-            subject: '',
-            message: '',
-            articles: [],
-            mail_logistics_cc: false,
-            mail_commercial_cc: false
-         });
+         this.Form.patchValue({message: ''});
+         this.Form.reset();
+         this.cd.detectChanges();
       });
    }
 
@@ -115,8 +112,9 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          const response: any = _.clone(resp);
          const data: any = response.data;
          this.pendingArticle = _.clone(data);
-         const reviewArticles: Array<number> = _.map(data, (item) => { return item.ID; });
+         const reviewArticles: Array<number> = _.map(data, (item) => { return item.id; });
          this.Form.patchValue({ articles: reviewArticles });
+         this.cd.detectChanges();
          $('#send-mail-modal').modal('show');
       });
    }

@@ -47,7 +47,7 @@ export class EditArticleComponent implements OnInit {
     this._article = _.clone(article);
     if (_.isObject(article)) {
       this.ID = article.id;
-      this.initValues();
+      if (!_.isEmpty(article)) this.initValues();
     }
     this.cd.detectChanges();
   }
