@@ -39,7 +39,6 @@ export class ModuloReviewSuppliersComponent implements OnInit {
     this.Wordpress.users().id(supplierId).context('edit').then(resp => {
       Helpers.setLoading(false);
       let response: any = _.clone(resp);
-      response.data = {user_email: resp.email};
       this.selectedSupplier = response;
       this.Mail.openDialog(supplierId);
       

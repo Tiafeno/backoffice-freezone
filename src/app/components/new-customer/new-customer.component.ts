@@ -28,7 +28,6 @@ export class NewCustomerComponent implements OnInit, AfterViewInit {
       $('#customer-edit-modal').modal('toggle');
       $('.modal-backdrop').remove();
       $('body').removeClass('modal-open');
-
     });
   }
 

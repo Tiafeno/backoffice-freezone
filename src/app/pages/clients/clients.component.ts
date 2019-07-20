@@ -10,6 +10,7 @@ import {TypeClientSwitcherComponent} from "../../components/type-client-switcher
 import Swal from 'sweetalert2';
 import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
 import { FzSecurityService } from '../../_services/fz-security.service';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-clients',
@@ -24,6 +25,7 @@ export class ClientsComponent implements OnInit {
   public Responsibles: Array<any> = [];
   public responsible: any = null;
   public responsibleLoading: boolean = false;
+  public FormStatus: FormGroup;
 
   @ViewChild(TypeClientSwitcherComponent) public SwitchType: TypeClientSwitcherComponent;
   constructor(
@@ -36,6 +38,10 @@ export class ClientsComponent implements OnInit {
   ) {
     this.WPAPI = this.apiWp.getWPAPI();
     this.WCAPI = this.apiWc.getWoocommerce();
+    this.FormStatus = new FormGroup({
+      status : new FormControl(0, Validators.required),
+      id: new FormControl(0, Validators.required)
+    });
   }
 
   public reload() {
@@ -54,6 +60,19 @@ export class ClientsComponent implements OnInit {
       }
       Swal.fire('Succès', "Client supprimer avec succès", 'success');
     });
+  }
+
+  public fnOnUpdateStatus() {
+    if (this.FormStatus.valid) {
+      Helpers.setLoading(true);
+      const Value: any = this.FormStatus.value;
+      this.WPAPI.users().id(Value.id).update({disable: Value.status}).then(resp => {
+        Helpers.setLoading(false);
+        $('.modal').modal('hide');
+        Swal.fire('Succès', 'Client mis à jour avec succès', 'success');
+        this.reload();
+      }).catch(err => { Helpers.setLoading(false); });
+    }
   }
 
   ngOnInit() {
@@ -94,6 +113,15 @@ export class ClientsComponent implements OnInit {
         {
           data: 'email', render: (data, type, row) => {
             return `<a href="mailto:${data}" target="_blank">${data}</span>`;
+          }
+        },
+        {
+          data: 'meta_data', render: (data, type, row) => {
+            let meta_disable: any = _.find(data, {key: 'ja_disable_user'});
+            if (_.isUndefined(meta_disable)) return `<span class="badge badge-blue uppercase switch-status">Active</span>`;
+            let status: string = parseInt(meta_disable.value, 10) === 0 ? 'Active' : 'Désactiver';
+            let style: string = parseInt(meta_disable.value, 10) === 0 ? 'primary' : 'warning';
+            return `<span class="badge badge-${style} uppercase switch-status">${status}</span>`;
           }
         },
         {
@@ -166,6 +194,18 @@ export class ClientsComponent implements OnInit {
             const __clt: any = getElementData(e);
             this.SwitchType.fnOpen(__clt);
           }
+        });
+
+        $('#clients-table tbody').on('click', '.switch-status', e => {
+          e.preventDefault();
+          const __clt: any = getElementData(e);
+
+          let meta_disable: any = _.find(__clt.meta_data, {key: 'ja_disable_user'});
+          const editStatus = _.isUndefined(meta_disable) ? 0 : meta_disable.value;
+
+          this.FormStatus.patchValue({ status: editStatus, id: __clt.id });
+          this.cd.detectChanges();
+          $('#switch-status-modal').modal('show');
         });
       },
       ajax: {

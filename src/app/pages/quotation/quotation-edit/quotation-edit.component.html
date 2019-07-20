@@ -38,8 +38,9 @@
     <div class="modal-content" *ngIf="Item">
       <div class="modal-header px-4 py-3 bg-primary-400">
         <div>
-          <h5 class="modal-title text-white">Liste fournisseur pour</h5><small>
-            <a class="text-white" href="javascript:;">{{Item.name}}</a></small>
+          <h5 class="modal-title text-white">Liste fournisseur pour</h5>
+          <p class="mb-0"> <a class="text-white font-14" href="javascript:;"><b>{{Item.name}}</b></a></p>
+          <p class="mb-0"> <a class="text-white font-14" href="javascript:;">Quantité: <b>{{Item.quantity}}</b></a></p>
         </div>
         <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">×</span>

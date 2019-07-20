@@ -128,37 +128,28 @@
         <div class="ibox-body">
             <h5 class="font-strong mb-4">INFORMATION GENERAL DU CLIENT</h5>
             <div class="row mb-2">
-                <div class="col-6 text-muted">First Name:</div>
-                <div class="col-6">Lynn</div>
+                <div class="col-6 text-muted">Nom:</div>
+                <div class="col-6">{{Author.first_name}}</div>
             </div>
             <div class="row mb-2">
-                <div class="col-6 text-muted">Last Name:</div>
-                <div class="col-6">Weaver</div>
+                <div class="col-6 text-muted">Prénom:</div>
+                <div class="col-6">{{Author.last_name}}</div>
             </div>
             <div class="row mb-2">
-                <div class="col-6 text-muted">Age:</div>
-                <div class="col-6">26</div>
+                <div class="col-6 text-muted">Téléphone:</div>
+                <div class="col-6">{{Author.phone}}</div>
             </div>
             <div class="row mb-2">
-                <div class="col-6 text-muted">Position:</div>
-                <div class="col-6">Web Designer</div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-6 text-muted">City:</div>
-                <div class="col-6">New York, USA</div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-6 text-muted">Address:</div>
-                <div class="col-6">228 Park Ave Str.</div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-6 text-muted">Phone:</div>
-                <div class="col-6">+1-202-555-0134</div>
+                <div class="col-6 text-muted">Adresse:</div>
+                <div class="col-6">{{Author.address}}</div>
             </div>
             <div class="row mb-2">
                 <div class="col-6 text-muted">Email:</div>
-                <div class="col-6">lweaver@gmail.com</div>
+                <div class="col-6">{{Author.email}}</div>
             </div>
+        </div>
+        <div class="ibox-footer">
+          <a class="btn btn-sm btn-primary" [routerLink]="['/sav', ID, 'mail']" routerLinkActive="active" >Envoyer un mail</a>
         </div>
     </div>
   </div>

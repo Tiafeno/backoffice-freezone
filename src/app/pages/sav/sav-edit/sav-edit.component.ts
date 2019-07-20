@@ -15,6 +15,7 @@ declare var $: any;
 })
 export class SavEditComponent implements OnInit {
   public ID: number = 0;
+  public Author: any = {};
   public reference: string = '';
   public Form: FormGroup;
   private Wordpress: any;
@@ -74,6 +75,7 @@ export class SavEditComponent implements OnInit {
           Swal.fire('Désolé', "Une erreur inconnue s'est produit", 'warning');
           return;
         }
+        this.Author = _.clone(resp.auctor);
         this.reference = resp.reference;
         let args: any = {};
         (<any>Object).keys(this.Form.value).forEach(element => {

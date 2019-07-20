@@ -48,7 +48,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          mail_logistics_cc:  new FormControl(false),
          mail_commercial_cc: new FormControl(false),
       });
-      this.Fournisseur.data = {};
+      this.Fournisseur;
    }
 
    ngOnInit() {
@@ -64,6 +64,8 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          this.Fournisseur = changes.supplier.currentValue;
          // TODO: Ajouter un objet et un message par default pour le mail
       }
+
+      console.log(changes);
    }
 
    onSend() {
@@ -78,7 +80,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          Form.append('articles', Value.articles);
          Form.append('cc', _.join(ccLists, ','));
          Helpers.setLoading(true);
-         this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.ID}`, Form).subscribe(result => {
+         this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.id}`, Form).subscribe(result => {
             Helpers.setLoading(false);
             const response: any = _.clone(result);
             if (response.success) {

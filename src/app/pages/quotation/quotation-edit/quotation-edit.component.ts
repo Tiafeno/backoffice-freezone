@@ -144,6 +144,7 @@ export class QuotationEditComponent implements OnInit {
                      const el = $(e.currentTarget).parents('tr');
                      const item = this.Table.row(el).data();
                      this.Item = _.cloneDeep(item); // Contient l'item en cours de traitement
+                     console.log(this.Item);
                      Helpers.setLoading(true);
                      this.WPAPI
                         .fz_product()
@@ -198,11 +199,9 @@ export class QuotationEditComponent implements OnInit {
                                              let userId: any = data;
                                              let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
 
-                                             let dateReview: any = moment(pdt.date_review); // date limit
-                                             let dateNow: any = moment();
-                                             let dateLimit: any = moment(dateReview).subtract(-1, 'day');
-                                             let msg: string = dateLimit > dateNow ? "Traité" : "En attente";
-                                             let style: string = dateLimit > dateNow ? 'blue' : 'warning';
+                                             let dateLimit: any = moment(pdt.date_review).subtract(-1, 'days');
+                                             let msg: string = dateLimit > moment() ? "Traité" : "En attente";
+                                             let style: string = dateLimit > moment() ? 'blue' : 'warning';
                                              return `<span class="badge badge-${style}">${msg}</span>`;
                                           }
                                        }, // statut product
@@ -242,8 +241,12 @@ export class QuotationEditComponent implements OnInit {
                                              }
 
                                              let fzProduct: any = _.find(this.__FZPRODUCTS__, { user_id: row.id });
+
+                                             const dateLimit: any = moment(fzProduct.date_review).subtract(-1, 'days');
+                                             let disabled: boolean = dateLimit < moment();
+
                                              return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
-                                       value="${inputValue}" min="0" max="${fzProduct.total_sales}" 
+                                       value="${inputValue}" min="0" max="${fzProduct.total_sales}" ${disabled ? "disabled='disabled'" : ''}
                                        data-product="${fzProduct.product_id}" 
                                        data-supplier="${row.id}" 
                                        data-article="${fzProduct.id}">`;
@@ -295,13 +298,12 @@ export class QuotationEditComponent implements OnInit {
 
                                           this.objectMeta = _.reject(this.objectMeta, { article_id: elData.article });
                                           this.objectMeta.push({
-                                             supplier: elData.supplier,
-                                             get: parseInt(element.val()),
-                                             product_id: parseInt(elData.product),
+                                             supplier: parseInt(elData.supplier, 10),
+                                             get: parseInt(element.val(), 10),
+                                             product_id: parseInt(elData.product, 10),
                                              article_id: elData.article
                                           });
 
-                                          console.log(this.objectMeta);
                                        });
 
                                        this.cd.detectChanges();
@@ -346,10 +348,10 @@ export class QuotationEditComponent implements OnInit {
       this.loading = true;
       let lineItems: Array<any>;
       lineItems = _.map(this.__ITEMS__, (item) => {
-         let currentItem: any = _.cloneDeep(item); // product
+         const currentItem: any = _.cloneDeep(item); // product
          let currentMetaData: Array<any> = _.cloneDeep(currentItem.meta_data); // Product meta
          // Rechercher les modifications pour ce produit
-         let metas: any = _.filter(this.objectMeta, { product_id: currentItem.product_id });
+         const metas: any = _.filter(this.objectMeta, { product_id: currentItem.product_id });
          if (_.isEmpty(metas)) return item;
 
          currentMetaData = _.map(currentMetaData, meta => {
@@ -364,12 +366,11 @@ export class QuotationEditComponent implements OnInit {
 
                if (!meta.value) return meta;
                // Verifier si l'article est en review
-               let aIds: Array<any> = _.map(metas, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
-               let collectFZProducts: Array<any> = _.filter(this.__FZPRODUCTS__, (fz) => { return _.indexOf(aIds, fz.id) >= 0; });
-               let cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {
-                  let dateReview: any = moment(prd.date_review); // date limit
-                  let dateNow: any = moment();
-                  let dateLimit: any = moment(dateReview).subtract(-1, 'day');
+               const aIds: Array<any> = _.map(metas, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
+               const collectFZProducts: Array<any> = _.filter(this.__FZPRODUCTS__, (fz) => { return _.indexOf(aIds, fz.id) >= 0; });
+               const cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {
+                  const dateNow: any = moment();
+                  let dateLimit: any = moment(prd.date_review).subtract(-1, 'days');
 
                   return dateLimit > dateNow; // à jour
                });
@@ -381,13 +382,13 @@ export class QuotationEditComponent implements OnInit {
             }
             return meta;
          });
-         let filterMetaSuppliers = _.filter(currentMetaData, { key: 'suppliers' } as any);
+         const filterMetaSuppliers = _.filter(currentMetaData, { key: 'suppliers' } as any);
          if (_.isEmpty(filterMetaSuppliers)) currentMetaData.push({ key: 'suppliers', value: JSON.stringify(metas) });
          currentItem.meta_data = _.clone(currentMetaData);
          return currentItem;
       });
-      let data: any = { line_items: lineItems };
-      this.WCAPI.put(`orders/${this.ID}`, data, (err, data, res) => {
+      const data: any = { line_items: lineItems };
+      this.WCAPI.put(`orders/${this.ID}`, data, (err, d, res) => {
          let response: any = JSON.parse(res);
          this.__ITEMS__ = response.line_items.line_items;
          this.Table.clear().draw();

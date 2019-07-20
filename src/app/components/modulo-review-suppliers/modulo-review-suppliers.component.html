@@ -9,9 +9,9 @@
         <div class="media-body d-flex align-items-center">
           <div class="flex-1">
             <div class="media-heading">{{supplier.reference}} </div>
-            <small class="text-muted">{{supplier.data.user_email}}</small>
+            <small class="text-muted">{{supplier.email}}</small>
           </div>
-          <button class="btn btn-sm btn-outline-secondary btn-rounded" (click)="onMail(supplier.ID)">Envoyer un mail</button>
+          <button class="btn btn-sm btn-outline-secondary btn-rounded" (click)="onMail(supplier.id)">Envoyer un mail</button>
         </div>
       </li>
     </ul>

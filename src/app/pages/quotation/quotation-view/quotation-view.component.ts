@@ -58,6 +58,12 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     }
 
     public onSendMail(): void | boolean {
+        // Ne pas envoyer le devis si le client est toujours en attente
+        if (!_.isEmpty(this.ownerClient.company_name) && this.ownerClient.company_status === "pending") {
+            Swal.fire('Désolé', "Le client est en attente de confirmation", "warning");
+            return false;
+        }
+        // ne pas envoyer le mail s'il y a encore un founisseur en attente
         if (this.error) {
             Swal.fire("Désolé", "Vous ne pouvez pas envoyer par mail ce devis pour l'instant. Veuillez bien vérifier l'articles des fournisseurs. Merci", "error");
             return false;
@@ -115,7 +121,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         // Vérifier si la date de revision est périmé
         _.map(ARTICLES, (a) => {
             let dateReview: any = moment(a.date_review);
-            let dateLimit: any = moment().subtract(2, 'day');
+            let dateLimit: any = moment().subtract(1, 'days');
             if ( dateLimit > dateReview &&  this.order.status !== 'completed') {
                 this.error = true;
             }

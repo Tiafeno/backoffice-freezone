@@ -1,43 +1,49 @@
+<style>
+  .switch-status {
+    cursor: pointer;
+  }
+</style>
 <div class="page-content fade-in-up">
   <div class="ibox">
     <div class="ibox-body">
       <h5 class="font-strong mb-4">LES CLIENTS</h5>
       <div class="flexbox mb-4">
         <div class="flexbox">
-            <div class="row">
-                <div class="col-md-12">
-                  <div class="form-group mb-4">
-                    <label class="font-light">Filtre responsable</label>
-                    <ng-select name="responsible" (change)="reload()" placeholder="Veuillez selectionner" [(ngModel)]="responsible"
-                      bindLabel="email" bindValue="id" [hideSelected]="false" [loading]="responsibleLoading" [multiple]="false" [items]="Responsibles"
-                      required>
-                      <ng-template ng-option-tmp let-item="item">
-                        {{item.email}}
-                      </ng-template>
-                    </ng-select>
-                  </div>
-                </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label class="font-light">Filtre responsable</label>
+                <ng-select name="responsible" (change)="reload()" placeholder="Veuillez selectionner"
+                  [(ngModel)]="responsible" bindLabel="email" bindValue="id" [hideSelected]="false"
+                  [loading]="responsibleLoading" [multiple]="false" [items]="Responsibles" required>
+                  <ng-template ng-option-tmp let-item="item">
+                    {{item.email}}
+                  </ng-template>
+                </ng-select>
               </div>
+            </div>
+          </div>
         </div>
         <div class="flexbox">
           <div class="input-group-icon input-group-icon-left mr-3">
             <span class="input-icon input-icon-right font-16"><i class="ti-search"></i></span>
             <input class="form-control form-control-rounded form-control-solid" id="key-search" type="text"
-                   placeholder="Search ...">
+              placeholder="Search ...">
           </div>
         </div>
       </div>
       <div class="table-responsive row">
         <table class="table table-bordered table-hover" id="clients-table">
           <thead class="thead-default thead-lg">
-          <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Adresse E-mail</th>
-            <th>Type</th>
-            <th>Date d'ajout</th>
-            <th>Actions</th>
-          </tr>
+            <tr>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Adresse E-mail</th>
+              <th>Statut</th>
+              <th>Type</th>
+              <th>Date d'ajout</th>
+              <th>Actions</th>
+            </tr>
           </thead>
         </table>
       </div>
@@ -49,5 +55,42 @@
 <div class="modal fade" id="switch-type-modal" data-backdrop="static">
   <div class="modal-dialog" role="document">
     <app-type-client-switcher (refresh)="reload()"></app-type-client-switcher>
+  </div>
+</div>
+
+<div class="modal fade" id="switch-status-modal" data-backdrop="static">
+  <div class="modal-dialog" role="document">
+    <form class="modal-content" [formGroup]="FormStatus" (ngSubmit)="fnOnUpdateStatus()">
+      <div class="modal-header px-4 py-3 bg-primary-400">
+        <div>
+          <h5 class="modal-title text-white">Mettre à jour le status du client</h5>
+        </div>
+        <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group mb-4">
+              <p class="font-strong">Statut</p>
+              <select class="form-control" formControlName="status">
+                <option value="">En attente</option>
+                <option value="0">Active</option>
+                <option value="1">Désactiver</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer justify-content-between bg-primary-50">
+        <div>
+          <input type="hidden" formControlName="id" />
+          <button class="btn btn-primary btn-rounded mr-3" type="submit">Mettre à jour</button>
+        </div>
+      </div>
+    </form>
+
   </div>
 </div>
