@@ -9,16 +9,16 @@ import {
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import * as _ from 'lodash';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
-import { Helpers } from '../../../helpers';
+import { environment } from '../../../../../environments/environment';
+import { Helpers } from '../../../../helpers';
 import { of } from 'rxjs/observable/of';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/zip';
 import Swal from 'sweetalert2';
-import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import { ApiWordpressService } from '../../../../_services/api-wordpress.service';
 import * as moment from 'moment';
-import { FzSecurityService } from '../../../_services/fz-security.service';
-import { FzServicesService } from '../../../_services/fz-services.service';
+import { FzSecurityService } from '../../../../_services/fz-security.service';
+import { FzServicesService } from '../../../../_services/fz-services.service';
 
 declare var $: any;
 

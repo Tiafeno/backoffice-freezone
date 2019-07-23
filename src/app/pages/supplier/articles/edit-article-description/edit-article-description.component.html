@@ -1,0 +1,56 @@
+<style type="text/css">
+  .form-control {
+    font-family: inherit;
+  }
+  </style>
+  <div class="page-content fade-in-up">
+    <div class="row">
+      <div class="col-lg-12">
+  
+        <div class="ibox ibox-fullheight">
+          <form class="ibox-body" [formGroup]="formEditor" (ngSubmit)="onSave()">
+            <div class="row">
+              <div class="col-12">
+                  <div class="page-heading mb-4">
+                      <h1 class="page-title">Modifier la description</h1>
+                  </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-8">
+                <div class="form-group mb-4">
+                  <label>Designation</label>
+                  <input class="form-control" formControlName="name" type="text" id="name" >
+                </div>
+              </div>
+            </div>
+
+  
+            <div class="row">
+              <div class="col-sm-8">
+                <div class="form-group mb-4">
+                  <label>Description <span style="color: red">*</span></label>
+                  <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="description" [init]="tinyMCESettings"></editor>
+                  <div *ngIf="f.description.errors && f.description.dirty">
+                    <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+  
+            <div class="text-center mb-4">
+              <div class="row">
+                <button class="btn btn-primary  col-2" type="submit">METTRE A JOUR</button>
+                <a class="btn btn-secondary ml-3 col-2" [routerLink]="['/articles', 'lists']"
+                  routerLinkActive="active">RETOUR</a>
+              </div>
+  
+            </div>
+          </form>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  

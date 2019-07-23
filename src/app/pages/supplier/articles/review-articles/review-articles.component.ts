@@ -3,9 +3,9 @@ import * as moment from 'moment';
 import * as _ from 'lodash';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
-import { config } from '../../../../environments/environment';
-import { Helpers } from '../../../helpers';
-import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import { config } from '../../../../../environments/environment';
+import { Helpers } from '../../../../helpers';
+import { ApiWordpressService } from '../../../../_services/api-wordpress.service';
 import { EditArticleComponent } from '../edit-article/edit-article.component';
 declare var $: any;
 
@@ -22,7 +22,7 @@ export class ReviewArticlesComponent implements OnInit {
   @ViewChild(EditArticleComponent) Editor: EditArticleComponent;
   constructor(
     private router: Router,
-    private apiWP: ApiWordpressService
+    private apiWP: ApiWordpressService,
   ) {
     this.WPAPI = this.apiWP.getWPAPI();
    }

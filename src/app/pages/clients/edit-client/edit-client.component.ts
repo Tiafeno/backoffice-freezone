@@ -49,7 +49,7 @@ export class EditClientComponent implements OnInit {
       cif: new FormControl(''), // Meta data
       cin: new FormControl(''), // Meta data
       date_cin: new FormControl(''), // Meta data
-      company_status: new FormControl('', Validators.required), // Meta data
+      company_status: new FormControl(''), // Meta data
     });
 
     /**

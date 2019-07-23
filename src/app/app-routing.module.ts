@@ -30,14 +30,14 @@ import { AddSupplierComponent } from './pages/supplier/add-supplier/add-supplier
 import { EditSupplierComponent } from './pages/supplier/edit-supplier/edit-supplier.component';
 import { ApiWoocommerceService } from './_services/api-woocommerce.service';
 import { QuotationEditComponent } from './pages/quotation/quotation-edit/quotation-edit.component';
-import { ArticleSupplierComponent } from './pages/supplier/article-supplier/article-supplier.component';
+import { ArticleSupplierComponent } from './pages/supplier/articles/article-supplier/article-supplier.component';
 import { ProductListsComponent } from './pages/products/product-lists/product-lists.component';
 import { ProductNewComponent } from './pages/products/product-new/product-new.component';
 import { FilterArticleComponent } from './components/filter-article/filter-article.component';
 import { FilterSearchArticleComponent } from './components/filter-search-article/filter-search-article.component';
-import { AddArticleComponent } from './pages/supplier/add-article/add-article.component';
+import { AddArticleComponent } from './pages/supplier/articles/add-article/add-article.component';
 import { FzServicesService } from './_services/fz-services.service';
-import { EditArticleComponent } from './pages/supplier/edit-article/edit-article.component';
+import { EditArticleComponent } from './pages/supplier/articles/edit-article/edit-article.component';
 import { ProductEditComponent } from './pages/products/product-edit/product-edit.component';
 import { QuotationViewComponent } from './pages/quotation/quotation-view/quotation-view.component';
 import { MomentsPipe } from './pipes/moments.pipe';
@@ -45,7 +45,7 @@ import { StatusQuotationSwitcherComponent } from './components/status-quotation-
 import { QuotationArticleReviewComponent } from './pages/quotation/quotation-article-review/quotation-article-review.component';
 import { CustomerEditComponent } from './pages/customer/customer-edit/customer-edit.component';
 import { QuotationMailComponent } from './pages/quotation/quotation-mail/quotation-mail.component';
-import { ReviewArticlesComponent } from './pages/supplier/review-articles/review-articles.component';
+import { ReviewArticlesComponent } from './pages/supplier/articles/review-articles/review-articles.component';
 import { ReviewSupplierComponent } from './pages/supplier/review-supplier/review-supplier.component';
 import { ReviewMailSupplierComponent } from './pages/supplier/review-mail-supplier/review-mail-supplier.component';
 import { SavComponent } from './pages/sav/sav/sav.component';
@@ -55,8 +55,8 @@ import { ClientsComponent } from './pages/clients/clients.component';
 import { EditClientComponent } from './pages/clients/edit-client/edit-client.component';
 import { NoCommercialAccessGuard } from './guards/no-commercial-access.guard';
 import { FzSecurityService } from './_services/fz-security.service';
-import {StatusArticleComponent} from './components/status-article/status-article.component';
-import {TypeClientSwitcherComponent} from "./components/type-client-switcher/type-client-switcher.component";
+import { StatusArticleComponent } from './components/status-article/status-article.component';
+import { TypeClientSwitcherComponent } from "./components/type-client-switcher/type-client-switcher.component";
 import { FaqPageComponent } from './pages/faq/faq-page/faq-page.component';
 import { ResponsibleComponent } from './components/responsible/responsible.component';
 import { SettingsComponent } from './pages/settings/settings.component';
@@ -65,6 +65,9 @@ import { SavEditComponent } from './pages/sav/sav-edit/sav-edit.component';
 import { SavMailComponent } from './pages/sav/sav-mail/sav-mail.component';
 import { QuotationTreatyComponent } from './pages/quotation/quotation-treaty/quotation-treaty.component';
 import { ModuloReviewSuppliersComponent } from './components/modulo-review-suppliers/modulo-review-suppliers.component';
+import { EditArticleDescriptionComponent } from './pages/supplier/articles/edit-article-description/edit-article-description.component';
+import { ArticlesComponent } from './pages/supplier/articles/articles.component';
+import { BenefitPipe } from './pipes/benefit.pipe';
 
 
 const routes: Routes = [
@@ -103,12 +106,12 @@ const routes: Routes = [
                 children: [
                     { path: '', redirectTo: 'lists', pathMatch: 'full' },
                     { path: 'lists', component: SavComponent },
-                    { 
+                    {
                         path: ':id',
                         children: [
                             { path: '', redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: SavEditComponent },
-                            { 
+                            {
                                 path: 'mail',
                                 component: SavMailComponent
                             }
@@ -154,10 +157,6 @@ const routes: Routes = [
                         component: ReviewSupplierComponent
                     },
                     {
-                        path: 'articles',
-                        component: ArticleSupplierComponent
-                    },
-                    {
                         path: 'article/review',
                         canActivate: [NoCommercialAccessGuard],
                         component: ReviewArticlesComponent
@@ -171,6 +170,18 @@ const routes: Routes = [
                         ]
                     },
 
+                ]
+            },
+            {
+                path: 'articles',
+                component: ArticlesComponent,
+                children: [
+                    { path: '', redirectTo: 'lists', pathMatch: 'full' },
+                    { path: 'lists', component: ArticleSupplierComponent },
+                    {
+                        path: 'edit/:id',
+                        component: EditArticleDescriptionComponent
+                    }
                 ]
             },
             {
@@ -280,7 +291,10 @@ const routes: Routes = [
         SavMailComponent,
         QuotationTreatyComponent,
         ModuloReviewSuppliersComponent,
-        MomentsPipe
+        EditArticleDescriptionComponent,
+        ArticlesComponent,
+        MomentsPipe,
+        BenefitPipe
     ],
     imports: [
         CommonModule,

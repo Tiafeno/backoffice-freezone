@@ -62,7 +62,7 @@
             </div>
           </div>
 
-          <div class="row">
+          <div class="row" *ngIf="clientRole === 'fz-company'">
             <div class="col-md-12">
               <div class="form-group mb-4">
                 <label class="font-light">Professionnel ou Revendeur ?</label>
@@ -85,8 +85,8 @@
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">STAT</label>
-                  <input class="form-control" autocomplete="off" formControlName="stat" id="stat"
-                    type="text" placeholder="">
+                  <input class="form-control" autocomplete="off" formControlName="stat" id="stat" type="text"
+                    placeholder="">
                 </div>
               </div>
 
@@ -119,25 +119,25 @@
           </div>
 
           <div *ngIf="clientRole === 'fz-particular'">
-              <div class="row">
-                <div class="col-sm-6">
-                  <div class="form-group mb-4">
-                    <label class="font-light">CIN</label>
-                    <input class="form-control" autocomplete="off" formControlName="cin" id="cin"
-                      type="text" placeholder="">
-                  </div>
-                </div>
-  
-                <div class="col-sm-6">
-                  <div class="form-group mb-4">
-                    <label class="font-light">Date de délivrance</label>
-                    <input class="form-control" autocomplete="off" formControlName="date_cin" id="date_cin" type="text"
-                      placeholder="">
-                  </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">CIN</label>
+                  <input class="form-control" autocomplete="off" formControlName="cin" id="cin" type="text"
+                    placeholder="">
                 </div>
               </div>
 
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">Date de délivrance</label>
+                  <input class="form-control" autocomplete="off" formControlName="date_cin" id="date_cin" type="text"
+                    placeholder="">
+                </div>
+              </div>
             </div>
+
+          </div>
 
           <!--- Billing & Shipping form here... -->
           <div class="row mt-4 mb-2">

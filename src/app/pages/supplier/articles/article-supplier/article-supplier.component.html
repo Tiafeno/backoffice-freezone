@@ -39,7 +39,7 @@
                     <img class="mr-3 update-thumbnail" [attr.data-product]="article.product_id" [attr.data-article]="article.id"
                     [src]="article.product_thumbnail.src" alt="image" width="60">
                   </td>
-                  <td width="325">
+                  <td width="250">
                     <a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
                   </td>
                   <td><span class="badge"
@@ -50,22 +50,31 @@
                     {{article.product_status === 'publish' ? 'PUBLIER' : (article.product_status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                   </td>
 
-                  <td *ngIf="isNumber(article.price)">{{article.price * 5 | currency:'FMG':'symbole':'4.2-2':'fr'}}</td>
+                  <td *ngIf="isNumber(article.price)">{{article.price * 5 | currency:'FMG':'symbole':'4.0-2':'fr'}}</td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
 
-                  <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                  <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
 
                   <td>{{article.marge}}</td>
-                  <td>{{article.priceUF | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                  <td>{{article.priceUF | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td>{{article.marge_dealer}}</td>
-                  <td>{{article.price_dealer | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                  <td>{{article.price_dealer | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']"
                         routerLinkActive="active" class="badge badge-info">
                     {{article.supplier.reference}}
                   </a></td>
-                  <td>
-                    <a class="text-light mr-3 font-16" (click)="onEditArticle(article.id)"><i class="ti-pencil"></i></a>
+                  <td  width="20">
+                    <div class="row">
+                      <div class="col-6">
+                          <a class="text-light font-16" (click)="onEditArticle(article.id)"><i class="ti-pencil"></i></a>
+                      </div>
+                      <div class="col-6">
+                          <a class="text-light font-16" (click)="onChangeRoute('/articles/edit/' + article.product_id)" ><i class="ti-pencil-alt"></i></a>
+                      </div>
+                    </div>
+                    
+                    
                   </td>
                 </tr>
               </tbody>

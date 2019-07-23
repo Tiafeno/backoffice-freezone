@@ -22,6 +22,7 @@ export class FaqPageComponent implements OnInit {
   public listGroup: Array<any> = [];
   public listFaq: Array<any> = [];
   public newForm: FormGroup;
+  public newTermForm: FormGroup;
   public isAdministrator: boolean = false;
   public tinyMCESettings: any = {
     language_url: '/assets/js/langs/fr_FR.js',
@@ -54,10 +55,14 @@ export class FaqPageComponent implements OnInit {
       content: new FormControl('', Validators.required),
       category: new FormControl(null, Validators.required)
     });
+    this.newTermForm = new FormGroup({
+      title: new FormControl('', Validators.required)
+    });
     this.isAdministrator = this.auth.getCurrentUserRole() === 'administrator' ? true : false;
   }
 
   get f() { return this.newForm.controls; }
+
   onSubmit() {
     if (this.newForm.valid) {
       Helpers.setLoading(true);
@@ -81,6 +86,19 @@ export class FaqPageComponent implements OnInit {
         Swal.fire('Désolé', "Une erreur s'est produite. Veuillez réessayer plus tard. Merci", 'error');
       });
     }
+  }
+
+  onSubmitNewTerm() {
+    
+    if (this.newTermForm.valid) {
+      const value: any = this.newTermForm.value;
+      Helpers.setLoading(true);
+      this.wordpress.categories().create({name: value.title}).then(resp => {
+        Helpers.setLoading(false);
+        $(".modal").modal('hide');
+        this.ngOnInit();
+      });
+    } 
   }
 
   onEdit(articleId: number) {
@@ -122,13 +140,6 @@ export class FaqPageComponent implements OnInit {
     }
   }
 
-  private formSuccess() {
-    Helpers.setLoading(false);
-    $('#question-dialog').modal('hide');
-    this.newForm.reset();
-    this.ngOnInit();
-  }
-
   ngOnInit() {
     Helpers.setLoading(true);
     RSVP.hash({
@@ -146,6 +157,18 @@ export class FaqPageComponent implements OnInit {
 
       this.cd.detectChanges();
     });
+
+    $('#new-term-dialog').on('hide.bs.modal', e => {
+      this.newTermForm.reset();
+      this.cd.detectChanges();
+    })
+  }
+
+  private formSuccess() {
+    Helpers.setLoading(false);
+    $('#question-dialog').modal('hide');
+    this.newForm.reset();
+    this.ngOnInit();
   }
 
   public faqByGroup(categorieId: number): Array<any> {

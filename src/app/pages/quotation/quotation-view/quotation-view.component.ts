@@ -215,7 +215,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
     getUsers(ids: string): Promise<any> {
         return new Promise(resolve => {
-            this.Wordpress.users().include(ids).then(users => {
+            this.Wordpress.users().include(ids).context('edit').then(users => {
                 resolve(users);
             }).catch(err => { resolve([]); });
         });

@@ -1,18 +1,18 @@
 import { Component, OnInit, EventEmitter, ChangeDetectorRef, Output } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { Helpers } from '../../../helpers';
+import { Helpers } from '../../../../helpers';
 import * as _ from 'lodash';
-import { FzServicesService } from '../../../_services/fz-services.service';
+import { FzServicesService } from '../../../../_services/fz-services.service';
 import { debounceTime, switchMap, catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { of } from 'rxjs/observable/of';
-import { environment, config } from '../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import { ApiWordpressService } from '../../../../_services/api-wordpress.service';
 import * as moment from 'moment';
-import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
-import { FzSecurityService } from "../../../_services/fz-security.service";
+import { ApiWoocommerceService } from '../../../../_services/api-woocommerce.service';
+import { FzSecurityService } from "../../../../_services/fz-security.service";
 import Swal from "sweetalert2";
+import { config, environment } from '../../../../../environments/environment';
 
 declare var $: any;
 

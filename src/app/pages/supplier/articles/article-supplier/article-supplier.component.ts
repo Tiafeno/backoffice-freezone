@@ -1,16 +1,17 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation, ChangeDetectorRef } from '@angular/core';
-import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
-import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import { Component, OnInit, ViewChild, ViewEncapsulation, ChangeDetectorRef, NgZone } from '@angular/core';
+import { ApiWoocommerceService } from '../../../../_services/api-woocommerce.service';
+import { ApiWordpressService } from '../../../../_services/api-wordpress.service';
 import * as _ from 'lodash';
-import { FilterArticleComponent } from '../../../components/filter-article/filter-article.component';
-import { FilterSearchArticleComponent } from '../../../components/filter-search-article/filter-search-article.component';
-import { ImportArticleComponent } from '../../../components/import-article/import-article.component';
-import { Helpers } from '../../../helpers';
-import { StatusArticleComponent } from '../../../components/status-article/status-article.component';
+import { FilterArticleComponent } from '../../../../components/filter-article/filter-article.component';
+import { FilterSearchArticleComponent } from '../../../../components/filter-search-article/filter-search-article.component';
+import { ImportArticleComponent } from '../../../../components/import-article/import-article.component';
+import { Helpers } from '../../../../helpers';
+import { StatusArticleComponent } from '../../../../components/status-article/status-article.component';
 import Swal from 'sweetalert2';
-import { AuthorizationService } from '../../../_services/authorization.service';
-import { FzSecurityService } from '../../../_services/fz-security.service';
+import { AuthorizationService } from '../../../../_services/authorization.service';
+import { FzSecurityService } from '../../../../_services/fz-security.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 declare var $: any;
 
@@ -45,7 +46,9 @@ export class ArticleSupplierComponent implements OnInit {
       private apiWP: ApiWordpressService,
       private cd: ChangeDetectorRef,
       private authorisation: AuthorizationService,
-      private Security: FzSecurityService
+      private Security: FzSecurityService,
+      private router: Router,
+      private zone: NgZone
    ) {
       this.WP = apiWP.getWPAPI();
       this.WC = apiWC.getWoocommerce();
@@ -73,6 +76,11 @@ export class ArticleSupplierComponent implements OnInit {
    onSearchWord($event): void {
       this.findWord = _.clone($event.word);
    }
+
+   public onChangeRoute(link: string) {
+      this.zone.run(() => { this.router.navigateByUrl(link); })
+    }
+  
 
    /**
     * Cette evennement ce declanche quand on click sur modifier une article

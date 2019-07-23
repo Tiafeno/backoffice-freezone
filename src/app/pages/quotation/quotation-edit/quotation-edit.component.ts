@@ -7,7 +7,7 @@ import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import Swal from 'sweetalert2';
 import * as moment from 'moment'
 import { QuotationViewComponent } from '../quotation-view/quotation-view.component';
-import { EditArticleComponent } from '../../supplier/edit-article/edit-article.component';
+import { EditArticleComponent } from '../../supplier/articles/edit-article/edit-article.component';
 import { FzSecurityService } from '../../../_services/fz-security.service';
 import { FzServicesService } from '../../../_services/fz-services.service';
 declare var $: any;

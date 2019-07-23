@@ -20,6 +20,7 @@ export class FzSecurityService {
     { code: 's12', name: "Supprimer un client" },
     { code: 's13', name: "Modifier le statut du client" },
     { code: 's14', name: "Ajouter ou Remplacer les images des articles" },
+    { code: 's15', name: "Modifier la status du SAV" },
   ];
   private access: Array<object> = [
     {
@@ -39,6 +40,7 @@ export class FzSecurityService {
         { code: 's12', access: true },
         { code: 's13', access: true },
         { code: 's14', access: true },
+        { code: 's15', access: true },
       ]
     },
     {
@@ -58,6 +60,7 @@ export class FzSecurityService {
         { code: 's12', access: false },
         { code: 's13', access: false },
         { code: 's14', access: false },
+        { code: 's15', access: false },
       ]
     },
     {
@@ -77,6 +80,7 @@ export class FzSecurityService {
         { code: 's12', access: false },
         { code: 's13', access: false },
         { code: 's14', access: true },
+        { code: 's15', access: true },
       ]
     }
   ];
