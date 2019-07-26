@@ -6,7 +6,6 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 declare var $: any;
 import {Router} from '@angular/router';
-import {TypeClientSwitcherComponent} from "../../components/type-client-switcher/type-client-switcher.component";
 import Swal from 'sweetalert2';
 import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
 import { FzSecurityService } from '../../_services/fz-security.service';
@@ -27,7 +26,6 @@ export class ClientsComponent implements OnInit {
   public responsibleLoading: boolean = false;
   public FormStatus: FormGroup;
 
-  @ViewChild(TypeClientSwitcherComponent) public SwitchType: TypeClientSwitcherComponent;
   constructor(
     private Security: FzSecurityService,
     private apiWp: ApiWordpressService,
@@ -136,7 +134,7 @@ export class ClientsComponent implements OnInit {
             const role: any = _.isArray(data) ? data[0] : data;
             const status: string = role === 'fz-company' ? 'Entreprise' : 'Particulier';
             const style: string = role === 'fz-company' ? 'blue' : 'success';
-            return `<span class="badge badge-${style} switch-type uppercase" style="cursor: pointer;">${status}</span>`;
+            return `<span class="badge badge-${style} uppercase" style="cursor: pointer;">${status}</span>`;
           }
         },
         {
@@ -187,14 +185,6 @@ export class ClientsComponent implements OnInit {
           }
         });
 
-        // Professionnel ou Revendeur
-        $('#clients-table tbody').on('click', '.switch-type', e => {
-          e.preventDefault();
-          if (this.Security.hasAccess('s11', true)) {
-            const __clt: any = getElementData(e);
-            this.SwitchType.fnOpen(__clt);
-          }
-        });
 
         $('#clients-table tbody').on('click', '.switch-status', e => {
           e.preventDefault();

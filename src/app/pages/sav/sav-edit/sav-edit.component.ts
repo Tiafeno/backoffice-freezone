@@ -53,6 +53,7 @@ export class SavEditComponent implements OnInit {
       client: new FormControl(''),
       date_purchase: new FormControl(''),
       description: new FormControl(''),
+      quotation_ref: new FormControl(''),
       mark: new FormControl(''),
       product: new FormControl(''),
       product_provider: new FormControl(''),
@@ -106,7 +107,7 @@ export class SavEditComponent implements OnInit {
       product_provider: Value.product_provider,
       serial_number: Value.serial_number,
       status_product: Value.status_product,
-
+      quotation_ref: Value.quotation_ref,
       title: Value.product
     }).then(resp => {
       Helpers.setLoading(false);

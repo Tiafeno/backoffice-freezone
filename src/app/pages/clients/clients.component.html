@@ -52,12 +52,6 @@
 </div>
 
 
-<div class="modal fade" id="switch-type-modal" data-backdrop="static">
-  <div class="modal-dialog" role="document">
-    <app-type-client-switcher (refresh)="reload()"></app-type-client-switcher>
-  </div>
-</div>
-
 <div class="modal fade" id="switch-status-modal" data-backdrop="static">
   <div class="modal-dialog" role="document">
     <form class="modal-content" [formGroup]="FormStatus" (ngSubmit)="fnOnUpdateStatus()">

@@ -32,8 +32,7 @@
             <div class="col-md-6">
               <div class="form-group mb-4">
                 <label class="font-light">Produit</label>
-                <input class="form-control" autocomplete="off" formControlName="product" type="text" id="product"
-                  name="product" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="product" type="text" id="product" placeholder="">
               </div>
             </div>
           </div>
@@ -41,7 +40,7 @@
             <div class="col-md-6">
               <div class="form-group mb-4">
                 <label class="font-light">Marque</label>
-                <input class="form-control" autocomplete="off" formControlName="mark" type="text" id="mark" name="mark"
+                <input class="form-control" autocomplete="off" formControlName="mark" type="text" id="mark"
                   placeholder="">
               </div>
             </div>
@@ -86,7 +85,7 @@
             <div class="col-sm-4">
               <div class="form-group mb-4">
                 <label class="font-light">Numéro de la facture</label>
-                <input class="form-control" autocomplete="off" formControlName="bill" id="bill" name="bill" type="text"
+                <input class="form-control" autocomplete="off" formControlName="bill" id="bill" type="text"
                   placeholder="">
                 <div *ngIf="f.bill.errors && f.bill.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
@@ -97,8 +96,7 @@
             <div class="col-sm-4">
               <div class="form-group mb-4">
                 <label class="font-light">Numéro de série</label>
-                <input class="form-control" autocomplete="off" formControlName="serial_number" id="serial_number"
-                  name="serial_number" type="text" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="serial_number" id="serial_number" type="text" placeholder="">
                 <div *ngIf="f.serial_number.errors && f.serial_number.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>
@@ -110,7 +108,17 @@
               <div class="form-group mb-4">
                 <label class="font-light">Identification de la demande</label>
                 <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="description"
-                  name="description" [init]="tinyMCESettings"></editor>
+                   [init]="tinyMCESettings"></editor>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Devis Réf</label>
+                <input class="form-control" autocomplete="off" formControlName="quotation_ref" type="text" id="quotation_ref" 
+                  placeholder="">
               </div>
             </div>
           </div>
