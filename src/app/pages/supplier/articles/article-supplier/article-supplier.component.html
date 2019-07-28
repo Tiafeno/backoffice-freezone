@@ -23,8 +23,8 @@
                   <th>Image</th>
                   <th>Designation</th>
                   <th>Statut</th>
-                  <th>Prix Fmg</th>
-                  <th>Prix AR</th>
+                  <th>Prix</th>
+                  <th>Prix P.</th>
                   <th>%UF</th>
                   <th>Prix UF</th>
                   <th>%R</th>
@@ -50,11 +50,11 @@
                     {{article.product_status === 'publish' ? 'PUBLIER' : (article.product_status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                   </td>
 
-                  <td *ngIf="isNumber(article.price)">{{article.price * 5 | currency:'FMG':'symbole':'4.0-2':'fr'}}</td>
-                  <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
-
                   <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
+
+                  <td *ngIf="isNumber(article.price)">{{article.price_particular | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
+                  <td *ngIf="!isNumber(article.price_particular)"><span class="badge badge-default">{{article.price_particular}}</span></td>
 
                   <td>{{article.marge}}</td>
                   <td>{{article.priceUF | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>

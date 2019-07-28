@@ -222,18 +222,35 @@ export class ArticleSupplierComponent implements OnInit {
       }
       this.Products = _.isEmpty(fzProducts) ? [] : fzProducts;
       this.Products = _.map(this.Products, product => {
+         const price = parseInt(product.price, 10);
          const _marge = parseInt(product.marge, 10);
          const _margeDealer = parseInt(product.marge_dealer, 10);
-         const price = parseInt(product.price, 10);
-         const priceMargeDealer = (price * _margeDealer) / 100;
-         const priceMarge = (price * _marge) / 100;
+         const _margeParticular = parseInt(product.marge_particular, 10);
+         product.marge_particular = this.adminAccess ? (_.isNaN(_margeParticular) ? 'Non définie' : _margeParticular + '%') : 'Restreint';
+         product.marge_dealer = this.adminAccess ? (_.isNaN(_margeDealer) ? 'Non définie' : _margeDealer + '%') : "Restreint";
+         product.marge = this.adminAccess ? (_.isNaN(_marge) ? 'Non définie' : _marge + '%') : "Restreint";
 
-         product.priceUF = Math.round(price + priceMarge);
-         product.price_dealer = Math.round(price + priceMargeDealer);
-         product.marge = this.adminAccess ? _marge + '%' : "Restreint";
+         if (!_.isNaN(_margeParticular)) {
+            const priceMargeParticular = (price * _margeParticular) * 100;
+            product.price_particular = this.adminAccess ? Math.round(price + priceMargeParticular) : 'Restreint';
+         } else {
+            product.price_particular = 'Non définie';
+         }
+
+         if (!_.isNaN(_margeDealer)) {
+            const priceMargeDealer = (price * _margeDealer) / 100;
+            product.price_dealer = this.adminAccess ? Math.round(price + priceMargeDealer) : 'Restreint';
+         } else {
+            product.price_dealer = 'Non définie';
+         }
+         
+         if (!_.isNaN(_marge)) {
+            const priceMarge = (price * _marge) / 100;
+            product.priceUF = Math.round(price + priceMarge);
+         } else {
+            product.priceUF = 'Non définie';
+         }
          product.price = this.adminAccess ? price : 'Restreint';
-         product.marge_dealer = this.adminAccess ? _margeDealer + '%' : "Restreint";
-
          return product;
       });
 
