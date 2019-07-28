@@ -138,6 +138,7 @@ export class AddArticleComponent implements OnInit {
       Form.append('marge', Value.margePro);
       Form.append('marge_dealer', Value.margeDealer);
       Form.append('marge_particular', Value.margeParticular);
+      Form.append('date_review', moment().subtract(2, 'days').format('YYYY-MM-DD HH:mm:ss'));
 
       this.http.post<any>(`${config.apiUrl}/create/article`, Form).subscribe(response => {
         Helpers.setLoading(false);
