@@ -144,7 +144,6 @@ export class QuotationEditComponent implements OnInit {
                      const el = $(e.currentTarget).parents('tr');
                      const item = this.Table.row(el).data();
                      this.Item = _.cloneDeep(item); // Contient l'item en cours de traitement
-                     console.log(this.Item);
                      Helpers.setLoading(true);
                      this.WPAPI
                         .fz_product()
@@ -242,6 +241,10 @@ export class QuotationEditComponent implements OnInit {
 
                                              let fzProduct: any = _.find(this.__FZPRODUCTS__, { user_id: row.id });
 
+                                             const price: number = parseInt(fzProduct.price, 10);
+                                             const marge = clientRole === 'fz-company' ? (fzProduct.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
+                                             const hisPrice = this.services.getBenefit(price, parseInt(marge, 10));
+
                                              const dateLimit: any = moment(fzProduct.date_review).subtract(-1, 'days');
                                              let disabled: boolean = dateLimit < moment();
 
@@ -249,13 +252,13 @@ export class QuotationEditComponent implements OnInit {
                                        value="${inputValue}" min="0" max="${fzProduct.total_sales}" ${disabled ? "disabled='disabled'" : ''}
                                        data-product="${fzProduct.product_id}" 
                                        data-supplier="${row.id}" 
+                                       data-price="${hisPrice}" 
                                        data-article="${fzProduct.id}">`;
                                           }
                                        }
                                     ],
                                     initComplete: () => {
                                        Helpers.setLoading(false);
-
                                        $('#quotation-view-supplier-modal').modal('show');
 
                                        $('#quotation-supplier-table tbody').on('click', '.view-supplier', ev => {
@@ -281,32 +284,34 @@ export class QuotationEditComponent implements OnInit {
                                           let element = $(ev.currentTarget);
                                           let currentValue = $(element).val();
                                           currentValue = parseInt(currentValue, 10);
-                                          const elData: any = $(element).data();
                                           let countInputSet = 0;
-
+                                          this.objectMeta = [];
                                           // Vérifier la quantité et la quantité ajouter pour les fournisseurs
                                           $(`input.input-increment`).each((index, value) => {
                                              let inputVal: any = $(value).val();
+                                             console.log('input increment:' + inputVal);
                                              inputVal = parseInt(inputVal, 10);
+                                             const inputData: any = $(value).data();
                                              countInputSet += inputVal;
+                                             if (0 !== inputVal)
+                                                this.objectMeta.push({
+                                                   supplier: parseInt(inputData.supplier, 10),
+                                                   get: parseInt(inputVal, 10),
+                                                   product_id: parseInt(inputData.product, 10),
+                                                   article_id: inputData.article,
+                                                   price: inputData.price
+                                                });
                                           });
+                                          this.cd.detectChanges();
 
                                           if (this.Item.quantity < countInputSet) {
                                              element.val(Math.abs(parseInt(currentValue) - 1));
                                              return false;
                                           };
-
-                                          this.objectMeta = _.reject(this.objectMeta, { article_id: elData.article });
-                                          this.objectMeta.push({
-                                             supplier: parseInt(elData.supplier, 10),
-                                             get: parseInt(element.val(), 10),
-                                             product_id: parseInt(elData.product, 10),
-                                             article_id: elData.article
-                                          });
-
+                                          
                                        });
 
-                                       this.cd.detectChanges();
+                                       
                                     }
                                  })
                               });
@@ -342,31 +347,33 @@ export class QuotationEditComponent implements OnInit {
     * Enregistrer le meta data pour les produits dans la commande
     */
    onSaveQuotationPdt() {
-      if (_.isEmpty(this.objectMeta)) return false;
-      //this.objectMeta = _.filter(this.objectMeta, (meta) => meta.get !== 0);
+      console.log(this.objectMeta);
+      if (_.isEmpty(this.Item) || _.isEmpty(this.objectMeta)) return false;
       Helpers.setLoading(true);
       this.loading = true;
       let lineItems: Array<any>;
       lineItems = _.map(this.__ITEMS__, (item) => {
-         const currentItem: any = _.cloneDeep(item); // product
-         let currentMetaData: Array<any> = _.cloneDeep(currentItem.meta_data); // Product meta
-         // Rechercher les modifications pour ce produit
-         const metas: any = _.filter(this.objectMeta, { product_id: currentItem.product_id });
-         if (_.isEmpty(metas)) return item;
+         if (item.product_id !== this.Item.product_id) return item;
+         
+         const prices = _.map(this.objectMeta, (mt) => parseInt(mt.price, 10));
+         item.price = _.max(prices);
+         item.total = Math.round(_.max(prices) * item.quantity).toString();
+         item.subtotal = Math.round(_.max(prices) * item.quantity).toString();
 
-         currentMetaData = _.map(currentMetaData, meta => {
+         let metaData: Array<any> = _.cloneDeep(item.meta_data); // Product meta
+         metaData = _.map(metaData, meta => {
             if (meta.key === 'status') {
-               if (_.isEmpty(metas)) {
+               if (_.isEmpty(this.objectMeta)) {
                   meta.value = 0;
                } else {
-                  let qts: Array<number> = _.map(metas, meta => { return parseInt(meta.get, 10); });
+                  let qts: Array<number> = _.map(this.objectMeta, meta => { return parseInt(meta.get, 10); });
                   let collectQts = _.sum(qts);
-                  meta.value = collectQts < currentItem.quantity ? 0 : 1;
+                  meta.value = collectQts < this.Item.quantity ? 0 : 1;
                }
 
                if (!meta.value) return meta;
                // Verifier si l'article est en review
-               const aIds: Array<any> = _.map(metas, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
+               const aIds: Array<any> = _.map(this.objectMeta, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
                const collectFZProducts: Array<any> = _.filter(this.__FZPRODUCTS__, (fz) => { return _.indexOf(aIds, fz.id) >= 0; });
                const cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {
                   const dateNow: any = moment();
@@ -378,15 +385,16 @@ export class QuotationEditComponent implements OnInit {
                meta.value = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
 
             } else {
-               meta.value = JSON.stringify(metas);
+               meta.value = JSON.stringify(this.objectMeta);
             }
             return meta;
          });
-         const filterMetaSuppliers = _.filter(currentMetaData, { key: 'suppliers' } as any);
-         if (_.isEmpty(filterMetaSuppliers)) currentMetaData.push({ key: 'suppliers', value: JSON.stringify(metas) });
-         currentItem.meta_data = _.clone(currentMetaData);
-         return currentItem;
+         const filterMetaSuppliers = _.filter(metaData, { key: 'suppliers' } as any);
+         if (_.isEmpty(filterMetaSuppliers)) metaData.push({ key: 'suppliers', value: JSON.stringify(this.objectMeta) });
+         item.meta_data = _.clone(metaData);
+         return item;
       });
+
       const data: any = { line_items: lineItems };
       this.WCAPI.put(`orders/${this.ID}`, data, (err, d, res) => {
          let response: any = JSON.parse(res);

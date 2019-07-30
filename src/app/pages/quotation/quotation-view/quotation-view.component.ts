@@ -111,6 +111,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             // Cette valeur est herité depuis le post type 'product'
             schema.marge = parseInt(article.marge);
             schema.marge_dealer = parseInt(article.marge_dealer, 10);
+            schema.marge_particular = parseInt(article.marge_particular, 10);
 
             let price = parseInt(article.price);
             schema.price = price;
@@ -165,20 +166,14 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 Swal.fire('Désolé', 'Quantité ajouter incorrect', 'error');
                 return product;
             }
-            this.error = false;
-            const _marge = _.find(SCHEMAS, schema => { return schema.price === price; }).marge;
-            const _marge_dealer = _.find(SCHEMAS, schema => { return schema.price === price; }).marge_dealer;
-            const marge: number = parseInt(this.ownerClient.role_office, 10) === 2 ? _marge_dealer : _marge;
-            const _price: number = this.services.getBenefit(price, marge);
-            let total: number = Math.round(_price * take);
-
-            product.stock = _.clone(take);
-            product.total = total.toString();
-            product.subtotal = total.toString();
-            product.price = Math.round(total / product.quantity);
-
+            
             return product;
         });
+        console.log('Items:')
+        console.log(this.Items);
+
+        console.log('QtItems:')
+        console.log(this.QtItems);
 
         let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return parseInt(item.total, 10); });
         this.Billing.subtotal = _.sum(totalItemsArray);
