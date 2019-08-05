@@ -249,7 +249,7 @@ export class QuotationEditComponent implements OnInit {
                                              let disabled: boolean = dateLimit < moment();
 
                                              return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
-                                       value="${inputValue}" min="0" max="${fzProduct.total_sales}" ${disabled ? "disabled='disabled'" : ''}
+                                       value="${disabled ? 0 : inputValue}" min="0" max="${fzProduct.total_sales}" ${disabled ? "disabled='disabled'" : ''}
                                        data-product="${fzProduct.product_id}" 
                                        data-supplier="${row.id}" 
                                        data-price="${hisPrice}" 

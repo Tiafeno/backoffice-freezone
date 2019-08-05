@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { config } from '../../../../environments/environment';
 import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
+import { ModuloMailTemplateComponent } from '../../../components/modulo-mail-template/modulo-mail-template.component';
 declare var $: any;
 
 @Component({
@@ -37,6 +38,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       toolbar: 'undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',
       plugins: ['lists'],
    };
+   @ViewChild(ModuloMailTemplateComponent) MailTemplate: ModuloMailTemplateComponent;
    constructor(
       private Http: HttpClient,
       private cd: ChangeDetectorRef
@@ -48,7 +50,6 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          mail_logistics_cc:  new FormControl(false),
          mail_commercial_cc: new FormControl(false),
       });
-      this.Fournisseur;
    }
 
    ngOnInit() {
@@ -66,6 +67,10 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       }
 
       console.log(changes);
+   }
+
+   onAddTemplateMail(subsject: any, message: any) {
+
    }
 
    onSend() {

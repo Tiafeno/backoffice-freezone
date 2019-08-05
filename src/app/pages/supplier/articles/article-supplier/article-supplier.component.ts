@@ -12,6 +12,7 @@ import { AuthorizationService } from '../../../../_services/authorization.servic
 import { FzSecurityService } from '../../../../_services/fz-security.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { FzServicesService } from '../../../../_services/fz-services.service';
 
 declare var $: any;
 
@@ -47,6 +48,7 @@ export class ArticleSupplierComponent implements OnInit {
       private cd: ChangeDetectorRef,
       private authorisation: AuthorizationService,
       private Security: FzSecurityService,
+      private services: FzServicesService,
       private router: Router,
       private zone: NgZone
    ) {
@@ -231,22 +233,19 @@ export class ArticleSupplierComponent implements OnInit {
          product.marge = this.adminAccess ? (_.isNaN(_marge) ? 'Non définie' : _marge + '%') : "Restreint";
 
          if (!_.isNaN(_margeParticular)) {
-            const priceMargeParticular = (price * _margeParticular) * 100;
-            product.price_particular = this.adminAccess ? Math.round(price + priceMargeParticular) : 'Restreint';
+            product.price_particular = this.adminAccess ? this.services.getBenefit(price, _margeParticular) : 'Restreint';
          } else {
             product.price_particular = 'Non définie';
          }
 
          if (!_.isNaN(_margeDealer)) {
-            const priceMargeDealer = (price * _margeDealer) / 100;
-            product.price_dealer = this.adminAccess ? Math.round(price + priceMargeDealer) : 'Restreint';
+            product.price_dealer = this.adminAccess ? this.services.getBenefit(price, _margeDealer) : 'Restreint';
          } else {
             product.price_dealer = 'Non définie';
          }
          
          if (!_.isNaN(_marge)) {
-            const priceMarge = (price * _marge) / 100;
-            product.priceUF = Math.round(price + priceMarge);
+            product.priceUF = this.services.getBenefit(price, _marge);
          } else {
             product.priceUF = 'Non définie';
          }

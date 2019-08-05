@@ -64,9 +64,15 @@ export class FzServicesService {
   }
 
   public getBenefit(price: any, marge: any): number {
-    const benefit: number = (parseInt(price) * parseInt(marge)) / 100;
-    const priceDealer: number = benefit + parseInt(price);
-    return this.manageAlgorithm(priceDealer); // @return number
+    const _price = parseInt(price, 10);
+    const _marge = parseInt(marge, 10);
+    const Y: number = 1 - (_marge / 100);
+    const result: number = _price / Y;
+    /**
+     * Prix = price / Y;
+     * or Y = 1 - (marge / 100)
+     */
+    return this.manageAlgorithm(result); // @return number
   }
 
   public manageAlgorithm(_value: number): number {

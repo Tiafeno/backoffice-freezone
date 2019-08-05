@@ -60,6 +60,19 @@
           <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="message" name="projet"
             [init]="tinyMCESettings"></editor>
         </div>
+        <div class="row">
+          <div class="col-sm-6"></div>
+          <div class="col-sm-6 d-flex">
+            <app-modulo-mail-template style="margin-right: 0; margin-left: auto" (set_predefined)="onAddTemplateMail($event)"></app-modulo-mail-template>
+          </div>
+        </div>
+
+        <div class="form-group mb-4">
+          <label>Les articles en attente:</label>
+          <ul class="list-group list-group-full list-group-divider">
+            <li *ngFor="let item of pendingArticle" class="list-group-item ">{{item.title.rendered}}</li>
+          </ul>
+        </div>
 
       </div>
     </div>

@@ -68,6 +68,7 @@ import { ModuloReviewSuppliersComponent } from './components/modulo-review-suppl
 import { EditArticleDescriptionComponent } from './pages/supplier/articles/edit-article-description/edit-article-description.component';
 import { ArticlesComponent } from './pages/supplier/articles/articles.component';
 import { BenefitPipe } from './pipes/benefit.pipe';
+import { ModuloMailTemplateComponent } from './components/modulo-mail-template/modulo-mail-template.component';
 
 
 const routes: Routes = [
@@ -291,6 +292,7 @@ const routes: Routes = [
         SavMailComponent,
         QuotationTreatyComponent,
         ModuloReviewSuppliersComponent,
+        ModuloMailTemplateComponent,
         EditArticleDescriptionComponent,
         ArticlesComponent,
         MomentsPipe,

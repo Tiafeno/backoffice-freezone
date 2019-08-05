@@ -53,7 +53,7 @@
                   <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
 
-                  <td *ngIf="isNumber(article.price)">{{article.price_particular | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
+                  <td *ngIf="isNumber(article.price_particular)">{{article.price_particular | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td *ngIf="!isNumber(article.price_particular)"><span class="badge badge-default">{{article.price_particular}}</span></td>
 
                   <td>{{article.marge}}</td>
@@ -66,9 +66,6 @@
                   </a></td>
                   <td  width="20">
                     <div class="row">
-                      <div class="col-6">
-                          <a class="text-light font-16" (click)="onEditArticle(article.id)"><i class="ti-pencil"></i></a>
-                      </div>
                       <div class="col-6">
                           <a class="text-light font-16" (click)="onChangeRoute('/articles/edit/' + article.product_id)" ><i class="ti-pencil-alt"></i></a>
                       </div>
