@@ -69,7 +69,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       console.log(changes);
    }
 
-   onAddTemplateMail(subsject: any, message: any) {
+   onAddTemplateMail(subject: any, message: any) {
 
    }
 

@@ -1,4 +1,9 @@
 <button class="btn btn-primary btn-sm" type="button" (click)="onAddTemplateMail()" >Ajouter un predefinie</button>
 <div class="ibox-body">
-  
+  <form [formGroup]="Form">
+      <p *ngFor="let item in predefined">
+          <input type="radio" (click)="onSelectTmpl(item.id)" formControlName="predefined" [value]="item.id">
+          <label>{{item.title.rendered}}</label>
+        </p>
+  </form>
 </div>

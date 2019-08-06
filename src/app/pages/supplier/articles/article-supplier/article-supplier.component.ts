@@ -75,13 +75,13 @@ export class ArticleSupplierComponent implements OnInit {
 
    }
 
-   onSearchWord($event): void {
+   public onSearchWord($event): void {
       this.findWord = _.clone($event.word);
    }
 
    public onChangeRoute(link: string) {
       this.zone.run(() => { this.router.navigateByUrl(link); })
-    }
+   }
   
 
    /**
