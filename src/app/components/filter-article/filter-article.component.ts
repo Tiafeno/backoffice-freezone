@@ -18,6 +18,11 @@ export class FilterArticleComponent implements OnInit, OnChanges {
     { label: "En attente", value: 'pending' },
     { label: "Désactiver", value: 'draft' },
   ];
+  public filterExpiration: Array<any> = [
+    { label: "Tous", value: '' },
+    { label: "Article à jour", value: 'up' },
+    { label: "Article non à jour", value: 'down' },
+  ];
   public filterForm: any = {};
   @Output() search = new EventEmitter();
   // @Input() set word(word: string) {

@@ -13,6 +13,7 @@ import { FzSecurityService } from '../../../../_services/fz-security.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FzServicesService } from '../../../../_services/fz-services.service';
+import * as moment from 'moment';
 
 declare var $: any;
 
@@ -63,6 +64,7 @@ export class ArticleSupplierComponent implements OnInit {
    }
 
    ngOnInit() {
+      moment.locale('fr');
       this.paginationContainer = $('#demo');
       this.Query = this.WP.fz_product().context('edit').perPage(this.perPage).page(this.currentPage);
       $('#status-product-modal').on('hide.bs.modal', ev => {
@@ -132,6 +134,16 @@ export class ArticleSupplierComponent implements OnInit {
          this.Query
             .param('filter[meta_key]', 'user_id')
             .param('filter[meta_value]', eventForm.supplier);
+      }
+
+      if (!_.isUndefined(eventForm.expiration) && !_.isEmpty(eventForm.expiration)) {
+         let _date = moment().format('YYYY-MM-DD HH:mm:ss');
+         let compare = eventForm.expiration === 'up' ? '>' : '<=';
+         this.Query
+            .param('filter[meta_key]', 'date_review')
+            .param('filter[meta_compare]', compare)
+            .param('filter[meta_type]', "DATETIME")
+            .param('filter[meta_value]', _date);
       }
 
       this.Query.headers().then(headers => {

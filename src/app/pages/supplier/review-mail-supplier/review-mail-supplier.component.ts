@@ -69,8 +69,13 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       console.log(changes);
    }
 
-   onAddTemplateMail(subject: any, message: any) {
-
+   onAddTemplateMail(predefined: any) {
+      console.log(predefined);
+      this.Form.patchValue({
+         subject: predefined.subject,
+         message:predefined.message
+      });
+      this.cd.detectChanges();
    }
 
    onSend() {
