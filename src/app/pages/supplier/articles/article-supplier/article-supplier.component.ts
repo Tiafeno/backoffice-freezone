@@ -116,6 +116,8 @@ export class ArticleSupplierComponent implements OnInit {
     */
    onSubmit($event): void | boolean {
       if (_.isUndefined($event) || _.isEmpty($event)) return false;
+      this.Query = this.WP.fz_product().context('edit').perPage(this.perPage).page(this.currentPage);
+
       Helpers.setLoading(true);
       const eventForm: any = $event.form;
 
@@ -129,23 +131,33 @@ export class ArticleSupplierComponent implements OnInit {
 
       const status: string = !_.isUndefined(eventForm.status) ? eventForm.status : 'any';
       this.Query.param('status', _.isEmpty(status) ? 'any' : status);
-
-      if (!_.isUndefined(eventForm.supplier)) {
-         this.Query
-            .param('filter[meta_key]', 'user_id')
-            .param('filter[meta_value]', eventForm.supplier);
+      let metaQuery = [];
+      if (!_.isUndefined(eventForm.supplier) && !_.isNull(eventForm.supplier) && !_.isEmpty(eventForm.supplier)) {
+         metaQuery.push({
+            key: 'user_id',
+            value: eventForm.supplier
+         });
       }
 
       if (!_.isUndefined(eventForm.expiration) && !_.isEmpty(eventForm.expiration)) {
          let _date = moment().format('YYYY-MM-DD HH:mm:ss');
          let compare = eventForm.expiration === 'up' ? '>' : '<=';
-         this.Query
-            .param('filter[meta_key]', 'date_review')
-            .param('filter[meta_compare]', compare)
-            .param('filter[meta_type]', "DATETIME")
-            .param('filter[meta_value]', _date);
+         metaQuery.push({
+            key: 'date_review',
+            value: _date,
+            compare: compare,
+            type: 'DATETIME'
+         });
+         // this.Query
+         //    .param('filter[meta_key]', 'date_review')
+         //    .param('filter[meta_compare]', compare)
+         //    .param('filter[meta_type]', "DATETIME")
+         //    .param('filter[meta_value]', _date);
       }
-
+      if (!_.isEmpty(metaQuery)) {
+         metaQuery['relation'] = 'AND';
+         this.Query.param('filter[meta_query]', Object.assign({}, metaQuery));
+      }
       this.Query.headers().then(headers => {
          this.Query.then((fzProducts) => {
             this.loadData(fzProducts, headers);
