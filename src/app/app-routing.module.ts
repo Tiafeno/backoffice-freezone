@@ -69,6 +69,7 @@ import { EditArticleDescriptionComponent } from './pages/supplier/articles/edit-
 import { ArticlesComponent } from './pages/supplier/articles/articles.component';
 import { BenefitPipe } from './pipes/benefit.pipe';
 import { ModuloMailTemplateComponent } from './components/modulo-mail-template/modulo-mail-template.component';
+import { CarouselComponent } from './pages/carousel/carousel.component';
 
 
 const routes: Routes = [
@@ -101,6 +102,11 @@ const routes: Routes = [
                         ]
                     }
                 ]
+            },
+            {
+                path: 'carousel',
+                canActivate: [NoCommercialAccessGuard],
+                component: CarouselComponent
             },
             {
                 path: 'sav',
@@ -294,6 +300,7 @@ const routes: Routes = [
         ModuloReviewSuppliersComponent,
         ModuloMailTemplateComponent,
         EditArticleDescriptionComponent,
+        CarouselComponent,
         ArticlesComponent,
         MomentsPipe,
         BenefitPipe

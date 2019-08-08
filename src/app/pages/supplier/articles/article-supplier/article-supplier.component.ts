@@ -148,11 +148,6 @@ export class ArticleSupplierComponent implements OnInit {
             compare: compare,
             type: 'DATETIME'
          });
-         // this.Query
-         //    .param('filter[meta_key]', 'date_review')
-         //    .param('filter[meta_compare]', compare)
-         //    .param('filter[meta_type]', "DATETIME")
-         //    .param('filter[meta_value]', _date);
       }
       if (!_.isEmpty(metaQuery)) {
          metaQuery['relation'] = 'AND';
