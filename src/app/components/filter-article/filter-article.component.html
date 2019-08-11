@@ -3,7 +3,7 @@
 
     <div class="form-group mb-4 col-sm-3">
       <ng-select name="supplier" (change)="onAdd($event)" placeholder="Selectionner un fournisseur"
-        [(ngModel)]="filterForm.supplier" bindLabel="company_name" bindValue="id" [searchFn]="customSearchFn"
+        [(ngModel)]="filterForm.supplier" bindLabel="company_name" bindValue="id" [searchFn]="searchFnSupplier"
         [hideSelected]="true" [multiple]="false" [items]="Suppliers">
         <ng-template ng-option-tmp let-item="item">
           {{item.company_name}} <br />

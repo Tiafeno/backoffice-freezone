@@ -307,9 +307,9 @@ const routes: Routes = [
     ],
     imports: [
         CommonModule,
+        BrowserModule,
         FormsModule,
         HttpClientModule,
-        BrowserModule,
         ReactiveFormsModule,
         NgSelectModule,
         EditorModule,

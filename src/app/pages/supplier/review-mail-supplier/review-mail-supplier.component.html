@@ -1,84 +1,155 @@
-<form [formGroup]="Form" (ngSubmit)="onSend()">
-  <div class="modal-header px-4 py-3 bg-primary-400" *ngIf="Fournisseur">
-    <div>
-      <h5 class="modal-title text-white">ENVOYER PAR E-MAIL
-      </h5>
-      <small class="text-white">à {{Fournisseur.email}} pour {{Fournisseur.company_name}} ({{Fournisseur.reference}})</small>
-
-    </div>
-    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
-      <span aria-hidden="true">×</span>
-    </button>
+<div class="modal-header px-4 py-3 bg-primary-400">
+  <div>
+    <h5 class="modal-title text-white">ENVOYER PAR E-MAIL / MISE A JOUR
+    </h5>
   </div>
-  <div class="modal-body p-4">
-    <div class="">
-      <div class="ibox-body">
-        <div class="d-flex justify-content-between">
-          <div class="flexbox mb-4">
-            <span class="btn-icon-only btn-circle bg-primary-50 text-primary mr-3"><i class="ti-envelope"></i></span>
-            <div class="flex-1 d-flex">
-              <div class="flex-1">
-                <span class="text-muted mr-2">De:</span>
-                <div>{{email}}</div>
+  <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">×</span>
+  </button>
+</div>
+
+<ul class="nav nav-tabs tabs-line tabs-line-pink">
+  <li class="nav-item">
+    <a class="nav-link active" href="#tab-1" data-toggle="tab">Mail</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#tab-2" data-toggle="tab">Mise à jour</a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div class="tab-pane fade show active" id="tab-1">
+    <form [formGroup]="Form" (ngSubmit)="onSend()">
+      <div class=" px-4 py-3 bg-primary-400" *ngIf="Fournisseur">
+        <div>
+          <h5 class="modal-title text-white">ENVOYER PAR E-MAIL
+          </h5>
+          <small class="text-white">à {{Fournisseur.email}} pour {{Fournisseur.company_name}}
+            ({{Fournisseur.reference}})</small>
+
+        </div>
+      </div>
+      <div class="modal-body p-4">
+        <div class="">
+          <div class="ibox-body">
+            <div class="d-flex justify-content-between">
+              <div class="flexbox mb-4">
+                <span class="btn-icon-only btn-circle bg-primary-50 text-primary mr-3"><i
+                    class="ti-envelope"></i></span>
+                <div class="flex-1 d-flex">
+                  <div class="flex-1">
+                    <span class="text-muted mr-2">De:</span>
+                    <div>{{email}}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flexbox mb-4">
+                <span class="btn-icon-only btn-circle bg-primary-50 text-danger mr-3">{{pendingArticle.length}}</span>
+                <div class="flex-1 d-flex">
+                  <div class="flex-1">
+                    <span class="mr-2">Article(s) en attente au total</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="form-group mb-4">
+              <label>Sujet</label>
+              <input class="form-control" formControlName="subject" type="text" placeholder="Objet de votre message">
+            </div>
+
+            <div class="form-group mb-4 row">
+              <label class="col-sm-2 col-form-label">Cc:</label>
+              <div class="col-sm-10 d-flex align-items-center">
+
+                <label class="radio radio-grey radio-primary radio-inline">
+                  <input type="checkbox" formControlName="mail_commercial_cc" checked="">
+                  <span class="input-span"></span>Commercials</label>
+
+                <label class="radio radio-grey radio-primary radio-inline">
+                  <input type="checkbox" formControlName="mail_logistics_cc">
+                  <span class="input-span"></span>Logistiques</label>
+              </div>
+            </div>
+
+
+            <div class="form-group mb-4">
+              <label class="font-light">Message</label>
+              <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="message" name="projet"
+                [init]="tinyMCESettings"></editor>
+            </div>
+
+            <app-modulo-mail-template style="margin-right: 0; margin-left: auto"
+              (set_predefined)="onAddTemplateMail($event)"></app-modulo-mail-template>
+
+            <div class="form-group mb-4 mt-4">
+              <label style="font-weight:bold">Les articles en attente:</label>
+              <ul class="list-group list-group-full list-group-divider">
+                <li *ngFor="let item of pendingArticle" class="list-group-item badge badge-secondary">
+                  {{item.title.rendered}}</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-between bg-primary-50">
+        <div></div>
+        <div>
+          <button class="btn btn-success mr-3" type="submit">Envoyer</button>
+          <button class="btn btn-secondary mr-3" data-dismiss="modal">Annuler</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="tab-pane fade " id="tab-2">
+    <div class="modal-body">
+      <div class="">
+        <div class="ibox-body">
+          <div class="px-4 py-3" *ngIf="Fournisseur">
+            <div class="row">
+              <div class="col-12">
+                <div class="table-responsive">
+                  <form [formGroup]="updateForm" (ngSubmit)="onSubmitFx()">
+                    <table class="table">
+                      <thead style="background-color: lavender;">
+                        <tr>
+                          <th>Designation</th>
+                          <th>Quantité disponible</th>
+                          <th>Prix revient (AR)</th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="articles">
+                        <tr *ngFor="let article of pendingArticle; let i = index" [formGroupName]="i">
+                          <td width="250"><span class="font-10">{{article.title.rendered}}</span></td>
+                          <td><input min="0" class="form-control" formControlName="qty" type="number" /></td>
+                          <td>
+                            <input min="0" class="form-control" formControlName="price" type="number" />
+                            <input formControlName="article_id" type="hidden" [value]="article.id" />
+                          </td>
+                        </tr>
+
+                      </tbody>
+                    </table>
+                    <div class="justify-content-between bg-primary-50">
+                      <div></div>
+                      <div>
+                        <button class="btn btn-danger mr-3" type="submit">Mettre à jour</button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
-
-          <div class="flexbox mb-4">
-            <span class="btn-icon-only btn-circle bg-primary-50 text-danger mr-3">{{pendingArticle.length}}</span>
-            <div class="flex-1 d-flex">
-              <div class="flex-1">
-                <span class="mr-2">Article(s) en attente au total</span>
-              </div>
-            </div>
-          </div>
         </div>
-
-
-        <div class="form-group mb-4">
-          <label>Sujet</label>
-          <input class="form-control" formControlName="subject" type="text" placeholder="Objet de votre message">
-        </div>
-
-        <div class="form-group mb-4 row">
-          <label class="col-sm-2 col-form-label">Cc:</label>
-          <div class="col-sm-10 d-flex align-items-center">
-
-            <label class="radio radio-grey radio-primary radio-inline">
-              <input type="checkbox" formControlName="mail_commercial_cc"  checked="">
-              <span class="input-span"></span>Commercials</label>
-
-            <label class="radio radio-grey radio-primary radio-inline">
-              <input type="checkbox" formControlName="mail_logistics_cc">
-              <span class="input-span"></span>Logistiques</label>
-          </div>
-        </div>
-
-
-        <div class="form-group mb-4">
-          <label class="font-light">Message</label>
-          <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="message" name="projet"
-            [init]="tinyMCESettings"></editor>
-        </div>
-        
-        <app-modulo-mail-template style="margin-right: 0; margin-left: auto" (set_predefined)="onAddTemplateMail($event)"></app-modulo-mail-template>
-
-        <div class="form-group mb-4 mt-4">
-          <label style="font-weight:bold">Les articles en attente:</label>
-          <ul class="list-group list-group-full list-group-divider">
-            <li *ngFor="let item of pendingArticle" class="list-group-item badge badge-secondary">{{item.title.rendered}}</li>
-          </ul>
-        </div>
-
+      </div>
+    </div>
+    <div class="modal-footer justify-content-between bg-primary-50">
+      <div></div>
+      <div>
+        <button class="btn btn-secondary mr-3" data-dismiss="modal">Annuler</button>
       </div>
     </div>
   </div>
-  <div class="modal-footer justify-content-between bg-primary-50">
-    <div></div>
-    <div>
-      <button class="btn btn-success mr-3" type="submit">Envoyer</button>
-      <button class="btn btn-secondary mr-3" data-dismiss="modal">Annuler</button>
-    </div>
-
-  </div>
-</form>

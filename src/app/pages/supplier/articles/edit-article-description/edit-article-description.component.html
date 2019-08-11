@@ -37,6 +37,18 @@
                 </div>
               </div>
             </div>
+
+            <div class="row">
+              <div class="form-group mb-4 col-sm-6">
+                <ng-select name="categorie" placeholder="Selectionner des categories" bindLabel="name" bindValue="id"
+                 [searchFn]="customSearchFn"  formControlName="categorie"
+                   [multiple]="true" [items]="Categories">
+                  <ng-template ng-option-tmp let-item="item">
+                    {{item.name}} <br />
+                  </ng-template>
+                </ng-select>
+              </div>
+            </div>
   
   
             <div class="text-center mb-4">

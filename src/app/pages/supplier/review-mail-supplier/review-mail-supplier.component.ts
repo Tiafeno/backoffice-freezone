@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { HttpClient } from '@angular/common/http';
@@ -7,6 +7,8 @@ import { config } from '../../../../environments/environment';
 import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
 import { ModuloMailTemplateComponent } from '../../../components/modulo-mail-template/modulo-mail-template.component';
+import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import * as RSVP from 'rsvp';
 declare var $: any;
 
 @Component({
@@ -16,10 +18,11 @@ declare var $: any;
 })
 export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    public Fournisseur: any = {};
+   public FormEditor: Array<any> = [];
    public email = 'contact@freezone.click';
    public pendingArticle: Array<any> = [];
    @Input() supplier: any = {};
-
+   public updateForm: FormGroup;
    public Form: FormGroup;
    public tinyMCESettings: any = {
       language_url: '/assets/js/langs/fr_FR.js',
@@ -38,26 +41,45 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       toolbar: 'undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',
       plugins: ['lists'],
    };
+   private Wordpress: any;
    @ViewChild(ModuloMailTemplateComponent) MailTemplate: ModuloMailTemplateComponent;
    constructor(
       private Http: HttpClient,
+      private apiWP: ApiWordpressService,
       private cd: ChangeDetectorRef
    ) {
       this.Form = new FormGroup({
          subject: new FormControl('', Validators.required),
          message: new FormControl('', Validators.required),
          articles: new FormControl('', Validators.required),
-         mail_logistics_cc:  new FormControl(false),
+         mail_logistics_cc: new FormControl(false),
          mail_commercial_cc: new FormControl(false),
       });
+
+      this.updateForm = new FormGroup({
+         articles: new FormArray([
+         ])
+      });
+
+      this.Wordpress = this.apiWP.getWordpress();
+   }
+
+   get formArticleArray() {
+      return this.updateForm.get('articles') as FormArray;
    }
 
    ngOnInit() {
       $("#send-mail-modal").on('hide.bs.modal', e => {
-         this.Form.patchValue({message: ''});
+         this.Form.patchValue({ message: '' });
          this.Form.reset();
+         this.updateForm.reset();
+         this.updateForm = new FormGroup({
+            articles: new FormArray([
+            ])
+         });
          this.cd.detectChanges();
       });
+
    }
 
    ngOnChanges(changes: SimpleChanges) {
@@ -73,9 +95,34 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       console.log(predefined);
       this.Form.patchValue({
          subject: predefined.subject,
-         message:predefined.message
+         message: predefined.message
       });
       this.cd.detectChanges();
+   }
+
+   onSubmitFx() {
+      let updateArticles: Array<any> = [];
+      if (this.updateForm.valid) {
+         const Value: any = this.updateForm.value;
+         const articles: any = Value.articles;
+         for (let article of articles) {
+            updateArticles.push(this.Wordpress.fz_product().id(article.article_id).update({
+               price: article.price.toString(),
+               total_sales: article.qty,
+               date_review: moment().format('YYYY-MM-DD HH:mm:ss')
+            }));
+         }
+         Helpers.setLoading(true);
+         RSVP.all(updateArticles).then(function (posts) {
+            // posts contains an array of results for the given promises
+            Helpers.setLoading(false);
+            Swal.fire('Succès', "Tous les articles sont à jours. Veuillez actualiser les resultats", 'success');
+            $('.modal').modal('hide');
+         }).catch(function (reason) {
+            // if any of the promises fails.
+            Swal.fire('Désolé', "Une erreru s'est produit pendant la mise à jour", 'warning');
+         });
+      }
    }
 
    onSend() {
@@ -124,6 +171,14 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          const response: any = _.clone(resp);
          const data: any = response.data;
          this.pendingArticle = _.clone(data);
+         for (let item of data) {
+            this.formArticleArray.push(new FormGroup({
+               title: new FormControl(item.title.rendered),
+               price: new FormControl(0),
+               qty: new FormControl(0),
+               article_id: new FormControl(item.id, Validators.required)
+            }));
+         }
          const reviewArticles: Array<number> = _.map(data, (item) => { return item.id; });
          this.Form.patchValue({ articles: reviewArticles });
          this.cd.detectChanges();

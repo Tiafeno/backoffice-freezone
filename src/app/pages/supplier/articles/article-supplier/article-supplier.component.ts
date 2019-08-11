@@ -119,6 +119,7 @@ export class ArticleSupplierComponent implements OnInit {
       this.Query = this.WP.fz_product().context('edit').perPage(this.perPage).page(this.currentPage);
 
       Helpers.setLoading(true);
+      console.log('$event:', $event);
       const eventForm: any = $event.form;
 
       if (!_.isUndefined(eventForm.word)) {
@@ -132,11 +133,12 @@ export class ArticleSupplierComponent implements OnInit {
       const status: string = !_.isUndefined(eventForm.status) ? eventForm.status : 'any';
       this.Query.param('status', _.isEmpty(status) ? 'any' : status);
       let metaQuery = [];
-      if (!_.isUndefined(eventForm.supplier) && !_.isNull(eventForm.supplier) && !_.isEmpty(eventForm.supplier)) {
+      if (!_.isUndefined(eventForm.supplier) && _.isNumber(eventForm.supplier)) {
          metaQuery.push({
             key: 'user_id',
             value: eventForm.supplier
          });
+         console.log('Filter by supplier run');
       }
 
       if (!_.isUndefined(eventForm.expiration) && !_.isEmpty(eventForm.expiration)) {

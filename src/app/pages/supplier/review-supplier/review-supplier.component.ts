@@ -85,6 +85,7 @@ export class ReviewSupplierComponent implements OnInit {
           this.selectedSupplier = getElementData(ev);
           this.Mail.openDialog(this.selectedSupplier.id);
         });
+
       },
       ajax: {
         url: `${config.apiUrl}/supplier/review`,
