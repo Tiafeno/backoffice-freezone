@@ -60,7 +60,13 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public onSendMail(): void | boolean {
         // Ne pas envoyer le devis si le client est toujours en attente
         if (!_.isEmpty(this.ownerClient.company_name) && this.ownerClient.company_status === "pending") {
-            Swal.fire('Désolé', "Le client est en attente de confirmation", "warning");
+            Swal.fire('Désolé', "L'entreprise est en attente de confirmation", "warning");
+            return false;
+        }
+
+        // Ne pas envoyer le devis si le compte particulier est en attente
+        if (this.ownerClient.pending == 1 || this.ownerClient.disable == 1) {
+            Swal.fire('Désolé', "Le client est en attente de confirmation ou désactiver", "warning");
             return false;
         }
         // ne pas envoyer le mail s'il y a encore un founisseur en attente

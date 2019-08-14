@@ -8,8 +8,8 @@ import * as _ from 'lodash';
 @Injectable()
 export class ScheduleGuard implements CanActivate {
   public dates: Array<any> = [
-    { start: '08:00:00', end: '12:00:00' },
-    { start: '14:00:00', end: '17:30:00' }
+    { start: '08:00:00', end: '12:15:00' },
+    { start: '13:30:00', end: '17:50:00' }
   ];
   public days: Array<string> = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   constructor(private auth: AuthorizationService, private router: Router) {}
@@ -22,6 +22,7 @@ export class ScheduleGuard implements CanActivate {
         const isIn = moment().isBetween(dateStart, dateEnd, 'hours'); 
         if (!isIn) {
           // Heure creuse
+          this.router.navigate(['login']);
           return false;
         }
       }
@@ -30,6 +31,7 @@ export class ScheduleGuard implements CanActivate {
       const isIn: number = _.indexOf(this.days, currentDay);
       if (isIn >= 0 && (currentDay === 'Sat' || currentDay === 'Sun')) {
           // Heure creuse
+          this.router.navigate(['login']);
           return false;
       }
     }

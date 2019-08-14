@@ -1,11 +1,11 @@
-import {Component, OnInit, ViewChild, NgZone, ChangeDetectorRef} from '@angular/core';
-import {ApiWordpressService} from "../../_services/api-wordpress.service";
-import {config} from "../../../environments/environment";
-import {Helpers} from "../../helpers";
+import { Component, OnInit, ViewChild, NgZone, ChangeDetectorRef } from '@angular/core';
+import { ApiWordpressService } from "../../_services/api-wordpress.service";
+import { config } from "../../../environments/environment";
+import { Helpers } from "../../helpers";
 import * as _ from 'lodash';
 import * as moment from 'moment';
 declare var $: any;
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
 import { FzSecurityService } from '../../_services/fz-security.service';
@@ -37,7 +37,7 @@ export class ClientsComponent implements OnInit {
     this.WPAPI = this.apiWp.getWPAPI();
     this.WCAPI = this.apiWc.getWoocommerce();
     this.FormStatus = new FormGroup({
-      status : new FormControl(0, Validators.required),
+      status: new FormControl(0, Validators.required),
       id: new FormControl(0, Validators.required)
     });
   }
@@ -64,12 +64,23 @@ export class ClientsComponent implements OnInit {
     if (this.FormStatus.valid) {
       Helpers.setLoading(true);
       const Value: any = this.FormStatus.value;
-      this.WPAPI.users().id(Value.id).update({disable: Value.status}).then(resp => {
+      let requestWP;
+      if (Value.status === 'pending') {
+        requestWP = this.WPAPI.users().id(Value.id).update({ pending: 1 });
+      } else {
+        requestWP = this.WPAPI.users().id(Value.id).update({
+          disable: parseInt(Value.status, 10),
+          pending: 0
+        });
+      }
+
+      requestWP.then(resp => {
         Helpers.setLoading(false);
         $('.modal').modal('hide');
         Swal.fire('Succès', 'Client mis à jour avec succès', 'success');
         this.reload();
       }).catch(err => { Helpers.setLoading(false); });
+
     }
   }
 
@@ -115,10 +126,15 @@ export class ClientsComponent implements OnInit {
         },
         {
           data: 'meta_data', render: (data, type, row) => {
-            let meta_disable: any = _.find(data, {key: 'ja_disable_user'});
-            if (_.isUndefined(meta_disable)) return `<span class="badge badge-blue uppercase switch-status">Active</span>`;
-            let status: string = parseInt(meta_disable.value, 10) === 0 ? 'Active' : 'Désactiver';
-            let style: string = parseInt(meta_disable.value, 10) === 0 ? 'primary' : 'warning';
+            let meta_disable: any = _.find(data, { key: 'ja_disable_user' });
+            let meta_pending: any = _.find(data, { key: 'fz_pending_user' });
+            meta_disable =  _.isUndefined(meta_disable) ? 0 : meta_disable;
+            meta_pending =  _.isUndefined(meta_pending) ? 0 : meta_pending;
+            let disable_value = parseInt(meta_disable.value, 10);
+            let pending_value = parseInt(meta_pending.value, 10);
+
+            let status: string = disable_value === 1 ? 'Désactiver' : (pending_value === 1 ? 'En attente' : "Active");
+            let style: string = disable_value === 1 ? 'danger' : (pending_value === 1 ? 'warning' : "primary");
             return `<span class="badge badge-${style} uppercase switch-status">${status}</span>`;
           }
         },
@@ -164,7 +180,7 @@ export class ClientsComponent implements OnInit {
         $('#clients-table tbody').on('click', '.edit-customer', e => {
           e.preventDefault();
           const __clt: any = getElementData(e);
-          this.zone.run(() => { this.router.navigate(['/client', __clt.id, 'edit'])});
+          this.zone.run(() => { this.router.navigate(['/client', __clt.id, 'edit']) });
         });
 
         // Supprimer un client
@@ -190,7 +206,7 @@ export class ClientsComponent implements OnInit {
           e.preventDefault();
           const __clt: any = getElementData(e);
 
-          let meta_disable: any = _.find(__clt.meta_data, {key: 'ja_disable_user'});
+          let meta_disable: any = _.find(__clt.meta_data, { key: 'ja_disable_user' });
           const editStatus = _.isUndefined(meta_disable) ? 0 : meta_disable.value;
 
           this.FormStatus.patchValue({ status: editStatus, id: __clt.id });
