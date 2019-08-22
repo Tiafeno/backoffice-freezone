@@ -48,32 +48,36 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     ngAfterViewInit() {
         $("#quotation-view-modal")
             .on('show.bs.modal', e => {
-              this.onShowModal();
+                this.onShowModal();
             })
             .on('hide.bs.modal', e => {
-              this.QtItems = [];
-              this.Billing = {};
-              this.supplierSchema = [];
-        });
+                this.QtItems = [];
+                this.Billing = {};
+                this.supplierSchema = [];
+            });
     }
 
     public onSendMail(): void | boolean {
-        // Ne pas envoyer le devis si le client est toujours en attente
-        if (!_.isEmpty(this.ownerClient.company_name) && this.ownerClient.company_status === "pending") {
-            Swal.fire('Désolé', "L'entreprise est en attente de confirmation", "warning");
-            return false;
+        // Envoyer et Terminer
+        if (!_.includes([1, 3], parseInt(this.order.position, 10))) {
+            // Ne pas envoyer le devis si le client est toujours en attente
+            if (!_.isEmpty(this.ownerClient.company_name) && this.ownerClient.company_status === "pending") {
+                Swal.fire('Désolé', "L'entreprise est en attente de confirmation", "warning");
+                return false;
+            }
+
+            // Ne pas envoyer le devis si le compte particulier est en attente
+            if (this.ownerClient.pending == 1 || this.ownerClient.disable == 1) {
+                Swal.fire('Désolé', "Le client est en attente de confirmation ou désactiver", "warning");
+                return false;
+            }
+            // ne pas envoyer le mail s'il y a encore un founisseur en attente
+            if (this.error) {
+                Swal.fire("Désolé", "Vous ne pouvez pas envoyer par mail ce devis pour l'instant. Veuillez bien vérifier l'articles des fournisseurs. Merci", "error");
+                return false;
+            }
         }
 
-        // Ne pas envoyer le devis si le compte particulier est en attente
-        if (this.ownerClient.pending == 1 || this.ownerClient.disable == 1) {
-            Swal.fire('Désolé', "Le client est en attente de confirmation ou désactiver", "warning");
-            return false;
-        }
-        // ne pas envoyer le mail s'il y a encore un founisseur en attente
-        if (this.error) {
-            Swal.fire("Désolé", "Vous ne pouvez pas envoyer par mail ce devis pour l'instant. Veuillez bien vérifier l'articles des fournisseurs. Merci", "error");
-            return false;
-        }
         this.QtItems = _.map(this.QtItems, item => {
             // Mettre le prix unitaire pour 0 par default
             // (Le prix sera regenerer automatiquement par woocommerce)
@@ -115,7 +119,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             if (_.isUndefined(article)) return schema;
             // "marge" appartient au produit woocommerce
             // Cette valeur est herité depuis le post type 'product'
-            schema.marge = parseInt(article.marge);
+            schema.marge = parseInt(article.marge, 10);
             schema.marge_dealer = parseInt(article.marge_dealer, 10);
             schema.marge_particular = parseInt(article.marge_particular, 10);
 
@@ -125,34 +129,38 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             return schema;
         });
 
-        // Vérifier si la date de revision est périmé
-        _.map(ARTICLES, (a) => {
-            let dateReview: any = moment(a.date_review);
-            let dateLimit: any = moment().subtract(1, 'days');
-            if ( dateLimit > dateReview &&  this.order.status !== 'completed') {
-                this.error = true;
+        // Envoyer et Terminer
+        if (!_.includes([1, 3], parseInt(this.order.position, 10))) {
+            // Vérifier si la date de revision est périmé
+            _.map(ARTICLES, (a) => {
+                let dateReview: any = moment(a.date_review);
+                let dateLimit: any = moment().subtract(1, 'days');
+                if (dateLimit > dateReview && this.order.status !== 'completed') {
+                    this.error = true;
+                }
+            });
+
+            if (this.error) {
+                $('.modal').modal('hide');
+                Helpers.setLoading(false);
+                this.cd.detectChanges();
+                setTimeout(() => {
+                    Swal.fire('Désolé', "Article en attente détecté. Veuillez mettre à jours l'article", 'error');
+                }, 600);
+
+                return false;
             }
-        });
-
-        if (this.error) {
-            $('.modal').modal('hide');
-            Helpers.setLoading(false);
-            this.cd.detectChanges();
-            setTimeout(() => {
-                Swal.fire('Désolé', "Article en attente détecté. Veuillez mettre à jours l'article", 'error');
-            }, 600);
-
-            return false;
         }
+        
 
         this.QtItems = _.map(this.Items, product => {
             // Récuperer tous les meta utiliser pour le produit
             let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: product.product_id });
-            const allPriceForItem = _.map(SCHEMAS, (schema) => schema.price);
-            
-            const metaDataSuppliers: any = _.find(product.meta_data, {key: 'suppliers'} as any);
-            const metaDataSuppliersValue =  JSON.parse(metaDataSuppliers.value);
-            const allTakeForItem = _.map(metaDataSuppliersValue, (supplier) => parseInt(supplier.get, 10));
+            const allPriceForItem = _.map(SCHEMAS, schema => schema.price);
+
+            const metaDataSuppliers: any = _.find(product.meta_data, { key: 'suppliers' } as any);
+            const metaDataSuppliersValue = JSON.parse(metaDataSuppliers.value);
+            const allTakeForItem = _.map(metaDataSuppliersValue, supplier => parseInt(supplier.get, 10));
 
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
             const take = _.sum(allTakeForItem);
@@ -172,14 +180,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 Swal.fire('Désolé', 'Quantité ajouter incorrect', 'error');
                 return product;
             }
-            
+
             return product;
         });
-        console.log('Items:')
-        console.log(this.Items);
-
-        console.log('QtItems:')
-        console.log(this.QtItems);
 
         let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return parseInt(item.total, 10); });
         this.Billing.subtotal = _.sum(totalItemsArray);

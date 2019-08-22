@@ -137,7 +137,7 @@ export class QuotationEditComponent implements OnInit {
                ],
                initComplete: () => {
 
-                  // Modifier une article
+                  // Gerer une article
                   $('#quotation-edit-table tbody').on('click', '.edit-item', e => {
                      e.preventDefault();
                      this.designationTrigger = e.currentTarget;
@@ -145,6 +145,7 @@ export class QuotationEditComponent implements OnInit {
                      const item = this.Table.row(el).data();
                      this.Item = _.cloneDeep(item); // Contient l'item en cours de traitement
                      Helpers.setLoading(true);
+                     // Récuperer tous les articles de ce produit
                      this.WPAPI
                         .fz_product()
                         .context('edit')
@@ -347,7 +348,6 @@ export class QuotationEditComponent implements OnInit {
     * Enregistrer le meta data pour les produits dans la commande
     */
    onSaveQuotationPdt() {
-      console.log(this.objectMeta);
       if (_.isEmpty(this.Item) || _.isEmpty(this.objectMeta)) return false;
       Helpers.setLoading(true);
       this.loading = true;
@@ -384,7 +384,7 @@ export class QuotationEditComponent implements OnInit {
 
                meta.value = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
 
-            } else {
+            } else if (meta.key === 'suppliers') {
                meta.value = JSON.stringify(this.objectMeta);
             }
             return meta;

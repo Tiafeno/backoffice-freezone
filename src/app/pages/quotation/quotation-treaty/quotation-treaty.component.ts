@@ -73,7 +73,7 @@ export class QuotationTreatyComponent implements OnInit {
         },
         {
           data: 'date_add', render: (data) => {
-            return moment(data.date).fromNow();
+            return moment(data.date).format('LLL');
           }
         },
         {

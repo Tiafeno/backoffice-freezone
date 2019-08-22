@@ -171,11 +171,12 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          const response: any = _.clone(resp);
          const data: any = response.data;
          this.pendingArticle = _.clone(data);
+         // Ajouter les quantité et les prix
          for (let item of data) {
             this.formArticleArray.push(new FormGroup({
                title: new FormControl(item.title.rendered),
-               price: new FormControl(0),
-               qty: new FormControl(0),
+               price: new FormControl(parseInt(item.price, 10)),
+               qty: new FormControl(parseInt(item.total_sales, 10)),
                article_id: new FormControl(item.id, Validators.required)
             }));
          }

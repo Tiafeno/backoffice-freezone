@@ -70,6 +70,10 @@ import { ArticlesComponent } from './pages/supplier/articles/articles.component'
 import { BenefitPipe } from './pipes/benefit.pipe';
 import { ModuloMailTemplateComponent } from './components/modulo-mail-template/modulo-mail-template.component';
 import { CarouselComponent } from './pages/carousel/carousel.component';
+import { FaqClientComponent } from './pages/faq-client/faq-client.component';
+import { FaqClientAddComponent } from './pages/faq-client/faq-client-add/faq-client-add.component';
+import { FaqClientEditComponent } from './pages/faq-client/faq-client-edit/faq-client-edit.component';
+import { FaqClientsComponent } from './pages/faq-client/faq-clients/faq-clients.component';
 
 
 const routes: Routes = [
@@ -107,6 +111,17 @@ const routes: Routes = [
                 path: 'carousel',
                 canActivate: [NoCommercialAccessGuard],
                 component: CarouselComponent
+            },
+            {
+                path: 'faq-client',
+                canActivate: [NoCommercialAccessGuard],
+                component: FaqClientComponent,
+                children: [
+                    { path: '', redirectTo: 'view', pathMatch: 'full' },
+                    { path: 'view', component: FaqClientsComponent },
+                    { path: 'edit', component: FaqClientEditComponent },
+                    { path: 'add', component: FaqClientAddComponent }
+                ]
             },
             {
                 path: 'sav',
@@ -302,6 +317,10 @@ const routes: Routes = [
         EditArticleDescriptionComponent,
         CarouselComponent,
         ArticlesComponent,
+        FaqClientComponent,
+        FaqClientAddComponent,
+        FaqClientEditComponent,
+        FaqClientsComponent,
         MomentsPipe,
         BenefitPipe
     ],

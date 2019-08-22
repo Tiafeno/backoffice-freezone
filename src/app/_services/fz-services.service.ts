@@ -63,9 +63,10 @@ export class FzServicesService {
     });
   }
 
-  public getBenefit(price: any, marge: any): number {
+  public getBenefit(price: any, marge: any, discount?: number): number {
     const _price = parseInt(price, 10);
     const _marge = parseInt(marge, 10);
+    const _discount = 0;
     const Y: number = 1 - (_marge / 100);
     const result: number = _price / Y;
     /**
@@ -84,7 +85,7 @@ export class FzServicesService {
         let $value = this.setCharAt(valueS, position, 0);
         $value = this.setCharAt($value, position + 1, 0)
 
-        return parseInt($value) + 100;
+        return parseInt($value, 10) + 100;
       } else {
         return value;
       }
