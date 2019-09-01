@@ -7,14 +7,16 @@ import { LayoutModule } from './layouts/layout.module';
 import { ScriptLoaderService } from './_services/script-loader.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { JwtInterceptorService } from './_services/jwt-interceptor.service';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
+    FormsModule,
     AppRoutingModule,
     LayoutModule,
   ],

@@ -1,0 +1,49 @@
+<div class="page-content fade-in-up">
+
+  <div class="row">
+    <div class="col-lg-10">
+      <div class="ibox ibox-fullheight">
+        <div class="ibox-head">
+          <div class="flexbox-b mb-5 mt-5">
+            <span class="mr-4 static-badge badge-pink"><i class="ti-layout-media-center font-36"></i></span>
+            <div>
+              <h5 class="font-strong">Slider</h5>
+              <div class="text-light"></div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="mb-3">
+              <span>
+                <button class="btn btn-sm btn-primary" (click)="viewForm = !viewForm" type="button">Ajouter un slide</button>
+              </span>
+            </div>
+            <div id="upload" *ngIf="viewForm">
+              <form [formGroup]="FormUpload" (ngSubmit)="uploadMedia()">
+                <input type="file" (change)="onFileChange($event)" accept="image/*" />
+                <button type="submit" class="btn btn-sm btn-success" >Ajouter</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="ibox-body">
+          <div class="">
+            <table class="table table-hover" id="carousel-table">
+              <thead class="thead-default thead-lg">
+                <tr>
+                  <th class="pl-4">#</th>
+                  <th>Image</th>
+                  <th>Date</th>
+                  <th class="pr-4"></th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+    </div>
+  </div>
+</div>

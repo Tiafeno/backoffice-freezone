@@ -3,10 +3,8 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnChanges,
   OnInit,
-  Output,
-  SimpleChanges
+  Output
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import * as _ from 'lodash';
@@ -20,7 +18,7 @@ declare var $: any;
   templateUrl: './status-article.component.html',
   styleUrls: ['./status-article.component.css']
 })
-export class StatusArticleComponent implements OnInit, OnChanges {
+export class StatusArticleComponent implements OnInit {
   public Form: FormGroup;
   public inputStatus: Array<object> = [
     { key: '', value: '-- Selectionnez --' },
@@ -30,8 +28,23 @@ export class StatusArticleComponent implements OnInit, OnChanges {
   ];
   private Woocommerce: any;
   private Wordpress: any;
+  private _article: any;
   @Output() refresh = new EventEmitter();
-  @Input() article: any = null;
+
+  @Input() 
+  set article(value: any){
+    this._article = _.clone(value);
+    if (_.isObject(value)) {
+      const currentStatus: any = _.find(this.inputStatus, { key: value.product_status });
+      this.Form.patchValue({ status: currentStatus.key });
+    }
+    this.cd.detectChanges();
+  }
+
+  get article(): any {
+    return this._article;
+  }
+
   constructor(
     private apiWC: ApiWoocommerceService,
     private apiWP: ApiWordpressService,
@@ -45,15 +58,6 @@ export class StatusArticleComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    const article: any = changes.article.currentValue;
-    if (_.isObject(article)) {
-      const currentStatus: any = _.find(this.inputStatus, { key: article.product_status });
-      this.Form.patchValue({ status: currentStatus.key });
-      this.cd.detectChanges();
-    }
   }
 
   onSubmit(): void | boolean {

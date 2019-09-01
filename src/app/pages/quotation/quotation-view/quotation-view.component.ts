@@ -5,6 +5,7 @@ import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
 import * as moment from 'moment';
+import { FzServicesService } from '../../../_services/fz-services.service';
 declare var $: any;
 
 @Component({
@@ -21,7 +22,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public Billing: any = {};
     public billingAdress: any = {}; // adresse de facturation
     public shippingAdress: any = {}; // adresse de facturation
-    public loading: boolean = false;
     public ownerClient: any = {};
 
     private Woocommerce: any;
@@ -29,13 +29,13 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     private supplierSchema: Array<any> = [];
     private error: boolean = false;
     private Tax: number = 20; // Tax de 20%
-
-    @Input() order: any;
+    @Input() public order: any;
 
     constructor(
         private apiWC: ApiWoocommerceService,
         private apiWP: ApiWordpressService,
-        private cd: ChangeDetectorRef
+        private cd: ChangeDetectorRef,
+        private services: FzServicesService
     ) {
         this.Woocommerce = this.apiWC.getWoocommerce();
         this.Wordpress = this.apiWP.getWPAPI();
@@ -48,20 +48,36 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     ngAfterViewInit() {
         $("#quotation-view-modal")
             .on('show.bs.modal', e => {
-              this.onShowModal();
+                this.onShowModal();
             })
             .on('hide.bs.modal', e => {
-              this.QtItems = [];
-              this.Billing = {};
-              this.supplierSchema = [];
-        });
+                this.QtItems = [];
+                this.Billing = {};
+                this.supplierSchema = [];
+            });
     }
 
     public onSendMail(): void | boolean {
-        if (this.error) {
-            Swal.fire("Désolé", "Vous ne pouvez pas envoyer par mail ce devis pour l'instant. Veuillez bien vérifier l'articles des fournisseurs. Merci", "error");
-            return false;
+        // Envoyer et Terminer
+        if (!_.includes([1, 3], parseInt(this.order.position, 10))) {
+            // Ne pas envoyer le devis si le client est toujours en attente
+            if (!_.isEmpty(this.ownerClient.company_name) && this.ownerClient.company_status === "pending") {
+                Swal.fire('Désolé', "L'entreprise est en attente de confirmation", "warning");
+                return false;
+            }
+
+            // Ne pas envoyer le devis si le compte particulier est en attente
+            if (this.ownerClient.pending == 1 || this.ownerClient.disable == 1) {
+                Swal.fire('Désolé', "Le client est en attente de confirmation ou désactiver", "warning");
+                return false;
+            }
+            // ne pas envoyer le mail s'il y a encore un founisseur en attente
+            if (this.error) {
+                Swal.fire("Désolé", "Vous ne pouvez pas envoyer par mail ce devis pour l'instant. Veuillez bien vérifier l'articles des fournisseurs. Merci", "error");
+                return false;
+            }
         }
+
         this.QtItems = _.map(this.QtItems, item => {
             // Mettre le prix unitaire pour 0 par default
             // (Le prix sera regenerer automatiquement par woocommerce)
@@ -87,7 +103,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
      * Cette fonction sera exécuter quand la boit de dialogue s'affiche
      */
     public async onShowModal() {
-        this.loading = true;
         this.error = false;
         this.cd.detectChanges();
         Helpers.setLoading(true);
@@ -99,77 +114,77 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.supplierSchema = await this.loadSchema();
         this.supplierSchema = _.flatten(this.supplierSchema);
         this.supplierSchema = _.map(this.supplierSchema, schema => {
-            let supplierId: number = parseInt(schema.supplier);
-            let article: any = _.find(ARTICLES, { user_id: supplierId });
+            const articleId: number = parseInt(schema.article_id);
+            const article: any = _.find(ARTICLES, { id: articleId });
             if (_.isUndefined(article)) return schema;
             // "marge" appartient au produit woocommerce
             // Cette valeur est herité depuis le post type 'product'
-            schema.marge = parseInt(article.marge);
+            schema.marge = parseInt(article.marge, 10);
             schema.marge_dealer = parseInt(article.marge_dealer, 10);
-            schema.price = parseInt(article.price);
+            schema.marge_particular = parseInt(article.marge_particular, 10);
+
+            let price = parseInt(article.price);
+            schema.price = price;
 
             return schema;
         });
 
-        // Vérifier si la date de revision est périmé
-        _.map(ARTICLES, (a) => {
-            let dateReview: any = moment(a.date_review);
-            let dateLimit: any = moment().subtract(2, 'day');
-            if ( dateLimit > dateReview ) {
-                this.error = true;
+        // Envoyer et Terminer
+        if (!_.includes([1, 3], parseInt(this.order.position, 10))) {
+            // Vérifier si la date de revision est périmé
+            _.map(ARTICLES, (a) => {
+                let dateReview: any = moment(a.date_review);
+                let dateLimit: any = moment().subtract(1, 'days');
+                if (dateLimit > dateReview && this.order.status !== 'completed') {
+                    this.error = true;
+                }
+            });
+
+            if (this.error) {
+                $('.modal').modal('hide');
+                Helpers.setLoading(false);
+                this.cd.detectChanges();
+                setTimeout(() => {
+                    Swal.fire('Désolé', "Article en attente détecté. Veuillez mettre à jours l'article", 'error');
+                }, 600);
+
+                return false;
             }
-        });
-
-        if (this.error) {
-            $('.modal').modal('hide');
-            Helpers.setLoading(this.loading = false);
-            this.cd.detectChanges();
-            setTimeout(() => {
-                Swal.fire('Désolé', "Article en attente détecté. Veuillez mettre à jours l'article", 'error');
-            }, 600);
-
-            return false;
         }
+        
 
         this.QtItems = _.map(this.Items, product => {
             // Récuperer tous les meta utiliser pour le produit
             let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: product.product_id });
-            const allPriceForItem = _.map(SCHEMAS, (schema) => parseInt(schema.price));
-            
-            const metaDataSuppliers: any = _.find(product.meta_data, {key: 'suppliers'} as any);
-            const metaDataSuppliersValue =  JSON.parse(metaDataSuppliers.value);
-            const allTakeForItem = _.map(metaDataSuppliersValue, (supplier) => parseInt(supplier.get, 10));
+            const allPriceForItem = _.map(SCHEMAS, schema => schema.price);
+
+            const metaDataSuppliers: any = _.find(product.meta_data, { key: 'suppliers' } as any);
+            const metaDataSuppliersValue = JSON.parse(metaDataSuppliers.value);
+            const allTakeForItem = _.map(metaDataSuppliersValue, supplier => parseInt(supplier.get, 10));
 
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
             const take = _.sum(allTakeForItem);
             if (take === 0) {
                 $('.modal').modal('hide');
-                Helpers.setLoading(this.loading = false);
+                Helpers.setLoading(false);
                 Swal.fire('Désolé', "Fournisseur non definie détecté", 'error');
+                return product;
             }
             // Récuperer le prix le plus grand pour chaque fournisseur ajouter
             const price = _.max(allPriceForItem);
+            // Vérifier le prix et la quantité ajouter
             if (_.isUndefined(price) || product.quantity > take) {
                 product.stock = product.total = product.subtotal = product.price = 0;
+
+                $('.modal').modal('hide');
+                Swal.fire('Désolé', 'Quantité ajouter incorrect', 'error');
                 return product;
             }
-            this.error = false;
-            const _marge = _.find(SCHEMAS, schema => { return schema.price === price; }).marge;
-            const _marge_dealer = _.find(SCHEMAS, schema => { return schema.price === price; }).marge_dealer;
-            const marge: number = parseInt(this.ownerClient.role_office, 10) === 2 ? _marge_dealer : _marge;
-            const benefit: number = (price * marge) / 100;
-            let total: number = (price + benefit) * take;
-            total = Math.round(total);
-
-            product.stock = _.clone(take);
-            product.total = total.toString();
-            product.subtotal = total.toString();
-            product.price = Math.round(total / product.quantity);
 
             return product;
         });
 
-        let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return item.total; });
+        let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return parseInt(item.total, 10); });
         this.Billing.subtotal = _.sum(totalItemsArray);
         this.Billing.total = _.sum(totalItemsArray);
 
@@ -177,7 +192,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.Billing.price_tax = priceTax;
         this.Billing.total_tax = parseInt(this.Billing.subtotal) + priceTax;
 
-        this.loading = false;
         this.cd.detectChanges();
 
         Helpers.setLoading(false);
@@ -205,7 +219,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
     getUsers(ids: string): Promise<any> {
         return new Promise(resolve => {
-            this.Wordpress.users().include(ids).then(users => {
+            this.Wordpress.users().include(ids).context('edit').then(users => {
                 resolve(users);
             }).catch(err => { resolve([]); });
         });

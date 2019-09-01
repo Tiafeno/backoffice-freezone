@@ -1,0 +1,164 @@
+<style type="text/css">
+  .form-control {
+    font-family: inherit;
+  }
+
+</style>
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="ibox ibox-fullheight">
+        <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
+          <p class="lea pb-0 font-bold">Modification</p>
+          <div *ngIf="reference" class=" mb-4">
+            <span class="badge badge-success font-20">{{reference}}</span>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group mb-4 row">
+                <label class="col-sm-4 col-form-label">Type de client</label>
+                <div class="col-sm-8 d-flex align-items-center">
+                  <label class="radio radio-grey radio-primary radio-inline">
+                    <input type="radio" formControlName="client" [value]="1" checked="">
+                    <span class="input-span"></span>Particulier</label>
+                  <label class="radio radio-grey radio-primary radio-inline">
+                    <input type="radio" formControlName="client" [value]="2">
+                    <span class="input-span"></span>Entreprise ou société</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Produit</label>
+                <input class="form-control" autocomplete="off" formControlName="product" type="text" id="product" placeholder="">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Marque</label>
+                <input class="form-control" autocomplete="off" formControlName="mark" type="text" id="mark"
+                  placeholder="">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Status du produit</label>
+
+                <select formControlName="status_product" class="form-control">
+                  <option [value]="item.value" *ngFor="let item of savProductStatus">{{item.label}}</option>
+                </select>
+                <div *ngIf="f.status_product.errors && f.status_product.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Fournisseur du produit</label>
+                <select formControlName="product_provider" class="form-control">
+                  <option value="">-- Selectionner un le fournisseur --</option>
+                  <option value="1">Free Zone</option>
+                  <option value="2">Autre fournisseur</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row" *ngIf="statusProduct.value == 1 && providerProduct.value == 1">
+            <div class="col-sm-4">
+              <div class="form-group mb-4">
+                <label class="font-light">Date d’achat</label>
+                <input class="form-control" autocomplete="off" formControlName="date_purchase" id="date_purchase"
+                  name="stdate_purchaseatus" type="date" placeholder="">
+                <div *ngIf="f.date_purchase.errors && f.date_purchase.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-4">
+              <div class="form-group mb-4">
+                <label class="font-light">Numéro de la facture</label>
+                <input class="form-control" autocomplete="off" formControlName="bill" id="bill" type="text"
+                  placeholder="">
+                <div *ngIf="f.bill.errors && f.bill.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-4">
+              <div class="form-group mb-4">
+                <label class="font-light">Numéro de série</label>
+                <input class="form-control" autocomplete="off" formControlName="serial_number" id="serial_number" type="text" placeholder="">
+                <div *ngIf="f.serial_number.errors && f.serial_number.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label class="font-light">Identification de la demande</label>
+                <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="description"
+                   [init]="tinyMCESettings"></editor>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Devis Réf</label>
+                <input class="form-control" autocomplete="off" formControlName="quotation_ref" type="text" id="quotation_ref" 
+                  placeholder="">
+              </div>
+            </div>
+          </div>
+
+          <div class="ibox-footer row">
+              <div class="col-sm-10">
+                  <button class="btn btn-primary mr-2" type="submit">Mettre à jour</button>
+                  <a class="btn btn-secondary" [routerLink]="['/sav']" routerLinkActive="active">Annuler</a>
+              </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="ibox-body">
+            <h5 class="font-strong mb-4">INFORMATION GENERAL DU CLIENT</h5>
+            <div class="row mb-2">
+                <div class="col-6 text-muted">Nom:</div>
+                <div class="col-6">{{Author.first_name}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6 text-muted">Prénom:</div>
+                <div class="col-6">{{Author.last_name}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6 text-muted">Téléphone:</div>
+                <div class="col-6">{{Author.phone}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6 text-muted">Adresse:</div>
+                <div class="col-6">{{Author.address}}</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6 text-muted">Email:</div>
+                <div class="col-6">{{Author.email}}</div>
+            </div>
+        </div>
+        <div class="ibox-footer">
+          <a class="btn btn-sm btn-primary" [routerLink]="['/sav', ID, 'mail']" routerLinkActive="active" >Envoyer un mail</a>
+        </div>
+    </div>
+  </div>
+</div>

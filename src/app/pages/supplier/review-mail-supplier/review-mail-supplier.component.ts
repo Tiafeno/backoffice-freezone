@@ -1,11 +1,14 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { FormGroup, FormControl, Validators, FormArray } from '@angular/forms';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { HttpClient } from '@angular/common/http';
 import { config } from '../../../../environments/environment';
 import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
+import { ModuloMailTemplateComponent } from '../../../components/modulo-mail-template/modulo-mail-template.component';
+import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import * as RSVP from 'rsvp';
 declare var $: any;
 
 @Component({
@@ -15,10 +18,11 @@ declare var $: any;
 })
 export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    public Fournisseur: any = {};
+   public FormEditor: Array<any> = [];
    public email = 'contact@freezone.click';
    public pendingArticle: Array<any> = [];
    @Input() supplier: any = {};
-
+   public updateForm: FormGroup;
    public Form: FormGroup;
    public tinyMCESettings: any = {
       language_url: '/assets/js/langs/fr_FR.js',
@@ -37,35 +41,87 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       toolbar: 'undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',
       plugins: ['lists'],
    };
+   private Wordpress: any;
+   @ViewChild(ModuloMailTemplateComponent) MailTemplate: ModuloMailTemplateComponent;
    constructor(
-      private Http: HttpClient
+      private Http: HttpClient,
+      private apiWP: ApiWordpressService,
+      private cd: ChangeDetectorRef
    ) {
       this.Form = new FormGroup({
          subject: new FormControl('', Validators.required),
          message: new FormControl('', Validators.required),
          articles: new FormControl('', Validators.required),
-         mail_logistics_cc:  new FormControl(false),
+         mail_logistics_cc: new FormControl(false),
          mail_commercial_cc: new FormControl(false),
       });
-      this.Fournisseur.data = {};
+
+      this.updateForm = new FormGroup({
+         articles: new FormArray([
+         ])
+      });
+
+      this.Wordpress = this.apiWP.getWordpress();
+   }
+
+   get formArticleArray() {
+      return this.updateForm.get('articles') as FormArray;
    }
 
    ngOnInit() {
       $("#send-mail-modal").on('hide.bs.modal', e => {
-         this.Form.patchValue({
-            subject: '',
-            message: '',
-            articles: [],
-            mail_logistics_cc: false,
-            mail_commercial_cc: false
+         this.Form.patchValue({ message: '' });
+         this.Form.reset();
+         this.updateForm.reset();
+         this.updateForm = new FormGroup({
+            articles: new FormArray([
+            ])
          });
+         this.cd.detectChanges();
       });
+
    }
 
    ngOnChanges(changes: SimpleChanges) {
       if (_.isObject(changes.supplier.currentValue) && !_.isEmpty(changes.supplier.currentValue)) {
          this.Fournisseur = changes.supplier.currentValue;
          // TODO: Ajouter un objet et un message par default pour le mail
+      }
+
+      console.log(changes);
+   }
+
+   onAddTemplateMail(predefined: any) {
+      console.log(predefined);
+      this.Form.patchValue({
+         subject: predefined.subject,
+         message: predefined.message
+      });
+      this.cd.detectChanges();
+   }
+
+   onSubmitFx() {
+      let updateArticles: Array<any> = [];
+      if (this.updateForm.valid) {
+         const Value: any = this.updateForm.value;
+         const articles: any = Value.articles;
+         for (let article of articles) {
+            updateArticles.push(this.Wordpress.fz_product().id(article.article_id).update({
+               price: article.price.toString(),
+               total_sales: article.qty,
+               date_review: moment().format('YYYY-MM-DD HH:mm:ss')
+            }));
+         }
+         Helpers.setLoading(true);
+         RSVP.all(updateArticles).then(function (posts) {
+            // posts contains an array of results for the given promises
+            Helpers.setLoading(false);
+            Swal.fire('Succès', "Tous les articles sont à jours. Veuillez actualiser les resultats", 'success');
+            $('.modal').modal('hide');
+         }).catch(function (reason) {
+            // if any of the promises fails.
+            Swal.fire('Désolé', "Une erreru s'est produit pendant la mise à jour", 'warning');
+         });
       }
    }
 
@@ -81,7 +137,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          Form.append('articles', Value.articles);
          Form.append('cc', _.join(ccLists, ','));
          Helpers.setLoading(true);
-         this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.ID}`, Form).subscribe(result => {
+         this.Http.post<any>(`${config.apiUrl}/mail/review/${this.Fournisseur.id}`, Form).subscribe(result => {
             Helpers.setLoading(false);
             const response: any = _.clone(result);
             if (response.success) {
@@ -107,32 +163,26 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    }
 
    openDialog(supplierid: number) {
-      const args: any = {
-         post_type: 'fz_product',
-         post_status: 'publish',
-         posts_per_page: -1,
-         meta_query: [
-            {
-               key: 'date_review',
-               value: moment().subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
-               compare: '<',
-               type: 'DATETIME'
-            },
-            {
-               key: 'user_id',
-               value: supplierid,
-               compare: '='
-            }
-         ]
-      };
       const Form: FormData = new FormData();
-      Form.append('args', JSON.stringify(args));
+      Form.append('supplierid', supplierid.toString());
       Helpers.setLoading(true);
-      this.Http.post<any>(`${config.apiUrl}/fz_product/query`, Form).subscribe(resp => {
+      this.Http.post<any>(`${config.apiUrl}/fz_product/review_articles`, Form).subscribe(resp => {
          Helpers.setLoading(false);
          const response: any = _.clone(resp);
          const data: any = response.data;
-         this.pendingArticle = data;
+         this.pendingArticle = _.clone(data);
+         // Ajouter les quantité et les prix
+         for (let item of data) {
+            this.formArticleArray.push(new FormGroup({
+               title: new FormControl(item.title.rendered),
+               price: new FormControl(parseInt(item.price, 10)),
+               qty: new FormControl(parseInt(item.total_sales, 10)),
+               article_id: new FormControl(item.id, Validators.required)
+            }));
+         }
+         const reviewArticles: Array<number> = _.map(data, (item) => { return item.id; });
+         this.Form.patchValue({ articles: reviewArticles });
+         this.cd.detectChanges();
          $('#send-mail-modal').modal('show');
       });
    }

@@ -10,41 +10,52 @@
     <div class="">
         <div class="ibox-body">
             <div class="row mb-5 pb-3">
-                <div class="col-6">
-                    <h5 class="font-strong mb-3">FACTURE DE</h5>
-                    <h5 class="font-strong text-success mb-3">Freezone</h5>
-                </div>
+                <div class="col-6"></div>
                 <div class="col-6 text-right">
-                    <h5 class="font-strong mb-3">FACTURE À</h5>
-                    <h5 class="font-strong text-success mb-3">{{billingAdress.first_name}} {{billingAdress.last_name}}</h5>
-                    <div class="text-light">{{billingAdress.address_1}}, {{billingAdress.postcode}} {{billingAdress.city}}.</div>
-                    <div class="text-light">{{billingAdress.email}}</div>
-                    <div class="text-light mb-4">{{billingAdress.phone}}</div>
+                    <h5 class="font-strong text-success mb-3" *ngIf="!ownerClient.company_name">
+                      {{ownerClient.first_name}} {{ownerClient.last_name}}
+                    </h5>
+                    <h5 class="font-strong text-success mb-3" *ngIf="ownerClient.company_name">
+                        {{ownerClient.company_name}}
+                    </h5>
+                    <div class="text-light">{{ownerClient.address}}, {{billingAdress.postcode}} {{billingAdress.city}}.</div>
+                    <div class="text-light">{{ownerClient.email}}</div>
+                    <div class="text-light mb-4">{{ownerClient.phone}}</div>
 
-                    <div class="row mb-2">
+                    <div class="row mb-2" *ngIf="ownerClient.stat">
                       <div class="col-6 text-muted">STAT:</div>
                       <div class="col-6">{{ownerClient.stat}}</div>
                     </div>
 
-                    <div class="row mb-2">
+                    <div class="row mb-2" *ngIf="ownerClient.nif">
                       <div class="col-6 text-muted">NIF:</div>
                       <div class="col-6">{{ownerClient.nif}}</div>
                     </div>
 
-                    <div class="row mb-2">
+                    <div class="row mb-2" *ngIf="ownerClient.rc">
                       <div class="col-6 text-muted">RC:</div>
                       <div class="col-6">{{ownerClient.rc}}</div>
                     </div>
 
-                    <div class="row mb-2">
+                    <div class="row mb-2" *ngIf="ownerClient.cif">
                       <div class="col-6 text-muted">CIF:</div>
                       <div class="col-6">{{ownerClient.cif}}</div>
+                    </div>
+
+                    <div class="row mb-2" *ngIf="ownerClient.cin">
+                      <div class="col-6 text-muted">CIN:</div>
+                      <div class="col-6">{{ownerClient.cin}}</div>
+                    </div>
+
+                    <div class="row mb-2" *ngIf="ownerClient.date_cin">
+                      <div class="col-6 text-muted">Date de délivrance:</div>
+                      <div class="col-6">{{ownerClient.date_cin}}</div>
                     </div>
 
                 </div>
             </div>
             <div class="ibox-block">
-                <table class="table mb-0" *ngIf="!loading">
+                <table class="table mb-0">
                     <thead class="thead-default thead-lg">
                         <tr>
                             <th class="pl-4">Désignation</th>
@@ -102,6 +113,6 @@
 </div>
 <div class="modal-footer justify-content-between bg-primary-50">
   <div>
-    <button class="btn btn-primary btn-rounded mr-3" [disabled]="loading" (click)="onSendMail()">Envoyer par email</button>
+    <button class="btn btn-primary btn-rounded mr-3" [disabled]="(order && order.status === 'completed') || order.position == 1" (click)="onSendMail()">Envoyer par email</button>
   </div>
 </div>

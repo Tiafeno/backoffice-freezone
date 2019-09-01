@@ -20,10 +20,11 @@
             <table class="table">
               <thead style="background-color: lavender;">
                 <tr>
+                  <th>Image</th>
                   <th>Designation</th>
                   <th>Statut</th>
-                  <th>Prix Fmg</th>
-                  <th>Prix AR</th>
+                  <th>Prix</th>
+                  <th>Prix P.</th>
                   <th>%UF</th>
                   <th>Prix UF</th>
                   <th>%R</th>
@@ -34,7 +35,12 @@
               </thead>
               <tbody>
                 <tr *ngFor="let article of Products">
-                  <td width="325"><a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
+                  <td>
+                    <img class="mr-3 update-thumbnail" [attr.data-product]="article.product_id" [attr.data-article]="article.id"
+                    [src]="article.product_thumbnail.src" alt="image" width="60">
+                  </td>
+                  <td width="250">
+                    <a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
                   </td>
                   <td><span class="badge"
                             [ngClass]="{'badge-blue': article.product_status === 'publish',
@@ -44,22 +50,26 @@
                     {{article.product_status === 'publish' ? 'PUBLIER' : (article.product_status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                   </td>
 
-                  <td *ngIf="isNumber(article.price)">{{article.price * 5 | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                  <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
 
-                  <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                  <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
+                  <td *ngIf="isNumber(article.price_particular)">{{article.price_particular | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
+                  <td *ngIf="!isNumber(article.price_particular)"><span class="badge badge-default">{{article.price_particular}}</span></td>
 
                   <td>{{article.marge}}</td>
-                  <td>{{article.priceUF | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                  <td>{{article.priceUF | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td>{{article.marge_dealer}}</td>
-                  <td>{{article.price_dealer | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                  <td>{{article.price_dealer | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']"
-                        routerLinkActive="active" class="badge badge-success">
+                        routerLinkActive="active" class="badge badge-info">
                     {{article.supplier.reference}}
                   </a></td>
-                  <td>
-                    <a (click)="onEditArticle(article.id)" class="badge badge-pink text-white">Modifier</a>
+                  <td  width="20">
+                    <div class="row">
+                      <div class="col-6">
+                          <a class="text-light font-16" (click)="onChangeRoute('/articles/edit/' + article.product_id)" ><i class="ti-pencil-alt"></i></a>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -82,7 +92,8 @@
 
       <div class="modal fade" id="edit-article-supplier-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
-          <app-edit-article [Article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
+          
+          <app-edit-article [article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
         </div>
       </div>
 
@@ -95,6 +106,37 @@
       <div class="modal fade" id="status-product-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <app-status-article [article]="articleEdit" (refresh)="onRefreshResults()"></app-status-article>
+        </div>
+      </div>
+
+      <div class="modal fade" id="update-thumbnail-modal" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+          <form class="modal-content" [formGroup]="thumbForm" (ngSubmit)="onSubmitThumbnail()">
+            <div class="modal-header px-4 py-3 bg-primary-400">
+              <div>
+                <h5 class="modal-title text-white">Ajouter/Remplacer une image en avant</h5>
+              </div>
+              <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div class="modal-body p-4">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group mb-4">
+                    <p class="font-strong">Joindre une image</p>
+                    <input type="file" formControlName="image" id="upload-media" />
+                  </div>
+                </div>
+              </div>
+          
+            </div>
+            <div class="modal-footer justify-content-between bg-primary-50">
+              <div>
+                <button class="btn btn-primary btn-rounded mr-3" type="submit">Enregistrer</button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
 

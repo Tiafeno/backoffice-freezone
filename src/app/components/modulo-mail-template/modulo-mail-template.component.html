@@ -1,0 +1,56 @@
+<style type="text/css">
+  #predefined-form {
+    border: 6px solid #4a5ab9;
+    padding: 10px;
+    background: #4a5ab9;
+    color: aliceblue;
+  }
+</style>
+
+<div class="row">
+  <div class="col-sm-6">
+    <div *ngFor="let item of predefined; let i = index">
+      <div class="row">
+        <div class="col-10">
+          <button type="button" class="btn btn-outline-pink btn-block btn-sm" (click)="onSelectTmpl(item.id)">
+            ({{i + 1}}) {{item.title.rendered}}
+          </button>
+        </div>
+        <div class="col-2">
+          <button class="btn btn-sm btn-primary btn-icon-only btn-circle" (click)="onRemoveTmpl(item.id)">
+            <i class="la la-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <button class="btn btn-primary btn-sm btn-block" type="button" (click)="onAddTemplateMail()">Ajouter un
+      predefinie</button>
+  </div>
+</div>
+
+<div class="row" *ngIf="viewForm">
+  <div class="col-12">
+    <div class="ibox-body">
+      <form [formGroup]="Form" (ngSubmit)="onSavePredefined()" id="predefined-form">
+        <div class="form-group mb-4">
+          <label>Sujet</label>
+          <input class="form-control" formControlName="subject" type="text" placeholder="Objet de votre message">
+        </div>
+        <div class="form-group mb-4">
+          <label class="font-light">Message</label>
+          <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="message" name="projet"
+            [init]="tinyMCESettings"></editor>
+        </div>
+        <div class="modal-footer justify-content-between bg-primary-50">
+          <div></div>
+          <div>
+            <button class="btn btn-success mr-3" type="submit">Enregistrer & Masquer</button>
+            <button class="btn btn-secondary mr-3" (click)="onAbordTemplateMail()">Masquer</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

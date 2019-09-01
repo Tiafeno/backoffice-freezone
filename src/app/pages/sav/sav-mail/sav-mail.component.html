@@ -1,0 +1,115 @@
+<style type="text/css">
+.paginationjs {
+    margin-bottom: 40px;
+}
+</style>
+<div class="page-content fade-in-up">
+    <div class="flexbox-b mb-5">
+        <span class="mr-4 static-badge badge-pink"><i class="la la-envelope"></i></span>
+        <div>
+            <h5 class="font-strong">Boites aux lettres commercial</h5>
+            <div class="text-light">{{dataOnlineUser.data.user_email}}</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3 col-md-4">
+            <a class="btn btn-primary btn-block" data-toggle="modal" data-target="#new-mail-modal" href="javascript:;">
+                <span class="btn-icon"><i class="la la-pencil"></i>Nouveau</span>
+            </a>
+        </div>
+        <div class="col-lg-9 col-md-8">
+            <div class="ibox" id="mailbox-container">
+                <div class="flexbox-b p-4">
+                    <h5 class="font-strong m-0 mr-3">MESSAGES</h5>
+                </div>
+                <table class="table table-hover table-inbox" id="table-inbox">
+                    <tbody class="rowlinkx" data-link="row">
+                        <tr [attr.data-id]="i + 1" *ngFor="let mail of Mails; let i = index">
+                            <td class="pl-4">{{mail.sender.last_name}} {{mail.sender.first_name}}</td>
+                            <td>
+                                <a class="d-block" 
+                                (click)="openViewMail($event, mail)"
+                                 data-toggle="modal"
+                                 data-target="#mail-view-modal" [innerHTML]="mail.content.rendered"></a>
+                            </td>
+                            <td></td>
+                            <td class="text-right">{{mail.date}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="inner-left preview pb-4" id="pagination">
+                    <div class="paginationjs">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="new-mail-modal">
+        <div class="modal-dialog" role="document">
+            <form class="modal-content" [formGroup]="formNewMail" (ngSubmit)="onSubmitNewMail()">
+                <div class="modal-header p-4">
+                    <h5 class="modal-title">NEW MESSAGE</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="flexbox mb-4">
+                        <span class="btn-icon-only btn-circle bg-primary-50 text-primary mr-3"><i class="ti-support"></i></span>
+                        <div class="flex-1 d-flex">
+                            <div class="flex-1">
+                                <span class="text-muted mr-2">From:</span>
+                                <div>{{dataOnlineUser.data.user_email}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        <input class="form-control form-control-line" type="text" formControlName="subject" placeholder="Enter Subject">
+                    </div>
+                    <div class="form-group mb-4">
+                        <textarea class="form-control form-control-line" rows="4" formControlName="message" placeholder="Enter Message"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between bg-primary-50">
+                    <div>
+                        <button class="btn btn-primary mr-3" type="submit">Envoyer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="mail-view-modal">
+        <div class="modal-dialog" role="document" *ngIf="viewMail">
+            <div class="modal-content">
+                <div class="modal-header px-4 py-3 bg-primary-400">
+                    <div>
+                        <h5 class="modal-title text-white">{{viewMail.sender.first_name}} {{viewMail.sender.last_name}}</h5></div>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex mb-4">
+                        <div class="flex-1 d-flex">
+                            <div class="flex-1">
+                                <div class="font-strong font-16">{{viewMail.title.rendered}}</div>
+                                <div>{{viewMail.sender.first_name}} {{viewMail.sender.last_name}}
+                                    <span class="text-muted ml-2">{{viewMail.sender.email}}</span>
+                                </div>
+                                <div class="text-muted font-13">{{viewMail.date}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div [innerHTML]="viewMail.content.rendered"></div>
+                </div>
+                <div class="modal-footer justify-content-between bg-primary-50">
+                    <div>
+                        <button class="btn btn-secondary btn-rounded mr-3" data-dismiss="modal" aria-label="Close">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

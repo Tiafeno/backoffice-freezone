@@ -56,13 +56,13 @@ export class ReviewSupplierComponent implements OnInit {
           }
         },
         {
-          data: 'data', render: (data) => {
-            return `<a href="mailto:${data.user_email}" >${data.user_email}</a>`;
+          data: 'email', render: (data) => {
+            return `<a href="mailto:${data}" >${data}</a>`;
           }
         },
         {
-          data: 'firstname', render: (data, type, row) => {
-            return `${data} ${row.lastname}`;
+          data: 'name', render: (data, type, row) => {
+            return `${data}`;
           }
         },
         {
@@ -83,8 +83,9 @@ export class ReviewSupplierComponent implements OnInit {
         $('#supplier-review-table tbody').on('click', '.send-mail', ev => {
           ev.preventDefault();
           this.selectedSupplier = getElementData(ev);
-          this.Mail.openDialog(this.selectedSupplier.ID);
+          this.Mail.openDialog(this.selectedSupplier.id);
         });
+
       },
       ajax: {
         url: `${config.apiUrl}/supplier/review`,

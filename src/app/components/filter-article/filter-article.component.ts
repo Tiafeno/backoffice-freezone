@@ -13,9 +13,15 @@ export class FilterArticleComponent implements OnInit, OnChanges {
   public Categories: Array<any> = [];
   public Suppliers: Array<any> = [];
   public Status: Array<any> = [
+    { label: "Tous", value: '' },
     { label: "Publier", value: 'publish' },
     { label: "En attente", value: 'pending' },
     { label: "Désactiver", value: 'draft' },
+  ];
+  public filterExpiration: Array<any> = [
+    { label: "Tous", value: '' },
+    { label: "Article à jour", value: 'up' },
+    { label: "Article non à jour", value: 'down' },
   ];
   public filterForm: any = {};
   @Output() search = new EventEmitter();
@@ -45,13 +51,16 @@ export class FilterArticleComponent implements OnInit, OnChanges {
     Helpers.setLoading(true);
     const categories = await this.fzServices.getCategories();
     this.Categories = _.isArray(categories) ? categories : [];
+    this.Categories.unshift({id: 0, name: 'Tous'});
 
     const suppliers = await this.fzServices.getSuppliers();
     this.Suppliers = _.isArray(suppliers) ? suppliers : [];
+    this.Suppliers.unshift({id: 0, company_name: 'Tous', reference: 0});
     Helpers.setLoading(false);
   }
 
   public onAdd($event) {
+    console.log(this.filterForm);
     this.search.emit({ form: this.filterForm });
   }
 
@@ -65,7 +74,30 @@ export class FilterArticleComponent implements OnInit, OnChanges {
     term = term.toLocaleLowerCase();
     var paramTerms = $.trim(term).split(' ');
     $.each(paramTerms, (index, value) => {
-      if (item.name.toLocaleLowerCase().indexOf($.trim(value).toLowerCase()) > -1) {
+      const byName = item.name.toLocaleLowerCase().indexOf($.trim(value).toLowerCase()) > -1;
+      if (byName) {
+        inTerm.push(true);
+      } else {
+        inTerm.push(false);
+      }
+    });
+    return _.every(inTerm, (boolean) => boolean === true);
+  }
+
+  /**
+    * Filtrage pour des recherches dans une element "select"
+    * @param term
+    * @param item
+    */
+   searchFnSupplier(term: string, item: any) {
+    var inTerm = [];
+    term = term.toLocaleLowerCase();
+    var paramTerms = $.trim(term).split(' ');
+    console.log(item);
+    $.each(paramTerms, (index, value) => {
+      const byNameCompany = item.company_name.toLocaleLowerCase().indexOf($.trim(value).toLowerCase()) > -1;
+      const byReference = item.reference.toLocaleLowerCase().indexOf($.trim(value).toLowerCase()) > -1;
+      if (byNameCompany || byReference) {
         inTerm.push(true);
       } else {
         inTerm.push(false);

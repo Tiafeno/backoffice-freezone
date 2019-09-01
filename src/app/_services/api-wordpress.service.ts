@@ -24,6 +24,21 @@ export class ApiWordpressService {
       params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include']
     });
 
+    const routeSav = '/fz_sav/(?P<id>\\d+)';
+    this.wpEndPoint.savs = this.wpEndPoint.registerRoute(namespace, routeSav, {
+      params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include']
+    });
+
+    const routeMailing = '/fz_mailing/(?P<id>\\d+)';
+    this.wpEndPoint.mailing = this.wpEndPoint.registerRoute(namespace, routeMailing, {
+      params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include', 'headers']
+    });
+
+    const routeMailTemplate = '/_fz_mail_template/(?P<id>\\d+)';
+    this.wpEndPoint.mail_template = this.wpEndPoint.registerRoute(namespace, routeMailTemplate, {
+      params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include', 'headers']
+    });
+ 
     const routeUsers = '/users/(?P<id>\\d+)';
     this.wpEndPoint.users = this.wpEndPoint.registerRoute(namespace, routeUsers, {
       params: ['roles', 'context', 'include', 'exclude', 'per_page', 'orderby', 'filter']

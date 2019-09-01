@@ -11,11 +11,6 @@
       <div class="ibox ibox-fullheight">
         <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
           <p class="lead mb-0 pb-0 font-bold">Modification</p>
-          <div class="mb-4" [ngClass]="{'badge badge-blue': roleOffice === 1 || roleOffice === 2, 'badge badge-pink': roleOffice === 0}">
-            {{roleOffice === 0 ? 'En attente' : (roleOffice === 1 ? 'Acheteur' : 'Revendeur')}}
-          </div>
-
-
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
@@ -25,22 +20,22 @@
               </div>
             </div>
             <div class="col-md-6">
-                <div class="form-group mb-4">
-                  <label class="font-light">Prénom</label>
-                  <input class="form-control" autocomplete="off" formControlName="first_name" type="text" id="first_name"
-                    name="first_name" placeholder="">
-                </div>
+              <div class="form-group mb-4">
+                <label class="font-light">Prénom</label>
+                <input class="form-control" autocomplete="off" formControlName="first_name" type="text" id="first_name"
+                  name="first_name" placeholder="">
               </div>
+            </div>
           </div>
 
           <div class="row">
-              <div class="col-md-6">
-                  <div class="form-group mb-4">
-                    <label class="font-light">Adresse E-mail</label>
-                    <input class="form-control" autocomplete="off" formControlName="email" type="text" id="email"
-                      name="email" placeholder="">
-                  </div>
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Adresse E-mail</label>
+                <input class="form-control" autocomplete="off" formControlName="email" type="text" id="email"
+                  name="email" placeholder="">
               </div>
+            </div>
           </div>
 
           <div class="row">
@@ -67,38 +62,38 @@
             </div>
           </div>
 
-          <div class="row">
+          <div class="row" *ngIf="clientRole === 'fz-company'">
             <div class="col-md-12">
               <div class="form-group mb-4">
-                <label class="font-light">Statut du client</label>
-                <ng-select name="client_status" placeholder="Veuillez selectionner" formControlName="client_status"
+                <label class="font-light">Professionnel ou Revendeur ?</label>
+                <ng-select name="company_status" placeholder="Veuillez selectionner" formControlName="company_status"
                   bindLabel="label" bindValue="value" [hideSelected]="false" [multiple]="false" [items]="Status"
                   required>
                   <ng-template ng-option-tmp let-item="item">
                     {{item.label}}
                   </ng-template>
                 </ng-select>
-                <div *ngIf="f.client_status.errors && f.client_status.dirty">
+                <div *ngIf="f.company_status.errors && f.company_status.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>
               </div>
             </div>
           </div>
 
-          <div *ngIf="clientStatus.value === 'company'">
+          <div *ngIf="clientRole === 'fz-company'">
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">STAT</label>
-                  <input class="form-control" autocomplete="off" formControlName="stat" id="stat" name="stat"
-                    type="text" placeholder="">
+                  <input class="form-control" autocomplete="off" formControlName="stat" id="stat" type="text"
+                    placeholder="">
                 </div>
               </div>
 
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">NIF</label>
-                  <input class="form-control" autocomplete="off" formControlName="nif" id="nif" name="nif" type="text"
+                  <input class="form-control" autocomplete="off" formControlName="nif" id="nif" type="text"
                     placeholder="">
                 </div>
               </div>
@@ -108,7 +103,7 @@
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">RC</label>
-                  <input class="form-control" autocomplete="off" formControlName="rc" id="rc" name="rc" type="text"
+                  <input class="form-control" autocomplete="off" formControlName="rc" id="rc" type="text"
                     placeholder="">
                 </div>
               </div>
@@ -116,11 +111,32 @@
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">CIF</label>
-                  <input class="form-control" autocomplete="off" formControlName="cif" id="cif" name="cif" type="text"
+                  <input class="form-control" autocomplete="off" formControlName="cif" id="cif" type="text"
                     placeholder="">
                 </div>
               </div>
             </div>
+          </div>
+
+          <div *ngIf="clientRole === 'fz-particular'">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">CIN</label>
+                  <input class="form-control" autocomplete="off" formControlName="cin" id="cin" type="text"
+                    placeholder="">
+                </div>
+              </div>
+
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">Date de délivrance</label>
+                  <input class="form-control" autocomplete="off" formControlName="date_cin" id="date_cin" type="text"
+                    placeholder="">
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!--- Billing & Shipping form here... -->
@@ -142,16 +158,10 @@
               </div>
 
               <div class="form-group mb-4">
-                  <label class="font-light">Adresse E-mail</label>
-                  <input class="form-control" autocomplete="off" formControlName="email" id="bill_email"
-                    name="bill_email" type="text" placeholder="">
-                </div>
-
-              <div class="form-group mb-4">
-                  <label class="font-light">Pays</label>
-                  <input class="form-control" autocomplete="off" formControlName="country" id="country" name="country" type="text"
-                    placeholder="">
-                </div>
+                <label class="font-light">Adresse E-mail</label>
+                <input class="form-control" autocomplete="off" formControlName="email" id="bill_email" name="bill_email"
+                  type="text" placeholder="">
+              </div>
 
               <div class="form-group mb-4">
                 <label class="font-light">Ville</label>
@@ -239,6 +249,7 @@
 
     </div>
     <div class="col-lg-4">
+      <app-responsible [clientId]="customerID" [responsible]="responsible"></app-responsible>
     </div>
   </div>
 </div>

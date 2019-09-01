@@ -8,20 +8,20 @@
           <div class="text-light">{{meta.phone}}</div>
           <div class="text-light"> {{Client.date_created}} </div>
       </div>
-      <div class="col-6" *ngIf="Client">
-        <div class="row mb-2">
+      <div class="col-6" *ngIf="meta">
+        <div class="row mb-2" *ngIf="meta.stat">
             <div class="col-6 text-muted">STAT:</div>
             <div class="col-6">{{meta.stat}}</div>
         </div>
-        <div class="row mb-2">
+        <div class="row mb-2" *ngIf="meta.nif">
             <div class="col-6 text-muted">NIF:</div>
             <div class="col-6">{{meta.nif}}</div>
         </div>
-        <div class="row mb-2">
+        <div class="row mb-2" *ngIf="meta.rc">
             <div class="col-6 text-muted">RC:</div>
             <div class="col-6">{{meta.rc}}</div>
         </div>
-        <div class="row mb-2">
+        <div class="row mb-2" *ngIf="meta.cif">
             <div class="col-6 text-muted">CIF:</div>
             <div class="col-6">{{meta.cif}}</div>
         </div>
@@ -75,7 +75,7 @@
               <div class="col-6">{{Client.shipping.last_name}}</div>
           </div>
           <div class="row mb-2">
-              <div class="col-6 text-muted">Scoiété:</div>
+              <div class="col-6 text-muted">Société:</div>
               <div class="col-6">{{Client.shipping.company}}</div>
           </div>
           <div class="row mb-2">

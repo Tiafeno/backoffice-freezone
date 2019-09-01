@@ -2,12 +2,12 @@
   <div class="flexbox-b mb-5 mt-5">
     <span class="mr-4 static-badge badge-pink"><i class="la la-shopping-cart font-36"></i></span>
     <div>
-      <h5 class="font-strong">Devis #{{ID}}</h5>
+      <h5 class="font-strong">Demande #{{ID}}</h5>
       <div class="text-light" *ngIf="Author">Par {{Author.nickname}}, {{__ORDER__.date_created}}</div>
     </div>
   </div>
 </div>
-<!-- Affiche les produits dans le devis -->
+<!-- Affiche les produits dans la demande -->
 <div class="ibox-body">
   <div class="">
     <table class="table table-hover" id="quotation-edit-table">
@@ -17,7 +17,7 @@
           <th>QTÉ</th>
           <th>ÉTAT</th>
           <th>FOURNISSEUR</th>
-          <th class="pr-4" style="width:91px;">#</th>
+          <th class="pr-4" style="width:91px;"></th>
         </tr>
       </thead>
     </table>
@@ -26,7 +26,7 @@
 <div class="ibox-footer">
   <div>
     <div class="btn-group mb-3">
-      <button class="btn btn-info mr-3" data-toggle="modal" data-target="#quotation-view-modal">Afficher le devis</button>
+      <button class="btn btn-info mr-3" data-toggle="modal" data-target="#quotation-view-modal">Afficher la demande</button>
       <a class="btn btn-secondary" [routerLink]="['/dashboard']" routerLinkActive="active" >Retour</a>
     </div>
   </div>
@@ -38,8 +38,9 @@
     <div class="modal-content" *ngIf="Item">
       <div class="modal-header px-4 py-3 bg-primary-400">
         <div>
-          <h5 class="modal-title text-white">Liste fournisseur pour</h5><small>
-            <a class="text-white" href="javascript:;">{{Item.name}}</a></small>
+          <h5 class="modal-title text-white">Liste fournisseur pour</h5>
+          <p class="mb-0"> <a class="text-white font-14" href="javascript:;"><b>{{Item.name}}</b></a></p>
+          <p class="mb-0"> <a class="text-white font-14" href="javascript:;">Quantité: <b>{{Item.quantity}}</b></a></p>
         </div>
         <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">×</span>
@@ -47,18 +48,6 @@
       </div>
       <div class="modal-body p-4">
         <div>
-          <div class="row">
-            <div class="col-6" *ngIf="canChangeMarge">
-                <label>Marge <b>%</b>:</label>
-                <input type="text" class="form-control marge" style="background-color: lavender;" [value]="itemMarge" [attr.data-product]="Item.product_id">
-            </div>
-
-            <div class="col-6" *ngIf="canChangeMargeDealer">
-              <label>Marge Revendeur <b>%</b>:</label>
-              <input type="text" class="form-control marge-dealer" style="background-color: lavender;" [value]="itemMargeDealer" [attr.data-product]="Item.product_id">
-            </div>
-            
-          </div>
           <table class="table table-hover" id="quotation-supplier-table">
             <thead class="thead-default thead-lg">
               <tr>
@@ -66,9 +55,9 @@
                 <th>REFERENCE</th>
                 <th>QTÉ</th>
                 <th>ÉTAT</th>
-                <th>PRIX UNITAIRE</th>
+                <th>PRIX</th>
                 <th>ARTICLE</th>
-                <th class="pr-4" style="width:91px;">#</th>
+                <th class="pr-4" style="width:91px;"></th>
               </tr>
             </thead>
           </table>
@@ -104,6 +93,6 @@
 
 <div class="modal fade" id="edit-article-supplier-modal">
   <div class="modal-dialog" role="document">
-    <app-edit-article [Article]="Editor" (refresh)="closeSupplierView()"></app-edit-article>
+    <app-edit-article [article]="Editor" (refresh)="closeSupplierView()"></app-edit-article>
   </div>
 </div>

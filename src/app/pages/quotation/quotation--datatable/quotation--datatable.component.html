@@ -7,9 +7,8 @@
             <select class="form-control" name="qtFilterPosition" id="qtFilterPosition" (change)="onChangePosition($event)">
                 <option value="">Choississez un statut</option>
                 <option value="0">En attente</option>
-                <option value="1">Envoyer</option>
                 <option value="2">Rejetés</option>
-                <option value="3">Validé</option>
+                <option value="3">Terminée</option>
             </select>
         </div>
     </div>
@@ -27,4 +26,11 @@
             </thead>
         </table>
     </div>
+</div>
+
+<div class="ibox-head">
+    <div class="ibox-title uppercase">Les demandes Traité</div>
+</div>
+<div class="ibox-body">
+    <app-quotation-treaty (Treaty)="setQtSelected($event)"></app-quotation-treaty>
 </div>

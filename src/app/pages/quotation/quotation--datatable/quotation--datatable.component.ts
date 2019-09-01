@@ -10,6 +10,7 @@ import { ApiWoocommerceService } from '../../../_services/api-woocommerce.servic
 import { StatusQuotationSwitcherComponent } from '../../../components/status-quotation-switcher/status-quotation-switcher.component';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { FzSecurityService } from '../../../_services/fz-security.service';
+import { QuotationTreatyComponent } from '../quotation-treaty/quotation-treaty.component';
 declare var $: any;
 @Component({
   selector: 'app-quotation--datatable',
@@ -25,6 +26,11 @@ export class QuotationDatatableComponent implements OnInit {
   public WCAPI: any;
 
   @ViewChild(StatusQuotationSwitcherComponent) QuotationSwitcher: StatusQuotationSwitcherComponent;
+  @ViewChild(QuotationTreatyComponent) QuotationTreaty: QuotationTreatyComponent;
+
+  setQtSelected(order: any) {
+    this.qtSelected = _.clone(order);
+  }
 
   constructor(
     private router: Router,
@@ -36,10 +42,11 @@ export class QuotationDatatableComponent implements OnInit {
   ) {
     this.WPAPI = this.apiWP.getWPAPI();
     this.WCAPI = this.apiWC.getWoocommerce();
-   }
+  }
 
   public reload(): void {
     this.Table.ajax.reload(null, false);
+    this.QuotationTreaty.reload();
   }
 
   onChangePosition($event): void | boolean {
@@ -70,7 +77,7 @@ export class QuotationDatatableComponent implements OnInit {
         url: "https://cdn.datatables.net/plug-ins/1.10.16/i18n/French.json"
       },
       columns: [
-        { data: 'ID', render: (data) => { return `n°${data}`} },
+        { data: 'ID', render: (data) => { return `n°${data}` } },
         {
           data: 'author', render: (data, type, row) => {
             return `<span>${data.lastname} ${data.firstname}</span>`;
@@ -78,14 +85,19 @@ export class QuotationDatatableComponent implements OnInit {
         },
         {
           data: 'position', render: (data, type, row) => {
-            let position: string = data === 0 ? 'En attente' : (data === 1 ? 'Envoyer' : "Rejetés");
-            let style: string = data === 0 ? 'warning' : (data === 1 ? 'blue' : 'danger');
-            return `<span class="badge badge-${style} status-switcher">${position}</span>`;
+            const Status: Array<any> = [
+              { value: 0, label: 'En ettente', style: 'warning' },
+              { value: 1, label: 'Envoyer', style: 'blue' },
+              { value: 2, label: 'Rejetés', style: 'danger' },
+              { value: 3, label: 'Terminée', style: 'success' },
+            ];
+            let position: any = _.find(Status, { value: data });
+            return `<span class="badge badge-${position.style} status-switcher">${position.label}</span>`;
           }
         },
         {
           data: 'date_add', render: (data) => {
-            return moment(data.date).fromNow();
+            return moment(data.date).format('LLL');
           }
         },
         {
@@ -123,7 +135,7 @@ export class QuotationDatatableComponent implements OnInit {
             }).then(result => {
               if (result.value) {
                 Helpers.setLoading(true);
-                this.WPAPI.orders().id(__quotation.ID).delete({force: true, reassign: 1}).then(resp => {
+                this.WPAPI.orders().id(__quotation.ID).delete({ force: true, reassign: 1 }).then(resp => {
                   Helpers.setLoading(false);
                   this.reload();
                   Swal.fire("Succès", "Client supprimer avec succès", 'success');
@@ -131,7 +143,7 @@ export class QuotationDatatableComponent implements OnInit {
               }
             });
           }
-          
+
         });
 
         $('#quotation-table tbody').on('click', '.status-switcher', e => {
@@ -146,7 +158,7 @@ export class QuotationDatatableComponent implements OnInit {
               this.cd.detectChanges();
             });
           }
-          
+
         });
 
         $('#quotation-switcher-modal').on('hide.bs.modal', e => {
@@ -159,7 +171,7 @@ export class QuotationDatatableComponent implements OnInit {
         data: (d) => {
           d.columns = false;
           d.order = false;
-          d.position = this.queryPosition;
+          d.position = _.isNull(this.queryPosition) || _.isEmpty(this.queryPosition) ? [0, 2] : this.queryPosition;
         },
         beforeSend: function (xhr) {
           let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));

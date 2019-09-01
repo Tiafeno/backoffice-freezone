@@ -20,7 +20,7 @@ export class FzServicesService {
   ) {
     this.Woocommerce = this.apiWc.getWoocommerce();
     this.Wordpress = this.apiWp.getWPAPI();
-   }
+  }
 
   public getCategories(): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -30,15 +30,6 @@ export class FzServicesService {
           reject(response.message);
         }
         resolve(response);
-      })
-    })
-  }
-
-  public filterProducts(item: string = ''): Promise<any> {
-    return new Promise(resolve => {
-      if (_.isEmpty(item)) resolve([]);
-      this.Woocommerce.get(`products?search=${item}`, (err, data, res) => {
-        resolve(JSON.parse(res));
       })
     })
   }
@@ -53,7 +44,7 @@ export class FzServicesService {
 
   public getSuppliers(): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.Wordpress.users().roles('fz-supplier').then(users => {
+      this.Wordpress.users().roles('fz-supplier').perPage(50).then(users => {
         const response: any = users;
         if (!_.isUndefined(response.code)) {
           reject(response.message);
@@ -61,6 +52,50 @@ export class FzServicesService {
         resolve(users);
       })
     })
+  }
+
+  public filterProducts(item: string = ''): Promise<any> {
+    return new Promise(resolve => {
+      if (_.isEmpty(item)) resolve([]);
+      this.Woocommerce.get(`products?search=${item}`, (err, data, res) => {
+        resolve(JSON.parse(res));
+      });
+    });
+  }
+
+  public getBenefit(price: any, marge: any, discount?: number): number {
+    const _price = parseInt(price, 10);
+    const _marge = parseInt(marge, 10);
+    const _discount = 0;
+    const Y: number = 1 - (_marge / 100);
+    const result: number = _price / Y;
+    /**
+     * Prix = price / Y;
+     * or Y = 1 - (marge / 100)
+     */
+    return this.manageAlgorithm(result); // @return number
+  }
+
+  public manageAlgorithm(_value: number): number {
+    if (_.isNumber(_value)) {
+      const value = Math.round(_value);
+      const valueS = value.toString();
+      let position: number = (valueS.length - 1) - 1;
+      if (valueS.charAt(position) !== '0' || valueS.charAt(position + 1) !== '0') {
+        let $value = this.setCharAt(valueS, position, 0);
+        $value = this.setCharAt($value, position + 1, 0)
+
+        return parseInt($value, 10) + 100;
+      } else {
+        return value;
+      }
+    }
+    return 0;
+  }
+
+  public setCharAt(str: string, index: number, chr: any) {
+    if (index > str.length - 1) return str;
+    return str.substr(0, index) + chr + str.substr(index + 1);
   }
 
   loadCategories(): Observable<any[]> {
