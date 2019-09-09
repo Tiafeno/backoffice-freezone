@@ -19,8 +19,6 @@
                         {{ownerClient.company_name}}
                     </h5>
                     <div class="text-light">{{ownerClient.address}}, {{billingAdress.postcode}} {{billingAdress.city}}.</div>
-                    <div class="text-light">{{ownerClient.email}}</div>
-                    <div class="text-light mb-4">{{ownerClient.phone}}</div>
 
                     <div class="row mb-2" *ngIf="ownerClient.stat">
                       <div class="col-6 text-muted">STAT:</div>
@@ -113,6 +111,6 @@
 </div>
 <div class="modal-footer justify-content-between bg-primary-50">
   <div>
-    <button class="btn btn-primary btn-rounded mr-3" [disabled]="(order && order.status === 'completed') || order.position == 1" (click)="onSendMail()">Envoyer par email</button>
+    <button class="btn btn-primary btn-rounded mr-3" [disabled]="order && order.status === 'completed'" (click)="onSendMail()">Envoyer par email</button>
   </div>
 </div>

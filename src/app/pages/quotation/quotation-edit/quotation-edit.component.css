@@ -1,3 +1,7 @@
 .input-increment {
     text-align: center;
 }
+
+.form-control {
+    height: inherit !important;
+}

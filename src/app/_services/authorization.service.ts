@@ -60,5 +60,11 @@ export class AuthorizationService {
     let User: any = this.getCurrentUser();
     return User.data.roles[0];
   }
+
+  public isAdministrator(): boolean {
+    const User = this.getCurrentUser();
+    const roles: Array<string> = User.data.roles;
+    return _.indexOf(roles, 'administrator') > -1;
+  }
   
 }

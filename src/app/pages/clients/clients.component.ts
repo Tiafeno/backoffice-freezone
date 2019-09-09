@@ -61,7 +61,7 @@ export class ClientsComponent implements OnInit {
   }
 
   public fnOnUpdateStatus() {
-    if (this.FormStatus.valid) {
+    if (this.FormStatus.valid && this.FormStatus.dirty) {
       Helpers.setLoading(true);
       const Value: any = this.FormStatus.value;
       let requestWP;
@@ -96,6 +96,7 @@ export class ClientsComponent implements OnInit {
     this.WPAPI.users().param('roles', 'editor').context('edit').then(resp => {
       this.Responsibles = _.clone(resp);
       this.responsibleLoading = false;
+      this.cd.detectChanges();
     });
 
     const productsTable = $('#clients-table');
@@ -133,9 +134,9 @@ export class ClientsComponent implements OnInit {
             let disable_value = parseInt(meta_disable.value, 10);
             let pending_value = parseInt(meta_pending.value, 10);
 
-            let status: string = disable_value === 1 ? 'Désactiver' : (pending_value === 1 ? 'En attente' : "Active");
+            let status: string = disable_value === 1 ? 'Désactiver' : (pending_value === 1 ? 'En attente' : "Actif");
             let style: string = disable_value === 1 ? 'danger' : (pending_value === 1 ? 'warning' : "primary");
-            return `<span class="badge badge-${style} uppercase switch-status">${status}</span>`;
+            return `<span class="badge badge-${style} uppercase switch-status" style="cursor: pointer;">${status}</span>`;
           }
         },
         {
@@ -150,7 +151,7 @@ export class ClientsComponent implements OnInit {
             const role: any = _.isArray(data) ? data[0] : data;
             const status: string = role === 'fz-company' ? 'Entreprise' : 'Particulier';
             const style: string = role === 'fz-company' ? 'blue' : 'success';
-            return `<span class="badge badge-${style} uppercase" style="cursor: pointer;">${status}</span>`;
+            return `<span class="badge badge-${style} uppercase">${status}</span>`;
           }
         },
         {

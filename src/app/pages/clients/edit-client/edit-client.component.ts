@@ -27,7 +27,7 @@ export class EditClientComponent implements OnInit {
   public Status: Array<any> = [
     { label: 'En attente', value: 'pending' },
     { label: 'Revendeur', value: 'dealer' },
-    { label: 'Professionnel (UF)', value: 'professional' },
+    { label: 'Utilisateur final', value: 'professional' },
   ];
   
   @ViewChild(ResponsibleComponent) private Responsible: ResponsibleComponent;
@@ -156,7 +156,7 @@ export class EditClientComponent implements OnInit {
       const Value: any = this.Form.value;
 
       if (Value.company_status === 'pending') {
-        Swal.fire('Avertissement', "Vous n'avez pas encore definie le client en professionnel ou revendeur", 'warning');
+        Swal.fire('Avertissement', "Vous n'avez pas encore definie le client en utilisateur final ou en revendeur", 'warning');
         return false;
       }
       

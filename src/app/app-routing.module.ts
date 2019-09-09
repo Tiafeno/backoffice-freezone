@@ -63,7 +63,6 @@ import { SettingsComponent } from './pages/settings/settings.component';
 import { UserManagerComponent } from './components/user-manager/user-manager.component';
 import { SavEditComponent } from './pages/sav/sav-edit/sav-edit.component';
 import { SavMailComponent } from './pages/sav/sav-mail/sav-mail.component';
-import { QuotationTreatyComponent } from './pages/quotation/quotation-treaty/quotation-treaty.component';
 import { ModuloReviewSuppliersComponent } from './components/modulo-review-suppliers/modulo-review-suppliers.component';
 import { EditArticleDescriptionComponent } from './pages/supplier/articles/edit-article-description/edit-article-description.component';
 import { ArticlesComponent } from './pages/supplier/articles/articles.component';
@@ -74,6 +73,7 @@ import { FaqClientComponent } from './pages/faq-client/faq-client.component';
 import { FaqClientAddComponent } from './pages/faq-client/faq-client-add/faq-client-add.component';
 import { FaqClientEditComponent } from './pages/faq-client/faq-client-edit/faq-client-edit.component';
 import { FaqClientsComponent } from './pages/faq-client/faq-clients/faq-clients.component';
+import { QuotationCustomComponent } from './pages/quotation/quotation-custom/quotation-custom.component';
 
 
 const routes: Routes = [
@@ -119,8 +119,14 @@ const routes: Routes = [
                 children: [
                     { path: '', redirectTo: 'view', pathMatch: 'full' },
                     { path: 'view', component: FaqClientsComponent },
-                    { path: 'edit', component: FaqClientEditComponent },
-                    { path: 'add', component: FaqClientAddComponent }
+                    { path: 'add', component: FaqClientAddComponent },
+                    {
+                        path: ":id",
+                        children: [
+                            { path: '', redirectTo: 'edit', pathMatch: 'full' },
+                            { path: 'edit', component: FaqClientEditComponent },
+                        ]
+                    }
                 ]
             },
             {
@@ -293,6 +299,7 @@ const routes: Routes = [
         ProductEditComponent,
         QuotationViewComponent,
         StatusQuotationSwitcherComponent,
+        QuotationCustomComponent,
         QuotationArticleReviewComponent,
         CustomerEditComponent,
         QuotationMailComponent,
@@ -311,7 +318,6 @@ const routes: Routes = [
         UserManagerComponent,
         SavEditComponent,
         SavMailComponent,
-        QuotationTreatyComponent,
         ModuloReviewSuppliersComponent,
         ModuloMailTemplateComponent,
         EditArticleDescriptionComponent,

@@ -201,7 +201,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         if (!_.isUndefined(changes.order.currentValue) && !_.isEmpty(changes.order.currentValue)) {
             this.ID = changes.order.currentValue.id;
             this.Quotation = _.cloneDeep(changes.order.currentValue);
-            this.Items = _.cloneDeep(this.Quotation.line_items.line_items);
+            this.Items = _.cloneDeep(this.Quotation.line_items);
             this.billingAdress = _.clone(this.Quotation.billing);
             this.shippingAdress = _.clone(this.Quotation.shipping);
 

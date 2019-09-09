@@ -44,9 +44,15 @@ export class QuotationMailComponent implements OnInit, OnChanges {
     private cd: ChangeDetectorRef,
     private security: FzSecurityService
   ) {
+    const message: string = `Chers clients, <br><br>
+    Nous vous remercions pour votre demande de devis et en retour nous prions de trouver la pro forma correspondant à vos besoins. 
+    Dans l’attente de la confirmation de ce devis. <br> <br>
+
+    Cordialement <br>
+    L’équipe commerciale de Freezone`;
     this.Form = new FormGroup({
       subject: new FormControl('', Validators.required),
-      content: new FormControl('', Validators.required)
+      content: new FormControl(message, Validators.required)
     });
     this.Woocommerce = this.apiWC.getWoocommerce();
   }
@@ -59,7 +65,6 @@ export class QuotationMailComponent implements OnInit, OnChanges {
       this.Order = _.clone(changes.order.currentValue);
       this.Form.patchValue({
         subject: `Devis #${this.Order.id} - Demande de confirmation pour votre demande sur Freezone`,
-        content: "Bonjour, <br><br> <p>Vous trouverez ci-joint votre devis.<p><p>Nous vous remercions d'avoir choisi notre solution!<br><br> Cordialement."
       });
     }
   }

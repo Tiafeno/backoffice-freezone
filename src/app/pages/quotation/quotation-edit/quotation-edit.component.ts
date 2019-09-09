@@ -10,6 +10,8 @@ import { QuotationViewComponent } from '../quotation-view/quotation-view.compone
 import { EditArticleComponent } from '../../supplier/articles/edit-article/edit-article.component';
 import { FzSecurityService } from '../../../_services/fz-security.service';
 import { FzServicesService } from '../../../_services/fz-services.service';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { AuthorizationService } from '../../../_services/authorization.service';
 declare var $: any;
 
 @Component({
@@ -21,21 +23,22 @@ declare var $: any;
 export class QuotationEditComponent implements OnInit {
    private WCAPI: any;
    private WPAPI: any;
-   public __ORDER__: any;
-   private __ITEMS__: Array<any> = [];
-   private __FZPRODUCTS__: Array<any> = [];
+   public __ORDER__: any; // Continent tous les données de la demande ou commande
+   private __ITEMS__: Array<any> = []; // Contient les elements (produit) dans la demande ou commande
+   private __FZPRODUCTS__: Array<any> = []; // Contient tous les articles de tous les fournisseurs d'un element selectionner ou Gerer 
 
-   public ID: number;
+   public ID: number; // ID de la demande ou commande
    public Editor: any;
    public designationTrigger: any = null;
    public Author: any;
    public Table: any;
    public qtSupplierTable: any;
-   public Item: any;
+   public Item: any; // Contient l'element en cours de traitement
    public canChangeMarge: boolean = true;
    public canChangeMargeDealer: boolean = true;
    public objectMeta: Array<any> = [];
    public loading: boolean = false;
+   public formDiscount: FormGroup;
 
    @ViewChild(QuotationViewComponent) QuotationView: QuotationViewComponent;
    @ViewChild(EditArticleComponent) EditArticle: EditArticleComponent;
@@ -43,6 +46,7 @@ export class QuotationEditComponent implements OnInit {
    constructor(
       private route: ActivatedRoute,
       private router: Router,
+      private auth: AuthorizationService,
       private apiWC: ApiWoocommerceService,
       private apiWP: ApiWordpressService,
       private cd: ChangeDetectorRef,
@@ -52,6 +56,10 @@ export class QuotationEditComponent implements OnInit {
    ) {
       this.WCAPI = this.apiWC.getWoocommerce();
       this.WPAPI = this.apiWP.getWPAPI();
+
+      this.formDiscount = new FormGroup({
+         discount: new FormControl(0, Validators.required)
+      });
 
       this.canChangeMarge = this.security.hasAccess('s4', false);
       this.canChangeMargeDealer = this.security.hasAccess('s5', false);
@@ -91,11 +99,11 @@ export class QuotationEditComponent implements OnInit {
          this.WCAPI.get(`orders/${this.ID}`, async (err, data, res) => {
             Helpers.setLoading(false);
             this.__ORDER__ = JSON.parse(res);
-            this.__ITEMS__ = this.__ORDER__.line_items.line_items;
+            this.__ITEMS__ = this.__ORDER__.line_items;
             // Récuperer les informations du client
             await this.WPAPI
                .users()
-               .id(this.__ORDER__.line_items.user_id)
+               .id(this.__ORDER__.user_id)
                .context('edit')
                .then(user => { this.Author = _.clone(user); });
 
@@ -109,7 +117,7 @@ export class QuotationEditComponent implements OnInit {
                   { data: 'name' },
                   { data: 'quantity' },
                   {
-                     data: 'meta_data', render: (data) => {
+                     data: 'meta_data', render: data => {
                         const meta: any = _.find(data, { key: 'status' });
                         const intStatus: number = parseInt(meta.value, 10);
                         const status: string = intStatus === 0 ? 'En attente' : (intStatus === 1 ? "Traitée" : "Rejeté");
@@ -118,9 +126,9 @@ export class QuotationEditComponent implements OnInit {
                      }
                   },
                   {
-                     data: 'meta_data', render: (data) => {
+                     data: 'meta_data', render: data => {
                         let metaSupplier: any = _.find(data, { key: 'suppliers' });
-                        if (!_.isObject(metaSupplier)) return 'Non définie';
+                        if (!_.isObject(metaSupplier) || _.isEmpty(metaSupplier.value)) return 'Non définie';
                         let value: any = JSON.parse(metaSupplier.value);
                         value = _.filter(value, item => item.get !== 0);
                         let countSuppliers = Object.keys(value);
@@ -129,7 +137,7 @@ export class QuotationEditComponent implements OnInit {
                      }
                   },
                   {
-                     data: null, render: (data) => {
+                     data: null, render: data => {
                         return `<span class="btn btn-sm btn-primary edit-item">Gerer</span>`
                      }
                   }
@@ -146,178 +154,7 @@ export class QuotationEditComponent implements OnInit {
                      this.Item = _.cloneDeep(item); // Contient l'item en cours de traitement
                      Helpers.setLoading(true);
                      // Récuperer tous les articles de ce produit
-                     this.WPAPI
-                        .fz_product()
-                        .context('edit')
-                        .param('meta_key', "product_id")
-                        .param('meta_value', this.Item.product_id)
-                        .then(_response => {
-                           let __FZPRODUCTS__: Array<any> = _.clone(_response);
-                           this.__FZPRODUCTS__ = _.cloneDeep(__FZPRODUCTS__);// Collect tous les articles pour ce produit
-                           // Vérfier si la liste des fournisseur disponible pour l'article est vide
-                           if (_.isEmpty(__FZPRODUCTS__)) {
-                              Swal.fire('Désolé', "Aucun fournisseur ne posséde cette article ou qu'il est encore en attente.", "warning");
-                              Helpers.setLoading(false);
-                              return false;
-                           }
-                           // Récuperer les fournisseurs (utilisateur) qui possède cette article
-                           let user_ids: Array<number> = _.map(this.__FZPRODUCTS__, p => parseInt(p.user_id, 10));
-                           this.WPAPI
-                              .users()
-                              .include(_.join(user_ids, ','))
-                              .roles('fz-supplier')
-                              .context('edit')
-                              .then(_users => {
-                                 const clientRole: string = _.isArray(this.Author.roles) ? this.Author.roles[0] : this.Author.roles;
-                                 let __USERS__: Array<any> = _.clone(_users);
-                                 this.qtSupplierTable = $('#quotation-supplier-table').DataTable({
-                                    // Installer le plugin WP Rest Filter (https://fr.wordpress.org/plugins/wp-rest-filter/)
-                                    fixedHeader: true,
-                                    responsive: false,
-                                    "sDom": 'rtip',
-                                    data: __USERS__,
-                                    columns: [
-                                       {
-                                          data: 'company_name', render: (data, type, row) => {
-                                             return `<span>${data}</span>`
-                                          }
-                                       },
-                                       {
-                                          data: 'reference', render: (data, type, row) => {
-                                             return `<span class="badge badge-default view-supplier" style="cursor: pointer" data-supplier="${row.id}">${data}</span>`
-                                          }
-                                       },
-                                       {
-                                          data: 'id', render: (data, type, row) => { // stock
-                                             let userId: any = data;
-                                             let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-                                             return pdt.total_sales;
-                                          }
-                                       },
-                                       {
-                                          data: 'id', render: (data) => {
-                                             let userId: any = data;
-                                             let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-
-                                             let dateLimit: any = moment(pdt.date_review).subtract(-1, 'days');
-                                             let msg: string = dateLimit > moment() ? "Traité" : "En attente";
-                                             let style: string = dateLimit > moment() ? 'blue' : 'warning';
-                                             return `<span class="badge badge-${style}">${msg}</span>`;
-                                          }
-                                       }, // statut product
-                                       {
-                                          data: 'id', render: data => {
-                                             const userId: any = data;
-                                             const pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-                                             const price: number = parseInt(pdt.price, 10);
-                                             const marge = clientRole === 'fz-company' ? (pdt.company_status === 'dealer' ? pdt.marge_dealer : pdt.marge) : pdt.marge_particular;
-
-                                             const hisPrice = this.services.getBenefit(price, parseInt(marge, 10));
-                                             return this.currencyFormat(hisPrice);
-                                          }
-                                       }, // price product
-                                       {
-                                          data: 'id', render: data => {
-                                             let userId: any = data;
-                                             let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-                                             let article: any = JSON.stringify(pdt);
-                                             return `<span class='badge badge-success view-article' style='cursor: pointer' data-article='${article}'>Voir</span>`;
-                                          }
-                                       }, // Produit
-                                       {
-                                          data: null, render: (data, type, row) => {
-                                             let inputValue: number = 0;
-                                             const metaSuppliers: any = _.find(this.Item.meta_data, { key: "suppliers" });
-                                             if (metaSuppliers && !_.isEmpty(metaSuppliers.value)) {
-                                                /**
-                                                 * @return Array
-                                                 */
-                                                let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: "2", product_id: 0, article_id: 0}] 
-                                                _.map(dataParser, (parse) => {
-                                                   if (row.id === parse.supplier) {
-                                                      inputValue = parseInt(parse.get);
-                                                   }
-                                                });
-                                             }
-
-                                             let fzProduct: any = _.find(this.__FZPRODUCTS__, { user_id: row.id });
-
-                                             const price: number = parseInt(fzProduct.price, 10);
-                                             const marge = clientRole === 'fz-company' ? (fzProduct.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
-                                             const hisPrice = this.services.getBenefit(price, parseInt(marge, 10));
-
-                                             const dateLimit: any = moment(fzProduct.date_review).subtract(-1, 'days');
-                                             let disabled: boolean = dateLimit < moment();
-
-                                             return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
-                                       value="${disabled ? 0 : inputValue}" min="0" max="${fzProduct.total_sales}" ${disabled ? "disabled='disabled'" : ''}
-                                       data-product="${fzProduct.product_id}" 
-                                       data-supplier="${row.id}" 
-                                       data-price="${hisPrice}" 
-                                       data-article="${fzProduct.id}">`;
-                                          }
-                                       }
-                                    ],
-                                    initComplete: () => {
-                                       Helpers.setLoading(false);
-                                       $('#quotation-view-supplier-modal').modal('show');
-
-                                       $('#quotation-supplier-table tbody').on('click', '.view-supplier', ev => {
-                                          ev.preventDefault();
-                                          const element = $(ev.currentTarget);
-                                          const elData: any = $(element).data();
-                                          $('.modal').modal('hide');
-                                          setTimeout(() => {
-                                             this.zone.run(() => this.router.navigate(['/supplier', elData.supplier, 'edit']));
-                                          }, 600);
-                                       });
-
-                                       $('#quotation-supplier-table tbody').on('click', '.view-article', ev => {
-                                          ev.preventDefault();
-                                          let data: any = $(ev.currentTarget).data();
-                                          this.Editor = _.clone(data.article);
-                                          this.cd.detectChanges();
-                                       });
-
-                                       $('#quotation-supplier-table tbody').on('change', '.input-increment', ev => {
-                                          ev.preventDefault();
-
-                                          let element = $(ev.currentTarget);
-                                          let currentValue = $(element).val();
-                                          currentValue = parseInt(currentValue, 10);
-                                          let countInputSet = 0;
-                                          this.objectMeta = [];
-                                          // Vérifier la quantité et la quantité ajouter pour les fournisseurs
-                                          $(`input.input-increment`).each((index, value) => {
-                                             let inputVal: any = $(value).val();
-                                             console.log('input increment:' + inputVal);
-                                             inputVal = parseInt(inputVal, 10);
-                                             const inputData: any = $(value).data();
-                                             countInputSet += inputVal;
-                                             if (0 !== inputVal)
-                                                this.objectMeta.push({
-                                                   supplier: parseInt(inputData.supplier, 10),
-                                                   get: parseInt(inputVal, 10),
-                                                   product_id: parseInt(inputData.product, 10),
-                                                   article_id: inputData.article,
-                                                   price: inputData.price
-                                                });
-                                          });
-                                          this.cd.detectChanges();
-
-                                          if (this.Item.quantity < countInputSet) {
-                                             element.val(Math.abs(parseInt(currentValue) - 1));
-                                             return false;
-                                          };
-                                          
-                                       });
-
-                                       
-                                    }
-                                 })
-                              });
-
-                        });
+                     this.onLoadingItem();
                   });
 
                   $('#quotation-view-supplier-modal').on('hide.bs.modal', e => {
@@ -329,7 +166,7 @@ export class QuotationEditComponent implements OnInit {
                      this.WCAPI.get(`orders/${this.ID}`, (err, data, res) => {
                         Helpers.setLoading(false);
                         this.__ORDER__ = JSON.parse(res);
-                        this.__ITEMS__ = this.__ORDER__.line_items.line_items;
+                        this.__ITEMS__ = this.__ORDER__.line_items;
                         this.Table.clear().draw();
                         this.Table.rows.add(this.__ITEMS__);
                         this.Table.columns.adjust().draw();
@@ -345,6 +182,53 @@ export class QuotationEditComponent implements OnInit {
    }
 
    /**
+    * Cette fonction permet de mettre à jour la remise d'un item
+    */
+   onUpdateDiscount() {
+      if (_.isEmpty(this.Item)) return false;
+      if (!this.auth.isAdministrator()) {
+         Swal.fire('Désolé', "Vous n'avez pas l'autorisation pour effectuer cette action", "warning");
+         return false;
+      }
+      if (this.formDiscount.valid && this.formDiscount.dirty) {
+         console.log('Update discount work!');
+         const Value = this.formDiscount.value;
+         let item = _.clone(this.Item);
+
+         item.meta_data = [
+            { key: 'status', value: 0 },
+            { key: 'suppliers', value: JSON.stringify([]) },
+            { key: 'discount', value: Value.discount }
+         ];
+
+         const data: any = {
+            line_items: _.map(this.__ITEMS__, (__item__) => {
+               if (__item__.id === item.id) {
+                  return item;
+               }
+
+               return __item__;
+            })
+         };
+         console.log(data);
+         Helpers.setLoading(true);
+         this.WCAPI.put(`orders/${this.ID}`, data, (err, d, res) => {
+            let response: any = JSON.parse(res);
+            this.__ITEMS__ = response.line_items;
+            this.Table.clear().draw();
+            this.Table.rows.add(this.__ITEMS__);
+            this.Table.columns.adjust().draw();
+
+            Helpers.setLoading(false);
+            this.cd.detectChanges();
+            this.formDiscount.reset();
+            $('.modal').modal('hide');
+
+         });
+      }
+   }
+
+   /**
     * Enregistrer le meta data pour les produits dans la commande
     */
    onSaveQuotationPdt() {
@@ -352,15 +236,15 @@ export class QuotationEditComponent implements OnInit {
       Helpers.setLoading(true);
       this.loading = true;
       let lineItems: Array<any>;
-      lineItems = _.map(this.__ITEMS__, (item) => {
+      lineItems = _.map(this.__ITEMS__, item => {
          if (item.product_id !== this.Item.product_id) return item;
-         
-         const prices = _.map(this.objectMeta, (mt) => parseInt(mt.price, 10));
+         let metaData: Array<any> = _.cloneDeep(item.meta_data); // Product meta
+         const prices = _.map(this.objectMeta, mt => parseInt(mt.price, 10));
+
          item.price = _.max(prices);
+
          item.total = Math.round(_.max(prices) * item.quantity).toString();
          item.subtotal = Math.round(_.max(prices) * item.quantity).toString();
-
-         let metaData: Array<any> = _.cloneDeep(item.meta_data); // Product meta
          metaData = _.map(metaData, meta => {
             if (meta.key === 'status') {
                if (_.isEmpty(this.objectMeta)) {
@@ -374,7 +258,7 @@ export class QuotationEditComponent implements OnInit {
                if (!meta.value) return meta;
                // Verifier si l'article est en review
                const aIds: Array<any> = _.map(this.objectMeta, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
-               const collectFZProducts: Array<any> = _.filter(this.__FZPRODUCTS__, (fz) => { return _.indexOf(aIds, fz.id) >= 0; });
+               const collectFZProducts: Array<any> = _.filter(this.__FZPRODUCTS__, fz => { return _.indexOf(aIds, fz.id) >= 0; });
                const cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {
                   const dateNow: any = moment();
                   let dateLimit: any = moment(prd.date_review).subtract(-1, 'days');
@@ -398,7 +282,7 @@ export class QuotationEditComponent implements OnInit {
       const data: any = { line_items: lineItems };
       this.WCAPI.put(`orders/${this.ID}`, data, (err, d, res) => {
          let response: any = JSON.parse(res);
-         this.__ITEMS__ = response.line_items.line_items;
+         this.__ITEMS__ = response.line_items;
          this.Table.clear().draw();
          this.Table.rows.add(this.__ITEMS__);
          this.Table.columns.adjust().draw();
@@ -409,6 +293,194 @@ export class QuotationEditComponent implements OnInit {
          $('#quotation-view-supplier-modal').modal('hide');
 
       });
+   }
+
+   onLoadingItem() {
+      Helpers.setLoading(true);
+
+      let __discount: any = _.find(this.Item.meta_data, { key: 'discount' });
+      __discount = _.isUndefined(__discount) ? 0 : __discount.value;
+      this.formDiscount.patchValue({ discount: __discount });
+      this.WPAPI
+         .fz_product()
+         .context('edit')
+         .param('meta_key', "product_id")
+         .param('meta_value', this.Item.product_id)
+         .then(_response => {
+            let __FZPRODUCTS__: Array<any> = _.clone(_response);
+            this.__FZPRODUCTS__ = _.cloneDeep(__FZPRODUCTS__);// Collect tous les articles pour ce produit
+            // Vérfier si la liste des fournisseur disponible pour l'article est vide
+            if (_.isEmpty(__FZPRODUCTS__)) {
+               Swal.fire('Désolé', "Aucun fournisseur ne posséde cette article ou qu'il est encore en attente.", "warning");
+               Helpers.setLoading(false);
+               return false;
+            }
+            // Récuperer les fournisseurs (utilisateur) qui possède cette article
+            let user_ids: Array<number> = _.map(this.__FZPRODUCTS__, p => parseInt(p.user_id, 10));
+            this.WPAPI
+               .users()
+               .include(_.join(user_ids, ','))
+               .roles('fz-supplier')
+               .context('edit')
+               .then(_users => {
+                  const clientRole: string = _.isArray(this.Author.roles) ? this.Author.roles[0] : this.Author.roles;
+                  let __USERS__: Array<any> = _.clone(_users);
+                  this.qtSupplierTable = $('#quotation-supplier-table').DataTable({
+                     // Installer le plugin WP Rest Filter (https://fr.wordpress.org/plugins/wp-rest-filter/)
+                     fixedHeader: true,
+                     responsive: false,
+                     "sDom": 'rtip',
+                     data: __USERS__,
+                     columns: [
+                        {
+                           data: 'company_name', render: (data, type, row) => {
+                              return `<span>${data}</span>`
+                           }
+                        },
+                        {
+                           data: 'reference', render: (data, type, row) => {
+                              return `<span class="badge badge-default view-supplier" style="cursor: pointer" data-supplier="${row.id}">${data}</span>`
+                           }
+                        },
+                        {
+                           data: 'id', render: (data, type, row) => { // stock
+                              let userId: any = data;
+                              let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
+                              return pdt.total_sales;
+                           }
+                        }, // Quantité
+                        {
+                           data: 'id', render: (data) => {
+                              let userId: any = data;
+                              let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
+
+                              let dateLimit: any = moment(pdt.date_review).subtract(-1, 'days');
+                              let msg: string = dateLimit > moment() ? "Traité" : "En attente";
+                              let style: string = dateLimit > moment() ? 'blue' : 'warning';
+                              return `<span class="badge badge-${style}">${msg}</span>`;
+                           }
+                        }, // statut product
+                        {
+                           data: 'id', render: data => {
+                              const userId: any = data;
+                              const pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
+                              const metaDiscount: any = _.find(this.Item.meta_data, { key: "discount" });
+                              const price: number = parseInt(pdt.price, 10);
+                              const marge = clientRole === 'fz-company' ? (pdt.company_status === 'dealer' ? pdt.marge_dealer : pdt.marge) : pdt.marge_particular;
+
+
+                              let discount = _.isUndefined(metaDiscount) ? 0 : parseInt(metaDiscount.value, 10);
+                              let hisPrice = Math.round(((price * discount) / 100) + price);
+                              hisPrice = this.services.getBenefit(hisPrice, parseInt(marge, 10));
+                              return this.currencyFormat(hisPrice);
+                           }
+                        }, // price product
+                        {
+                           data: 'id', render: data => {
+                              let userId: any = data;
+                              let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
+                              let article: any = JSON.stringify(pdt);
+                              return `<span class='badge badge-success view-article' style='cursor: pointer' data-article='${article}'>Voir</span>`;
+                           }
+                        }, // Produit
+                        {
+                           data: null, render: (data, type, row) => {
+                              let inputValue: number = 0;
+                              const metaSuppliers: any = _.find(this.Item.meta_data, { key: "suppliers" });
+                              const metaDiscount: any = _.find(this.Item.meta_data, { key: "discount" });
+                              let discount = _.isUndefined(metaDiscount) ? 0 : parseInt(metaDiscount.value, 10);
+                              if (metaSuppliers && !_.isEmpty(metaSuppliers.value)) {
+                                 /**
+                                  * @return Array
+                                  */
+                                 let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: "2", product_id: 0, article_id: 0, price: 0}] 
+                                 _.map(dataParser, (parse) => {
+                                    if (row.id === parse.supplier) {
+                                       inputValue = parseInt(parse.get);
+                                    }
+                                 });
+                              }
+
+                              let fzProduct: any = _.find(this.__FZPRODUCTS__, { user_id: row.id });
+
+                              const price: number = parseInt(fzProduct.price, 10);
+                              const marge = clientRole === 'fz-company' ? (fzProduct.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
+                              
+                              let hisPrice = Math.round(((price * discount) / 100) + price);
+                              hisPrice = this.services.getBenefit(hisPrice, parseInt(marge, 10));
+
+                              const dateLimit: any = moment(fzProduct.date_review).subtract(-1, 'days');
+                              let disabled: boolean = dateLimit < moment();
+
+                              return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
+                     value="${disabled ? 0 : inputValue}" min="0" max="${fzProduct.total_sales}" ${disabled ? "disabled='disabled'" : ''}
+                     data-product="${fzProduct.product_id}" 
+                     data-supplier="${row.id}" 
+                     data-price="${hisPrice}" 
+                     data-article="${fzProduct.id}">`;
+                           }
+                        }
+                     ],
+                     initComplete: () => {
+                        Helpers.setLoading(false);
+                        $('#quotation-view-supplier-modal').modal('show');
+
+                        $('#quotation-supplier-table tbody').on('click', '.view-supplier', ev => {
+                           ev.preventDefault();
+                           const element = $(ev.currentTarget);
+                           const elData: any = $(element).data();
+                           $('.modal').modal('hide');
+                           setTimeout(() => {
+                              this.zone.run(() => this.router.navigate(['/supplier', elData.supplier, 'edit']));
+                           }, 600);
+                        });
+
+                        $('#quotation-supplier-table tbody').on('click', '.view-article', ev => {
+                           ev.preventDefault();
+                           let data: any = $(ev.currentTarget).data();
+                           this.Editor = _.clone(data.article);
+                           this.cd.detectChanges();
+                        });
+
+                        $('#quotation-supplier-table tbody').on('change', '.input-increment', ev => {
+                           ev.preventDefault();
+
+                           let element = $(ev.currentTarget);
+                           let currentValue = $(element).val();
+                           currentValue = parseInt(currentValue, 10);
+                           let countInputSet = 0;
+                           this.objectMeta = [];
+                           // Vérifier la quantité et la quantité ajouter pour les fournisseurs
+                           $(`input.input-increment`).each((index, value) => {
+                              let inputVal: any = $(value).val();
+                              console.log('input increment:' + inputVal);
+                              inputVal = parseInt(inputVal, 10);
+                              const inputData: any = $(value).data();
+                              countInputSet += inputVal;
+                              if (0 !== inputVal)
+                                 this.objectMeta.push({
+                                    supplier: parseInt(inputData.supplier, 10),
+                                    get: parseInt(inputVal, 10),
+                                    product_id: parseInt(inputData.product, 10),
+                                    article_id: inputData.article,
+                                    price: inputData.price
+                                 });
+                           });
+                           this.cd.detectChanges();
+
+                           if (this.Item.quantity < countInputSet) {
+                              element.val(Math.abs(parseInt(currentValue) - 1));
+                              return false;
+                           };
+
+                        });
+
+
+                     }
+                  })
+               });
+
+         });
    }
 
 }
