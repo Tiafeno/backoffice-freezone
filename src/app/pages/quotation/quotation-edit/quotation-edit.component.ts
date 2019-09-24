@@ -152,9 +152,10 @@ export class QuotationEditComponent implements OnInit {
                      const el = $(e.currentTarget).parents('tr');
                      const item = this.Table.row(el).data();
                      this.Item = _.cloneDeep(item); // Contient l'item en cours de traitement
-                     Helpers.setLoading(true);
                      // Récuperer tous les articles de ce produit
-                     this.onLoadingItem();
+                     this.zone.run(() => {
+                        this.router.navigate(['/dashboard', 'quotation', this.ID, 'term', this.Item.id]);
+                     });
                   });
 
                   $('#quotation-view-supplier-modal').on('hide.bs.modal', e => {
