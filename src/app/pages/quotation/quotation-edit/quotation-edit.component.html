@@ -27,6 +27,7 @@
   <div>
     <div class="btn-group mb-3">
       <button class="btn btn-info mr-3" data-toggle="modal" data-target="#quotation-view-modal">Afficher la demande</button>
+      <a class="btn btn-secondary mr-3" [routerLink]="['/dashboard', 'quotation', ID, 'recap']" routerLinkActive="active" >Récapitulatif</a>
       <a class="btn btn-secondary" [routerLink]="['/dashboard']" routerLinkActive="active" >Retour</a>
     </div>
   </div>
@@ -67,9 +68,9 @@
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Remis en %</label>
+                    <label>Remise en %</label>
                     <div class="input-group">
-                        <input class="form-control" formControlName="discount" type="number" placeholder="Remise en %">
+                        <input class="form-control" formControlName="discount" type="number" min="0" placeholder="Remise en %">
                         <span class="input-group-btn">
                             <button class="btn btn-outline-secondary" type="submit">Mette à jour</button>
                         </span>

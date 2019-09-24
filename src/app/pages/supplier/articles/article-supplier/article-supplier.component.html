@@ -43,11 +43,11 @@
                     <a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
                   </td>
                   <td><span class="badge"
-                            [ngClass]="{'badge-blue': article.product_status === 'publish',
-                            'badge-pink': article.product_status === 'draft',
-                            'badge-warning': article.product_status === 'pending'}"
+                            [ngClass]="{'badge-blue': article.status === 'publish',
+                            'badge-pink': article.status === 'draft',
+                            'badge-warning': article.status === 'pending'}"
                             (click)="onChangeStatus(article)" style="cursor: pointer">
-                    {{article.product_status === 'publish' ? 'PUBLIER' : (article.product_status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
+                    {{article.status === 'publish' ? 'PUBLIER' : (article.status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                   </td>
 
                   <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>

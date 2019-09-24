@@ -18,7 +18,7 @@
           <div class="ibox-head">
             <div class="ibox-title uppercase">Demandes non traitées</div>
           </div>
-          <app-quotation-custom (selectQt)="setQtSelected($event)" [Position]="0" [Balise]="'pro_pending'"
+          <app-quotation-custom (selectQt)="setQtSelected($event)" [refresh]="refreshQuotatuon" [Position]="0" [Balise]="'pro_pending'"
             [Role]="'fz-company'">
           </app-quotation-custom>
         </div>
@@ -27,7 +27,7 @@
           <div class="ibox-head">
             <div class="ibox-title uppercase">Demandes traitées</div>
           </div>
-          <app-quotation-custom (selectQt)="setQtSelected($event)" [Position]="1" [Balise]="'pro_treaty'"
+          <app-quotation-custom (selectQt)="setQtSelected($event)" [refresh]="refreshQuotatuon" [Position]="1" [Balise]="'pro_treaty'"
             [Role]="'fz-company'">
           </app-quotation-custom>
         </div>
@@ -36,7 +36,7 @@
           <div class="ibox-head">
             <div class="ibox-title uppercase">Le résultat de la consultation</div>
           </div>
-          <app-quotation-custom (selectQt)="setQtSelected($event)" [Position]="3" [Balise]="'pro_terminate'"
+          <app-quotation-custom (selectQt)="setQtSelected($event)" [refresh]="refreshQuotatuon" [Position]="[3, 2]" [Balise]="'pro_terminate'"
             [Role]="'fz-company'">
           </app-quotation-custom>
         </div>
@@ -47,7 +47,7 @@
           <div class="ibox-head">
             <div class="ibox-title uppercase">Demandes non traitées</div>
           </div>
-          <app-quotation-custom (selectQt)="setQtSelected($event)" [Position]="0" [Balise]="'pa_pending'"
+          <app-quotation-custom (selectQt)="setQtSelected($event)" [refresh]="refreshQuotatuon" [Position]="0" [Balise]="'pa_pending'"
             [Role]="'fz-particular'">
           </app-quotation-custom>
         </div>
@@ -56,7 +56,7 @@
           <div class="ibox-head">
             <div class="ibox-title uppercase">Demandes traitées</div>
           </div>
-          <app-quotation-custom (selectQt)="setQtSelected($event)" [Position]="1" [Balise]="'pa_treaty'"
+          <app-quotation-custom (selectQt)="setQtSelected($event)" [refresh]="refreshQuotatuon" [Position]="1" [Balise]="'pa_treaty'"
             [Role]="'fz-particular'">
           </app-quotation-custom>
         </div>
@@ -65,7 +65,7 @@
           <div class="ibox-head">
             <div class="ibox-title uppercase">Le résultat de la consultation</div>
           </div>
-          <app-quotation-custom (selectQt)="setQtSelected($event)" [Position]="3" [Balise]="'pa_terminate'"
+          <app-quotation-custom (selectQt)="setQtSelected($event)" [refresh]="refreshQuotatuon" [Position]="[3, 2]" [Balise]="'pa_terminate'"
             [Role]="'fz-particular'">
           </app-quotation-custom>
         </div>

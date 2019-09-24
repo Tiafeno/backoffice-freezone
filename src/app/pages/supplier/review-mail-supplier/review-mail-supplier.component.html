@@ -23,8 +23,9 @@
         <div>
           <h5 class="modal-title text-white">ENVOYER PAR E-MAIL
           </h5>
-          <small class="text-white">à {{Fournisseur.email}} pour {{Fournisseur.company_name}}
-            ({{Fournisseur.reference}})</small>
+          <small class="text-white">à {{Fournisseur.email}}
+             <!-- pour {{Fournisseur.company_name}} ({{Fournisseur.reference}}) -->
+            </small>
 
         </div>
       </div>
@@ -65,11 +66,13 @@
 
                 <label class="radio radio-grey radio-primary radio-inline">
                   <input type="checkbox" formControlName="mail_commercial_cc" checked="">
-                  <span class="input-span"></span>Commercials</label>
+                  <span class="input-span"></span>Commercials
+                </label>
 
                 <label class="radio radio-grey radio-primary radio-inline">
                   <input type="checkbox" formControlName="mail_logistics_cc">
-                  <span class="input-span"></span>Logistiques</label>
+                  <span class="input-span"></span>Logistiques
+                </label>
               </div>
             </div>
 
@@ -85,10 +88,21 @@
 
             <div class="form-group mb-4 mt-4">
               <label style="font-weight:bold">Les articles en attente:</label>
-              <ul class="list-group list-group-full list-group-divider">
-                <li *ngFor="let item of pendingArticle" class="list-group-item badge badge-secondary">
-                  {{item.title.rendered}}</li>
-              </ul>
+              <table class="table">
+                <thead style="background-color: lavender;">
+                  <tr>
+                    <th>Designation</th>
+                    <th>Quantité demandée</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of pendingArticle; let i = index">
+                    <td width="500"><span class="font-10">{{item.title.rendered}}</span></td>
+                    <td>{{item.quantity_request}}</td>
+                  </tr>
+
+                </tbody>
+              </table>
             </div>
 
           </div>

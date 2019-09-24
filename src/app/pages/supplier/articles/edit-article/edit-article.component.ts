@@ -75,17 +75,18 @@ export class EditArticleComponent implements OnInit {
       marge: new FormControl({ value: 0 }, Validators.required),
       margeDealer: new FormControl({ value: 0 }, Validators.required),
       margeParticular: new FormControl({ value: 0 }, Validators.required),
+      garentee: new FormControl({value: null, disabled: !this.canEdit}),
       product: new FormControl({ value: null, disabled: true }, Validators.required),
       user_id: new FormControl(null, Validators.required),
       stock: new FormControl({ value: null, disabled: !this.canEdit }, Validators.required),
 
     });
-    this.WP = this.apiWP.getWPAPI();
+    this.WP = this.apiWP.getWordpress();
   }
 
   ngOnInit() {
     moment.locale('fr');
-    $('#edit-article-supplier-modal').on('hide.bs.modal', e => {
+    $('#edit-article-supplier-modal').on('hide.bs.modal', () => {
       Helpers.setLoading(false);
     });
   }
@@ -150,7 +151,7 @@ export class EditArticleComponent implements OnInit {
   loadPost(type: string, id?: number): Observable<any> {
     const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/${type}?include=${id}&status=any`;
     const results = this.http.get<any>(URL);
-    results.subscribe(resp => { }, error => {
+    results.subscribe(() => { }, error => {
       if (error instanceof HttpErrorResponse) {
         Swal.fire('Réquete invalide', error.message, 'error');
         Helpers.setLoading(false);
@@ -203,6 +204,7 @@ export class EditArticleComponent implements OnInit {
       marge: Values.marge, // Professional marge
       marge_dealer: Values.margeDealer,
       marge_particular: Values.margeParticular,
+      garentee: Values.garentee,
       total_sales: parseInt(Values.stock, 10),
       date_review: moment().format('YYYY-MM-DD HH:mm:ss')
     }).then(() => {
@@ -244,6 +246,7 @@ export class EditArticleComponent implements OnInit {
         marge: this._article.marge,
         margeDealer: this._article.marge_dealer,
         margeParticular: this._article.marge_particular,
+        garentee: this._article.garentee,
         product: this.Products[0].title.rendered,
         user_id: this._article.user_id,
         stock: this._article.total_sales
@@ -255,7 +258,7 @@ export class EditArticleComponent implements OnInit {
       this.dateReviewFromNow = moment(this._article.date_review).fromNow();
 
       this.cd.detectChanges();
-    }, error => {
+    }, () => {
     }, () => {
       $('#edit-article-supplier-modal').modal('show');
       Helpers.setLoading(false);
@@ -278,7 +281,7 @@ export class EditArticleComponent implements OnInit {
       }).then(result => {
         if (result.value) {
           Helpers.setLoading(true);
-          this.WP.fz_product().id(id).delete({ force: true, reassign: 1 }).then(resp => {
+          this.WP.fz_product().id(id).delete({ force: true, reassign: 1 }).then(() => {
             this.refresh.emit();
             Helpers.setLoading(false);
             Swal.fire('Succès', 'Article supprimer avec succès', 'success');

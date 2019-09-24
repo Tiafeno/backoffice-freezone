@@ -1,0 +1,40 @@
+<div class="ibox-head">
+  <div class="flexbox-b mb-5 mt-5">
+    <span class="mr-4 static-badge badge-pink"><i class="la la-shopping-cart font-36"></i></span>
+    <div>
+      <h5 class="font-strong">Demande #{{ID}}</h5>
+    </div>
+  </div>
+</div>
+<!-- Affiche les produits dans la demande -->
+<div class="ibox-body">
+  <div class="">
+    <table class="table table-hover" id="quotation-edit-table">
+
+      <thead class="thead-default thead-lg">
+        <tr>
+          <th class="pl-4">DESIGNATION</th>
+          <th>QTÉ</th>
+          <th>FOURNISSEUR</th>
+          <th class="pr-4" style="width:91px;"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let data of tableData">
+          <td> {{data.name}} </td>
+          <td> {{data.take}} </td>
+          <td> {{data.supplier.reference}} </td>
+        </tr>
+      </tbody>
+
+    </table>
+  </div>
+</div>
+<div class="ibox-footer">
+  <div>
+    <div class="btn-group mb-3">
+      <a class="btn btn-secondary" [routerLink]="['/dashboard', 'quotation', ID, 'edit']" routerLinkActive="active" >Retour</a>
+    </div>
+  </div>
+</div>

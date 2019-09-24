@@ -11,7 +11,7 @@
         </a>
         <div class="media-body d-flex align-items-center">
           <div class="flex-1">
-            <div class="media-heading">{{user.last_name}} {{user.first_name}}</div>
+            <div class="media-heading">{{user.nickname}} - {{user.last_name}} {{user.first_name}}</div>
             <small class="text-muted">{{user.email}}</small>
           </div>
           <button class="btn btn-sm btn-outline-secondary btn-rounded" (click)="onView(user.id)">Voir</button>
@@ -36,7 +36,7 @@
       </div>
       <div class="modal-body p-4">
         <div>
-            <app-customer-edit [customer]="customer"></app-customer-edit>
+          <app-customer-edit [customer]="customer"></app-customer-edit>
         </div>
       </div>
       <div class="modal-footer justify-content-between bg-primary-50">
@@ -44,10 +44,11 @@
           <button class="btn btn-primary mr-3" data-dismiss="modal">Fermer</button>
         </div>
         <div>
-          <a class="btn btn-warning mr-3 redirect" [routerLink]="['/client', customer, 'edit']"  routerLinkActive="active" >Modifier</a>
+          <a class="btn btn-warning mr-3 redirect" [routerLink]="['/client', customer, 'edit']"
+            routerLinkActive="active">Modifier</a>
         </div>
       </div>
-      
+
     </div>
   </div>
 </div>

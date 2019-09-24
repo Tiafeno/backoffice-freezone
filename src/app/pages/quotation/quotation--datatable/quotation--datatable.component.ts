@@ -2,6 +2,7 @@ import { Component, OnInit, ViewEncapsulation, ViewChild, ChangeDetectorRef } fr
 import * as _ from 'lodash';
 import { StatusQuotationSwitcherComponent } from '../../../components/status-quotation-switcher/status-quotation-switcher.component';
 import { QuotationCustomComponent } from '../quotation-custom/quotation-custom.component';
+import * as moment from 'moment';
 declare var $: any;
 
 @Component({
@@ -12,6 +13,7 @@ declare var $: any;
 })
 export class QuotationDatatableComponent implements OnInit {
   public qtSelected: any = null;
+  public refreshQuotatuon: any = '';
 
   @ViewChild(StatusQuotationSwitcherComponent) QuotationSwitcher: StatusQuotationSwitcherComponent;
   @ViewChild(QuotationCustomComponent) QuotationCustom: QuotationCustomComponent;
@@ -26,7 +28,8 @@ export class QuotationDatatableComponent implements OnInit {
    */
   public setQtSelected(order: any) {
     this.qtSelected = _.clone(order);
-    this.cd.markForCheck();
+    this.refreshQuotatuon = moment().format('YYYY-MM-DD HH:mm:ss');
+    this.cd.detectChanges();
   }
 
   ngOnInit() {

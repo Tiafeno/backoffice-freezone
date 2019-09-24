@@ -116,8 +116,13 @@ export class ClientsComponent implements OnInit {
           }
         },
         {
-          data: 'first_name', render: (data, type, row) => {
-            return `<span class="edit-product font-strong">${data} ${row.last_name}</span>`;
+          data: 'meta_data', render: (data, type, row) => {
+            // Nom de l'entreprise ou la société
+            let companyName: any = _.find(data, { key: 'company_name' });
+            let role: string = row.role;
+            let name = role === 'fz-company' ? companyName.value : `${row.last_name} ${row.first_name}`;
+
+            return `<span class="edit-product font-strong">${name}</span>`;
           }
         },
         {
@@ -156,7 +161,7 @@ export class ClientsComponent implements OnInit {
         },
         {
           data: 'date_created', render: (data) => {
-            return moment(data).fromNow();
+            return moment(data).format('LLL');
           }
         },
         {
@@ -208,9 +213,11 @@ export class ClientsComponent implements OnInit {
           const __clt: any = getElementData(e);
 
           let meta_disable: any = _.find(__clt.meta_data, { key: 'ja_disable_user' });
-          const editStatus = _.isUndefined(meta_disable) ? 0 : meta_disable.value;
+          let meta_pending: any = _.find(__clt.meta_data, { key: 'fz_pending_user' });
+          const editDisabled = _.isUndefined(meta_disable) ? 0 : parseInt(meta_disable.value, 10);
+          const editPending = _.isUndefined(meta_pending) ? 0 : parseInt(meta_pending.value, 10);
 
-          this.FormStatus.patchValue({ status: editStatus, id: __clt.id });
+          this.FormStatus.patchValue({ status: editDisabled ? 1 : (editPending ? 'pending' : 0), id: __clt.id });
           this.cd.detectChanges();
           $('#switch-status-modal').modal('show');
         });

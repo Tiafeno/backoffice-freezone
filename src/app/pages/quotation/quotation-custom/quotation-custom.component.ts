@@ -17,15 +17,27 @@ declare var $: any;
 })
 export class QuotationCustomComponent implements OnInit, AfterViewInit {
 
-  public Table: any;
+  public Table: any = null;
   public queryPosition: any;
+  public _qRefresh: any;
   private Woocommerce;
   private Wordpress;
 
   @Output() selectQt = new EventEmitter<any>();
   @Input() Balise: string = '';
-  @Input() Position: number = 0;
+  @Input() Position: any = 0;
   @Input() Role: string = '';
+
+  @Input() 
+  set refresh(val: any) {
+    this._qRefresh = _.clone(val);
+    if ( ! _.isNull(this.Table)) {
+      console.log(val);
+    }
+      
+  }
+
+  get refresh(): any { return this._qRefresh; }
 
   constructor(
     private security: FzSecurityService,
@@ -71,7 +83,7 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
         { data: 'ID', render: (data) => { return `n°${data}` } },
         {
           data: 'author', render: (data, type, row) => {
-            return `<span>${data.last_name} ${data.first_name}</span>`;
+            return _.isEmpty(data.company_name) || _.isNull(data.company_name) ? `<span>${data.last_name} ${data.first_name}</span>` : data.company_name;
           }
         },
         {
@@ -79,8 +91,8 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
             const Status: Array<any> = [
               { value: 0, label: 'En ettente', style: 'warning' },
               { value: 1, label: 'Envoyer', style: 'blue' },
-              { value: 2, label: 'Rejetés', style: 'danger' },
-              { value: 3, label: 'Terminée', style: 'success' },
+              { value: 2, label: 'Rejeté', style: 'danger' },
+              { value: 3, label: 'Accepté', style: 'success' },
             ];
             let position: any = _.find(Status, { value: data });
             if (_.isUndefined(position)) return 'Non definie';

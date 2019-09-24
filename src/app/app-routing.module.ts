@@ -74,6 +74,7 @@ import { FaqClientAddComponent } from './pages/faq-client/faq-client-add/faq-cli
 import { FaqClientEditComponent } from './pages/faq-client/faq-client-edit/faq-client-edit.component';
 import { FaqClientsComponent } from './pages/faq-client/faq-clients/faq-clients.component';
 import { QuotationCustomComponent } from './pages/quotation/quotation-custom/quotation-custom.component';
+import { QuotationRecapComponent } from './pages/quotation/quotation-recap/quotation-recap.component';
 
 
 const routes: Routes = [
@@ -99,7 +100,8 @@ const routes: Routes = [
                                 path: 'quotation/:id',
                                 children: [
                                     { path: '', redirectTo: 'edit', pathMatch: 'full' },
-                                    { path: 'edit', component: QuotationEditComponent }
+                                    { path: 'edit', component: QuotationEditComponent },
+                                    { path: 'recap', component: QuotationRecapComponent }
                                 ]
                             }
 
@@ -301,6 +303,7 @@ const routes: Routes = [
         StatusQuotationSwitcherComponent,
         QuotationCustomComponent,
         QuotationArticleReviewComponent,
+        QuotationRecapComponent,
         CustomerEditComponent,
         QuotationMailComponent,
         ReviewArticlesComponent,

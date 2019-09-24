@@ -31,14 +31,13 @@ export class StatusArticleComponent implements OnInit {
   private _article: any;
   @Output() refresh = new EventEmitter();
 
-  @Input() 
-  set article(value: any){
+  @Input()
+  set article(value: any) {
     this._article = _.clone(value);
     if (_.isObject(value)) {
-      const currentStatus: any = _.find(this.inputStatus, { key: value.product_status });
-      this.Form.patchValue({ status: currentStatus.key });
+      this.Form.patchValue({ status: value.status });
+      this.cd.detectChanges();
     }
-    this.cd.detectChanges();
   }
 
   get article(): any {
@@ -60,18 +59,35 @@ export class StatusArticleComponent implements OnInit {
   ngOnInit() {
   }
 
-  onSubmit(): void | boolean {
+  async onSubmit() {
     if (this.Form.invalid) return false;
+    Helpers.setLoading(true);
     const Value = this.Form.value;
     const args = { status: Value.status };
-    Helpers.setLoading(true);
-    this.Woocommerce.put(`products/${this.article.product_id}`, args, (err, data, res) => {
-      this.Wordpress.fz_product().id(this.article.id).update({ status : Value.status}).then(response => {
-        Helpers.setLoading(false);
-        this.refresh.emit();
-        $('#status-product-modal').modal('hide');
+
+    await this.putProductStatus(args);
+    this.Wordpress.fz_product().id(this._article.id).update({ status: Value.status }).then(response => {
+      Helpers.setLoading(false);
+      this.refresh.emit();
+      $('#status-product-modal').modal('hide');
+    });
+  }
+
+  private putProductStatus(args: any): Promise<any> {
+    return new Promise(resolve => {
+      /**
+       * Si on met en attente le produit, tout les articles qui sont déja pubier seront 'en attente'
+       * Cette action sera definie pour la publication seulement
+       */
+      if (args.status !== 'publish') {
+        resolve(false);
+        return false;
+      }
+      this.Woocommerce.put(`products/${this._article.product_id}`, args, (err, data, res) => {
+        resolve(JSON.parse(res));
       });
     });
+
   }
 
 }
