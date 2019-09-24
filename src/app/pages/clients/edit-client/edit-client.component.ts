@@ -64,12 +64,11 @@ export class EditClientComponent implements OnInit {
       address_2: new FormControl(''),
       city: new FormControl(''),
       postcode: new FormControl(''),
-      company: new FormControl(''),
       email: new FormControl(''),
       first_name: new FormControl(''),
       last_name: new FormControl(''),
       phone: new FormControl(''),
-      state: new FormControl(''),
+      state: new FormControl('Madagascar'),
     });
 
 
@@ -80,8 +79,7 @@ export class EditClientComponent implements OnInit {
       first_name: new FormControl(''),
       last_name: new FormControl(''),
       postcode: new FormControl(''),
-      company: new FormControl(''),
-      state: new FormControl(''),
+      state: new FormControl('Madagascar'),
     });
 
     if (this.auth.getCurrentUserRole() === 'editor') {
