@@ -66,7 +66,6 @@ export class FzServicesService {
   public getBenefit(price: any, marge: any, discount?: number): number {
     const _price = parseInt(price, 10);
     const _marge = parseInt(marge, 10);
-    const _discount = 0; // Remise
     const Y: number = 1 - (_marge / 100);
     const result: number = _price / Y;
     /**
@@ -97,6 +96,14 @@ export class FzServicesService {
     if (index > str.length - 1) return str;
     return str.substr(0, index) + chr + str.substr(index + 1);
   }
+
+  public currencyFormat(numb: number, cur: string = "MGA"): string {
+    return new Intl.NumberFormat('de-DE', {
+       style: "currency",
+       minimumFractionDigits: 0,
+       currency: cur
+    }).format(numb);
+ }
 
   loadCategories(): Observable<any[]> {
     const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/product_cat?hide_empty=false&per_page=100`;

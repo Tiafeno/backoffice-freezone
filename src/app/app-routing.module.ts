@@ -102,8 +102,8 @@ const routes: Routes = [
                                 children: [
                                     { path: '', redirectTo: 'edit', pathMatch: 'full' },
                                     { path: 'edit', component: QuotationEditComponent },
-                                    { path: 'recap', component: QuotationRecapComponent }
-                                    { path: 'term/:termId', component: QuotationManageComponent }
+                                    { path: 'recap', component: QuotationRecapComponent },
+                                    { path: 'item/:itemId', component: QuotationManageComponent }
                                 ]
                             }
 

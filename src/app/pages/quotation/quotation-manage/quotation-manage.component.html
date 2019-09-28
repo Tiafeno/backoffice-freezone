@@ -1,3 +1,70 @@
-<p>
-  quotation-manage works!
-</p>
+<div class="ibox-head">
+  <div class="flexbox-b mb-5 mt-5">
+    <span class="mr-4 static-badge badge-pink"><i class="la la-shopping-cart font-36"></i></span>
+    <div>
+      <h5 class="font-strong">Liste fournisseur pour</h5>
+      <div class="text-light" *ngIf="item">{{item.name}}, Quantité: <b>{{item.quantity}}</b></div>
+    </div>
+  </div>
+</div>
+<!-- Affiche les produits dans la demande -->
+<div class="ibox-body">
+  <div class="">
+    <div>
+      <form [formGroup]="editForm" id="form-editor">
+        <div class="row d-flex">
+          <div class="col-sm-4">
+            <div class="form-group">
+              <div class="input-group">
+                <input class="form-control" (change)="onUpdateFakeDiscount($event)" formControlName="dFake" type="text"
+                  placeholder="Faux remise">
+              </div>
+              <!-- 
+              <p class="help-block font-11">
+                Ce champ permet d'ajouter ou modifier la remise afficher pour cette article dans la demande
+              </p> -->
+            </div>
+
+          </div>
+          <div class="col-sm-8 m-auto">
+            <div class="form-group">
+              <label class="checkbox checkbox-outline-danger">
+                <input type="checkbox" formControlName="hasDiscount" (change)="onChangehasDiscount($event)">
+                <span class="input-span"></span>Ajouter la remise pour cette article</label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    <table class="table table-hover" id="quotation-supplier-table">
+      <thead class="thead-default thead-lg">
+        <tr>
+          <th>FOURNISSEUR</th>
+          <th>REF</th>
+          <th>QTÉ DSP</th>
+          <th>ÉTAT</th>
+          <th>PRIX</th>
+          <th>ARTICLE</th>
+          <th class="pr-4" style="width:80px;">QTÉ</th>
+          <th class="pr-4" style="width:90px;">REMISE (AR)</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+</div>
+
+<div class="ibox-footer justify-content-between bg-primary-50">
+  <div class=" btn-group ">
+    <button class="btn btn-primary radius-0 mr-3" (click)="onSaveQuotationPdt()">Enregistrer</button>
+    <a class="btn btn-secondary radius-0" [routerLink]="['/dashboard', 'quotation', orderId, 'edit']">Retour</a>
+  </div>
+
+</div>
+
+
+<div class="modal fade" id="edit-article-supplier-modal">
+  <div class="modal-dialog" role="document">
+    <app-edit-article [article]="articleEditor" (refresh)="refreshTable()"></app-edit-article>
+  </div>
+</div>
