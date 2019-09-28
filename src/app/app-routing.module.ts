@@ -103,7 +103,11 @@ const routes: Routes = [
                                     { path: '', redirectTo: 'edit', pathMatch: 'full' },
                                     { path: 'edit', component: QuotationEditComponent },
                                     { path: 'recap', component: QuotationRecapComponent },
+<<<<<<< HEAD
                                     { path: 'item/:itemId', component: QuotationManageComponent }
+=======
+                                    { path: 'term/:termId', component: QuotationManageComponent }
+>>>>>>> 5ee318ca1320a5b694f204295d7f0ac971d8d096
                                 ]
                             }
 
