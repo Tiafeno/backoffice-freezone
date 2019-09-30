@@ -153,12 +153,12 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         }
         
 
-        this.QtItems = _.map(this.Items, product => {
+        this.QtItems = _.map(this.Items, item => {
             // Récuperer tous les meta utiliser pour le produit
-            let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: product.product_id });
+            let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: item.product_id });
             const allPriceForItem = _.map(SCHEMAS, schema => schema.price);
 
-            const metaDataSuppliers: any = _.find(product.meta_data, { key: 'suppliers' } as any);
+            const metaDataSuppliers: any = _.find(item.meta_data, { key: 'suppliers' } as any);
             const metaDataSuppliersValue = JSON.parse(metaDataSuppliers.value);
             const allTakeForItem = _.map(metaDataSuppliersValue, supplier => parseInt(supplier.get, 10));
 
@@ -168,25 +168,25 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 $('.modal').modal('hide');
                 Helpers.setLoading(false);
                 Swal.fire('Désolé', "Fournisseur non definie détecté", 'error');
-                return product;
+                return item;
             }
             // Récuperer le prix le plus grand pour chaque fournisseur ajouter
             const price = _.max(allPriceForItem);
             // Vérifier le prix et la quantité ajouter
-            if (_.isUndefined(price) || product.quantity > take) {
-                product.stock = product.total = product.subtotal = product.price = 0;
+            if (_.isUndefined(price) || item.quantity > take) {
+                item.stock = item.total = item.subtotal = item.price = 0;
 
                 $('.modal').modal('hide');
                 Swal.fire('Désolé', 'Quantité ajouter incorrect', 'error');
-                return product;
+                return item;
             }
 
-            return product;
+            return item;
         });
 
-        let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return parseInt(item.total, 10); });
-        this.Billing.subtotal = _.sum(totalItemsArray);
-        this.Billing.total = _.sum(totalItemsArray);
+        let totalItems: Array<any> = _.map(this.QtItems, item => { return parseInt(item.total, 10); });
+        this.Billing.subtotal = _.sum(totalItems);
+        this.Billing.total = _.sum(totalItems);
 
         let priceTax: number = (this.Billing.subtotal * this.Tax) / 100;
         this.Billing.price_tax = priceTax;
@@ -237,9 +237,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             let supplier: any = _.find(metas, { key: 'suppliers' });
             if (_.isUndefined(supplier)) return [];
             // récuperer la valeur du meta item
-            let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
-            // Rétourner une tableau vide s'il est vide ou null
-            if (_.isNull(Value) || !_.isArray(Value)) return [];
+            let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : [];
             // Récupere seulement la propriété définie
             return _.map(Value, data => data[property]);
         });
@@ -254,11 +252,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             _.map(this.Items, item => {
                 let metas = item.meta_data;
                 let supplier: any = _.find(metas, { key: 'suppliers' });
-                if (_.isUndefined(supplier)) return;
-                let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
-                if (_.isArray(Value) && !_.isEmpty(Value)) {
-                    container.push(Value);
-                }
+                if (_.isUndefined(supplier)) return [];
+                let Value = _.isEmpty(supplier.value) ? [] : JSON.parse(supplier.value);
+                container.push(Value);
             });
 
             resolve(container);

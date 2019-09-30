@@ -1,15 +1,12 @@
-import { Component, OnInit, ViewEncapsulation, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, NgZone } from '@angular/core';
 import { Helpers } from '../../../helpers';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
-import Swal from 'sweetalert2';
 import * as moment from 'moment'
 import { QuotationViewComponent } from '../quotation-view/quotation-view.component';
 import { FzSecurityService } from '../../../_services/fz-security.service';
-import { FzServicesService } from '../../../_services/fz-services.service';
-import { AuthorizationService } from '../../../_services/authorization.service';
 declare var $: any;
 
 @Component({
@@ -40,17 +37,13 @@ export class QuotationEditComponent implements OnInit {
    constructor(
       private route: ActivatedRoute,
       private router: Router,
-      private auth: AuthorizationService,
       private apiWC: ApiWoocommerceService,
       private apiWP: ApiWordpressService,
-      private cd: ChangeDetectorRef,
       private zone: NgZone,
       private security: FzSecurityService,
-      private services: FzServicesService
    ) {
       this.WCAPI = this.apiWC.getWoocommerce();
       this.WPAPI = this.apiWP.getWPAPI();
-
 
       this.canChangeMarge = this.security.hasAccess('s4', false);
       this.canChangeMargeDealer = this.security.hasAccess('s5', false);
@@ -81,7 +74,6 @@ export class QuotationEditComponent implements OnInit {
       this.route.parent.params.subscribe(params => {
          this.ID = parseInt(params.id);
          this.WCAPI.get(`orders/${this.ID}`, async (err, data, res) => {
-            Helpers.setLoading(false);
             this.ORDER = JSON.parse(res);
             const ITEMS = this.ORDER.line_items;
          
@@ -114,15 +106,16 @@ export class QuotationEditComponent implements OnInit {
                      render: (data, type, row) => {
                         const meta_data = _.clone(row.meta_data);
                         const metaSuppliers: any = _.find(meta_data, {key: 'suppliers'});
-                        const quantityItemTakes = !_.isUndefined(metaSuppliers) ? _.map(JSON.parse(metaSuppliers.value), mt => parseInt(mt.get, 10)) : 0;
+                        let quantityItemTakes = !_.isUndefined(metaSuppliers) ? _.map(JSON.parse(metaSuppliers.value), mt => parseInt(mt.get, 10)) : 0;
+                        quantityItemTakes = _.isArray(quantityItemTakes) ? _.sum(quantityItemTakes) : 0;
                         return _.isEqual(quantityItemTakes, 0) ? 'Non definie' : quantityItemTakes;
                      }
                   },
                   {
                      data: 'meta_data', render: data => {
                         const meta: any = _.find(data, { key: 'status' });
-                        const intStatus: number = parseInt(meta.value, 10);
-                        const status: string = intStatus === 0 ? 'En attente' : (intStatus === 1 ? "Traitée" : "Rejeté");
+                        const intStatus: number = _.isUndefined(meta) ? 0 : parseInt(meta.value, 10);
+                        const status: string = intStatus === 0 ? 'En attente' : (intStatus === 1 ? "Traitée" : "N/A");
                         const style: string = intStatus === 0 ? 'warning' : (intStatus === 1 ? "success" : "danger");
                         return `<span class="badge badge-${style}">${status}</span>`;
                      }
@@ -146,7 +139,7 @@ export class QuotationEditComponent implements OnInit {
 
                ],
                initComplete: () => {
-
+                  Helpers.setLoading(false);
                   // Gerer une article
                   $('#quotation-edit-table tbody').on('click', '.edit-item', e => {
                      e.preventDefault();

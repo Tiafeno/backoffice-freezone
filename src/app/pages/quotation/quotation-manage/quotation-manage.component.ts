@@ -8,7 +8,7 @@ import * as moment from 'moment';
 import Swal from 'sweetalert2';
 import { FzServicesService } from '../../../_services/fz-services.service';
 import { EditArticleComponent } from '../../supplier/articles/edit-article/edit-article.component';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl } from '@angular/forms';
 import { AuthorizationService } from '../../../_services/authorization.service';
 declare var $: any;
 
@@ -21,6 +21,13 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
     public orderId: number = 0;
     public order: any = {};
     public item: any;
+    /**
+     * 0: En attente
+     * 1: Envoyer
+     * 2: Rejetés
+     * 3: Terminée
+     */
+    public quotationPosition: number = 0;
     private items: Array<any> = [];
     private itemId: number = 0;
     private Woocommerce: any;
@@ -49,7 +56,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         this.Woocommerce = this.apiWC.getWoocommerce();
         this.Wordpress = this.apiWP.getWordpress();
         this.editForm = new FormGroup({
-            dFake: new FormControl(null, Validators.required), // Valeur de la remise afficher du côté client
+            dFake: new FormControl(''), // Valeur de la remise afficher du côté client
             stockRequest: new FormControl(0), // Forcer la quantité de la demande pour les articles fournisseur disponible
             hasDiscount: new FormControl(true) // Appliquer ou pas la remise pour cette article
         });
@@ -72,8 +79,10 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 this.items = _.cloneDeep(this.order.line_items);
                 let item: any = _.find(this.order.line_items, { id: this.itemId });
                 this.item = _.isUndefined(item) || !_.isObject(item) ? null : item;
+                // Récuperer la status de la demande
+                this.quotationPosition = parseInt(this.order.position, 10);
+                // Les meta data
                 const meta = this.item.meta_data;
-
                 const fakeDiscount: any = _.find(meta, { key: 'fake_discount' });
                 const stockRequest: any = _.find(meta, { key: 'stock_request' });
                 const hasDiscount: any = _.find(meta, { key: 'has_discount' });
@@ -117,6 +126,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                     Helpers.setLoading(false);
                     return false;
                 }
+                this.cd.detectChanges();
                 // Récuperer les fournisseurs (utilisateur) qui possède cette article
                 let supplier_ids: Array<number> = _.map(this.allProducts, p => parseInt(p.user_id, 10));
                 this.Wordpress
@@ -159,8 +169,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         if (_.isUndefined(pdt)) return 'Introuvable';
 
                                         let dateLimit: any = moment(pdt.date_review).subtract(-1, 'days');
-                                        let msg: string = dateLimit > moment() ? "Traité" : "En attente";
-                                        let style: string = dateLimit > moment() ? 'blue' : 'warning';
+                                        let msg: string = _.isEqual(this.quotationPosition, 2) || dateLimit > moment() ? "Traité" : "En attente";
+                                        let style: string =  _.isEqual(this.quotationPosition, 2) || dateLimit > moment() ? 'blue' : 'warning';
+
                                         return `<span class="badge badge-${style}">${msg}</span>`;
                                     }
                                 }, // statut product
@@ -179,8 +190,8 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         if (frmEditValue.hasDiscount) {
                                             const discounts: any = _.find(this.item.meta_data, { key: 'discounts' });
                                             const discountValues: Array<any> = _.isUndefined(discounts) ? [] : JSON.parse(discounts.value);
-                                            const _current_discount_value = _.find(discountValues, { article_id: pdt.id }).discount;
-                                            hisPrice = parseInt(pdt.price) + parseInt(_current_discount_value);
+                                            const _current_discount_value = _.isEmpty(discountValues) ? 0 : _.find(discountValues, { article_id: pdt.id }).discount;
+                                            hisPrice = hisPrice + parseInt(_current_discount_value);
                                         }
 
                                         return this.services.currencyFormat(hisPrice);
@@ -220,12 +231,13 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         if (frmEditValue.hasDiscount) {
                                             const discounts: any = _.find(this.item.meta_data, { key: 'discounts' });
                                             const discountValues: Array<any> = _.isUndefined(discounts) ? [] : JSON.parse(discounts.value);
-                                            const _current_discount_value = _.find(discountValues, { article_id: fzProduct.id }).discount;
-                                            hisPrice = price + parseInt(_current_discount_value);
+                                            const _current_discount_value = _.isEmpty(discountValues) ? 0 : _.find(discountValues, { article_id: fzProduct.id }).discount;
+                                            hisPrice = hisPrice + parseInt(_current_discount_value);
                                         }
 
                                         const dateLimit: any = moment(fzProduct.date_review).subtract(-1, 'days');
-                                        let disabled: boolean = dateLimit <= moment();
+                                        // vérifier si l'article est en mode rejetée
+                                        let disabled: boolean = _.isEqual(this.quotationPosition, 2) ? false : dateLimit <= moment();
 
                                         return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
                                                     value="${disabled ? 0 : inputValue}" 
@@ -260,7 +272,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                             ],
                             initComplete: () => {
                                 Helpers.setLoading(false);
-
                                 this.cd.detectChanges();
 
                                 $('#quotation-supplier-table tbody').on('click', '.view-supplier', ev => {
@@ -355,7 +366,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         // rétourner la fonction pour les conditions suivantes
         if (!_.isObject(this.item)) return false;
 
-        Helpers.setLoading(true);
         let lineItems: Array<any> = this.items;
         const frmEditValue: any = this.editForm.value;
 
@@ -427,12 +437,20 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 const prices = _.map(this.objMetaSuppliers, mt => parseInt(mt.price, 10));
 
                 item.price = _.max(prices);
+                let stkRequest = stockInsuffisantCondition ? item.quantity : frmEditValue.stockRequest;
                 item.quantity = stockInsuffisantCondition ? _.sum(quantityItemTakes) : item.quantity;
                 item.total = Math.round(_.max(prices) * item.quantity).toString();
                 item.subtotal = Math.round(_.max(prices) * item.quantity).toString();
                 meta_data = _.map(meta_data, meta => {
                     switch (meta.key) {
                         case 'status':
+                            // L'etat d'une article est toujours traité pour la demande rejeté
+                            if (_.isEqual(this.quotationPosition, 2)) {
+                                meta.value = 1;
+                                return meta;
+                            }
+
+                            // Verifier le status par la quantité ajouter
                             if (_.isEmpty(this.objMetaSuppliers)) {
                                 meta.value = 0;
                             } else {
@@ -459,7 +477,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                             break;
 
                         case 'stock_request':
-                                meta.value = frmEditValue.stockRequest;
+                                meta.value = stkRequest;
                             break;
 
                         default:
@@ -470,13 +488,14 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 const hasSuppliers = _.find(meta_data, { key: 'suppliers' } as any);
                 const hasRequest = _.find(meta_data, { key: 'stock_request'} as any);
                 if (_.isUndefined(hasSuppliers)) meta_data.push({ key: 'suppliers', value: JSON.stringify(this.objMetaSuppliers) });
-                if (_.isUndefined(hasRequest)) meta_data.push({ key: 'stock_request', value:  frmEditValue.stockRequest});
+                if (_.isUndefined(hasRequest)) meta_data.push({ key: 'stock_request', value:  stkRequest});
                 item.meta_data = _.clone(meta_data);
 
                 return item;
             });
         }
 
+        Helpers.setLoading(true);
         const data: any = { line_items: lineItems };
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
             Helpers.setLoading(false);
