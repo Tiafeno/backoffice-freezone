@@ -214,7 +214,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         if (metaSuppliers && !_.isEmpty(metaSuppliers.value)) {
                                             let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: 2, product_id: 0, article_id: 0, price: 0} ...] 
                                             _.map(dataParser, (parse) => {
-                                                if (row.id === parse.supplier) {
+                                                if (row.id == parse.supplier) {
                                                     inputValue = parseInt(parse.get, 10);
                                                 }
                                             });
@@ -328,6 +328,8 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         }
                                     });
 
+                                    console.log(this.objMetaSuppliers);
+
                                 });
 
                                 $('#quotation-supplier-table tbody').on('change', '.input-discount', ev => {
@@ -367,6 +369,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         if (!_.isObject(this.item)) return false;
 
         let lineItems: Array<any> = this.items;
+        let stockInsuffisantCondition: boolean = false;
         const frmEditValue: any = this.editForm.value;
 
         if (!_.isEmpty(this.objMetaDiscount)) {
@@ -406,7 +409,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
         if (!_.isEmpty(this.objMetaSuppliers)) {
             // Récuperer la valeur de consition pour le changement de quantité
-            let stockInsuffisantCondition: boolean = false;
 
             let allCollectQuantity: Array<number> = _.map(this.objMetaSuppliers, meta => { return parseInt(meta.get, 10); });
             let collectQts = _.sum(allCollectQuantity);
@@ -499,7 +501,12 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         const data: any = { line_items: lineItems };
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
             Helpers.setLoading(false);
-            window.location.reload();
+            if (stockInsuffisantCondition) {
+                window.location.reload();
+            } else {
+                this.ngOnInit();
+            }
+            
         });
     }
 
@@ -541,7 +548,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             Helpers.setLoading(true);
             this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
                 Helpers.setLoading(false);
-                this.onRenderTable();
+                this.ngOnInit();
                 this.cd.detectChanges();
             });
         }
@@ -577,7 +584,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         Helpers.setLoading(true);
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
             Helpers.setLoading(false);
-            this.onRenderTable();
+            this.ngOnInit();
             this.cd.detectChanges();
         });
 
