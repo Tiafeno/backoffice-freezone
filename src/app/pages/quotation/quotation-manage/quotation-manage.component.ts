@@ -170,7 +170,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
                                         let dateLimit: any = moment(pdt.date_review).subtract(-1, 'days');
                                         let msg: string = _.isEqual(this.quotationPosition, 2) || dateLimit > moment() ? "Traité" : "En attente";
-                                        let style: string =  _.isEqual(this.quotationPosition, 2) || dateLimit > moment() ? 'blue' : 'warning';
+                                        let style: string = _.isEqual(this.quotationPosition, 2) || dateLimit > moment() ? 'blue' : 'warning';
 
                                         return `<span class="badge badge-${style}">${msg}</span>`;
                                     }
@@ -372,6 +372,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         let stockInsuffisantCondition: boolean = false;
         const frmEditValue: any = this.editForm.value;
 
+        // Mettre à jour et ajouter des remises pour les articles
         if (!_.isEmpty(this.objMetaDiscount)) {
             const discountKey: string = 'discounts';
             lineItems = _.map(lineItems, item => {
@@ -407,6 +408,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             });
         }
 
+        // Mettre à jours les fournisseurs ajouter pour l'article
         if (!_.isEmpty(this.objMetaSuppliers)) {
             // Récuperer la valeur de consition pour le changement de quantité
 
@@ -424,7 +426,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                     focusConfirm: false,
                 });
                 stockInsuffisantCondition = result ? true : false;
-                if (result) this.editForm.patchValue({stockRequest: collectQts});
+                if (result) this.editForm.patchValue({ stockRequest: collectQts });
                 this.cd.detectChanges();
             }
 
@@ -475,11 +477,11 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                             meta.value = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
                             break;
                         case 'suppliers':
-                                meta.value = JSON.stringify(this.objMetaSuppliers);
+                            meta.value = JSON.stringify(this.objMetaSuppliers);
                             break;
 
                         case 'stock_request':
-                                meta.value = stkRequest;
+                            meta.value = stkRequest;
                             break;
 
                         default:
@@ -488,9 +490,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                     return meta;
                 });
                 const hasSuppliers = _.find(meta_data, { key: 'suppliers' } as any);
-                const hasRequest = _.find(meta_data, { key: 'stock_request'} as any);
+                const hasRequest = _.find(meta_data, { key: 'stock_request' } as any);
                 if (_.isUndefined(hasSuppliers)) meta_data.push({ key: 'suppliers', value: JSON.stringify(this.objMetaSuppliers) });
-                if (_.isUndefined(hasRequest)) meta_data.push({ key: 'stock_request', value:  stkRequest});
+                if (_.isUndefined(hasRequest)) meta_data.push({ key: 'stock_request', value: stkRequest });
                 item.meta_data = _.clone(meta_data);
 
                 return item;
@@ -506,51 +508,42 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             } else {
                 this.ngOnInit();
             }
-            
+
         });
     }
 
-    onUpdateFakeDiscount(event: any) {
+
+    onSetFakeDiscount(event: any) {
         event.preventDefault();
         if (_.isEmpty(this.item)) return false;
-
         if (!this.auth.isAdministrator()) {
             Swal.fire('Désolé', "Vous n'avez pas l'autorisation pour effectuer cette action", "warning");
             return false;
         }
-
-        if (this.editForm.valid && this.editForm.dirty) {
+        if (this.editForm.dirty) {
+            Helpers.setLoading(true);
             const Value: any = this.editForm.value;
-            let item = _.cloneDeep(this.item);
-
-            const data: any = {
-                line_items: _.map(this.items, (__item__) => {
-                    if (__item__.id === item.id) {
-                        let findFakeDiscount = _.find(item.meta_data, { key: 'fake_discount' });
-                        if (_.isUndefined(findFakeDiscount) || _.isNull(findFakeDiscount)) {
-                            item.meta_data.push({ key: 'fake_discount', 'value': Value.dFake });
-                        } else {
-                            item.meta_data = _.map(item.meta_data, data => {
-                                if (data.key === 'fake_discount') {
-                                    data.value = Value.dFake
-                                }
-                                return data;
-                            });
-                        }
-
-                        return item;
+            this.items = _.map(this.items, (__item__) => {
+                if (__item__.id === this.item.id) {
+                    let findFakeDiscount = _.find(__item__.meta_data, { key: 'fake_discount' });
+                    if (_.isUndefined(findFakeDiscount) || _.isNull(findFakeDiscount)) {
+                        __item__.meta_data.push({ key: 'fake_discount', 'value': Value.dFake });
+                    } else {
+                        __item__.meta_data = _.map(__item__.meta_data, data => {
+                            if (data.key === 'fake_discount') {
+                                data.value = Value.dFake
+                            }
+                            return data;
+                        });
                     }
 
                     return __item__;
-                })
-            };
+                }
 
-            Helpers.setLoading(true);
-            this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
-                Helpers.setLoading(false);
-                this.ngOnInit();
-                this.cd.detectChanges();
+                return __item__;
             });
+            this.cd.detectChanges();
+            Helpers.setLoading(false);
         }
     }
 
