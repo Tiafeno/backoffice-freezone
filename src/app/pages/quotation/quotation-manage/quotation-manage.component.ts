@@ -77,6 +77,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 this.order = JSON.parse(res);
                 // Récuperer l'item dans la demande
                 this.items = _.cloneDeep(this.order.line_items);
+                // Récuperer l'item en cours
                 let item: any = _.find(this.order.line_items, { id: this.itemId });
                 this.item = _.isUndefined(item) || !_.isObject(item) ? null : item;
                 // Récuperer la status de la demande
@@ -87,7 +88,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 const stockRequest: any = _.find(meta, { key: 'stock_request' });
                 const hasDiscount: any = _.find(meta, { key: 'has_discount' });
                 this.editForm.patchValue({
-                    dFake: _.isUndefined(fakeDiscount) ? 0 : fakeDiscount.value,
+                    dFake: _.isUndefined(fakeDiscount) ? '' : fakeDiscount.value,
                     stockRequest: _.isUndefined(stockRequest) ? 0 : parseInt(stockRequest.value, 10),
                     hasDiscount: _.isUndefined(hasDiscount) ? true : (parseInt(hasDiscount.value, 10) ? true : false)
                 });
@@ -101,7 +102,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
                 // Afficher les informations sur la table
                 this.onRenderTable();
-
                 this.cd.detectChanges();
             });
         });
@@ -209,32 +209,15 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     data: null, render: (data, type, row) => {
                                         let inputValue: number = 0;
                                         const metaSuppliers: any = _.find(this.item.meta_data, { key: "suppliers" });
-                                        /* const metaDiscount: any = _.find(this.item.meta_data, { key: "discount" });
-                                        let discount = _.isUndefined(metaDiscount) ? 0 : parseInt(metaDiscount.value, 10); */
                                         if (metaSuppliers && !_.isEmpty(metaSuppliers.value)) {
                                             let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: 2, product_id: 0, article_id: 0, price: 0} ...] 
-                                            _.map(dataParser, (parse) => {
-                                                if (row.id == parse.supplier) {
-                                                    inputValue = parseInt(parse.get, 10);
-                                                }
+                                            let input: Array<any> = _.map(dataParser, data => {
+                                                return row.id == data.supplier ? parseInt(data.get, 10) : 0;
                                             });
+                                            inputValue = _.sum(input);
                                         }
 
                                         let fzProduct: any = _.find(this.allProducts, { user_id: row.id });
-
-                                        const price: number = parseInt(fzProduct.price, 10);
-                                        const marge = clientRole === 'fz-company' ? (fzProduct.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
-                                        let hisPrice: number = this.services.getBenefit(price, parseInt(marge, 10));
-
-                                        // Ajouter la remise s'il existe
-
-                                        if (frmEditValue.hasDiscount) {
-                                            const discounts: any = _.find(this.item.meta_data, { key: 'discounts' });
-                                            const discountValues: Array<any> = _.isUndefined(discounts) ? [] : JSON.parse(discounts.value);
-                                            const _current_discount_value = _.isEmpty(discountValues) ? 0 : _.find(discountValues, { article_id: fzProduct.id }).discount;
-                                            hisPrice = hisPrice + parseInt(_current_discount_value);
-                                        }
-
                                         const dateLimit: any = moment(fzProduct.date_review).subtract(-1, 'days');
                                         // vérifier si l'article est en mode rejetée
                                         let disabled: boolean = _.isEqual(this.quotationPosition, 2) ? false : dateLimit <= moment();
@@ -246,7 +229,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                                     ${disabled ? " disabled='disabled' " : ''}
                                                     data-product="${fzProduct.product_id}" 
                                                     data-supplier="${row.id}" 
-                                                    data-price="${hisPrice}" 
                                                     data-article="${fzProduct.id}">`;
                                     }
                                 }, // champ quantité
@@ -328,8 +310,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         }
                                     });
 
-                                    console.log(this.objMetaSuppliers);
-
                                 });
 
                                 $('#quotation-supplier-table tbody').on('change', '.input-discount', ev => {
@@ -342,9 +322,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     $(`input.input-discount`).each((index, value) => {
                                         let discount: number = frmEditValue.hasDiscount ? parseInt($(value).val()) : 0; // en Ariary
                                         let fzProduct: any = _.find(this.allProducts, { user_id: item.id });
+
                                         this.objMetaDiscount.push({
                                             discount: discount,
-                                            price: parseInt(fzProduct.price, 10) + discount,
                                             article_id: parseInt(fzProduct.id, 10),
                                         });
                                     });
@@ -371,7 +351,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         let lineItems: Array<any> = this.items;
         let stockInsuffisantCondition: boolean = false;
         const frmEditValue: any = this.editForm.value;
-
         // Mettre à jour et ajouter des remises pour les articles
         if (!_.isEmpty(this.objMetaDiscount)) {
             const discountKey: string = 'discounts';
@@ -384,8 +363,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 // Trouver les remises
                 let findDiscounts = _.find(metaData, { key: discountKey } as any);
                 // Ajouter le prix la plus élevé 
-                const prices = _.map(this.objMetaDiscount, mt => parseInt(mt.price, 10));
-                item.price = _.max(prices);
                 // Récuperer seuelement les données requis
                 const metaValue: Array<any> = _.map(this.objMetaDiscount, m => {
                     return _.pick(m, ['discount', 'article_id']);
@@ -437,14 +414,10 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 // Récuperer seulement l'item en cours de modification
                 if (item.product_id !== this.item.product_id) return item;
 
-                let meta_data: Array<any> = _.cloneDeep(item.meta_data); // Product meta
-                const prices = _.map(this.objMetaSuppliers, mt => parseInt(mt.price, 10));
-
-                item.price = _.max(prices);
                 let stkRequest = stockInsuffisantCondition ? item.quantity : frmEditValue.stockRequest;
+                let meta_data: Array<any> = _.cloneDeep(item.meta_data); // Product meta
                 item.quantity = stockInsuffisantCondition ? _.sum(quantityItemTakes) : item.quantity;
-                item.total = Math.round(_.max(prices) * item.quantity).toString();
-                item.subtotal = Math.round(_.max(prices) * item.quantity).toString();
+                // Meta data informations
                 meta_data = _.map(meta_data, meta => {
                     switch (meta.key) {
                         case 'status':
@@ -499,14 +472,48 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             });
         }
 
+        // Ajouter les prix des articles
+        lineItems = _.map(lineItems, item => {
+            const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
+            const suppliers: any = _.find(item.meta_data, { key: 'suppliers' });
+            if (_.isUndefined(suppliers)) return item;
+            let suppliersValue: Array<any> = _.isObject(suppliers) ? JSON.parse(suppliers.value) : [];
+            if (_.isEmpty(suppliersValue)) return item;
+
+            let prices: Array<any> = [];
+            // Recuperer les fournisseurs
+            _.map(suppliersValue, sup => {
+                let fzProduct: any = _.find(this.allProducts, { user_id: sup.supplier });
+                if (_.isUndefined(fzProduct)) return sup;
+                const price: number = parseInt(fzProduct.price, 10);
+                const marge = clientRole === 'fz-company' ? (fzProduct.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
+                let hisPrice: number = this.services.getBenefit(price, parseInt(marge, 10));
+
+                // Ajouter la remise s'il existe
+                if (frmEditValue.hasDiscount) {
+                    const discounts: any = _.find(item.meta_data, { key: 'discounts' });
+                    const discountValues: Array<any> = _.isUndefined(discounts) ? [] : JSON.parse(discounts.value);
+                    const _current_discount_value = _.isEmpty(discountValues) ? 0 : _.find(discountValues, { article_id: fzProduct.id }).discount;
+                    hisPrice = hisPrice + parseInt(_current_discount_value);
+                }
+                prices.push(hisPrice);
+            });
+
+            let price: number = _.max(prices);
+            item.price = price;
+            item.total = Math.round(price * item.quantity).toString();
+            item.subtotal = Math.round(price * item.quantity).toString();
+
+            return item;
+        });
+
         Helpers.setLoading(true);
         const data: any = { line_items: lineItems };
+
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
             Helpers.setLoading(false);
             if (stockInsuffisantCondition) {
                 window.location.reload();
-            } else {
-                this.ngOnInit();
             }
 
         });
@@ -542,6 +549,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
                 return __item__;
             });
+
             this.cd.detectChanges();
             Helpers.setLoading(false);
         }
@@ -550,37 +558,26 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
     onChangehasDiscount(event: any) {
         event.preventDefault();
         const Value: any = this.editForm.value;
-        let item = _.cloneDeep(this.item);
 
-        const data: any = {
-            line_items: _.map(this.items, (__item__) => {
-                if (__item__.id === item.id) {
-                    let hasDisc = _.find(item.meta_data, { key: 'has_discount' });
-                    if (_.isUndefined(hasDisc) || _.isNull(hasDisc)) {
-                        item.meta_data.push({ key: 'has_discount', 'value': Value.hasDiscount ? 1 : 0 });
-                    } else {
-                        item.meta_data = _.map(item.meta_data, data => {
-                            if (data.key === 'has_discount') {
-                                data.value = Value.hasDiscount ? 1 : 0
-                            }
-                            return data;
-                        });
-                    }
-
-                    return item;
+        this.items = _.map(this.items, (__item__) => {
+            if (__item__.id === this.item.id) {
+                let hasDisc = _.find(__item__.meta_data, { key: 'has_discount' });
+                if (_.isUndefined(hasDisc) || _.isNull(hasDisc)) {
+                    __item__.meta_data.push({ key: 'has_discount', 'value': Value.hasDiscount ? 1 : 0 });
+                } else {
+                    __item__.meta_data = _.map(__item__.meta_data, data => {
+                        if (data.key === 'has_discount') {
+                            data.value = Value.hasDiscount ? 1 : 0
+                        }
+                        return data;
+                    });
                 }
-
-                return __item__;
-            })
-        };
-
-        Helpers.setLoading(true);
-        this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
-            Helpers.setLoading(false);
-            this.ngOnInit();
-            this.cd.detectChanges();
+            }
+            return __item__;
         });
 
+        this.cd.detectChanges();
+        Helpers.setLoading(false);
     }
 
     ngAfterViewInit() {
