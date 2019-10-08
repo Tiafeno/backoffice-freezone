@@ -473,17 +473,18 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         }
 
         // Ajouter les prix des articles
+        const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
         lineItems = _.map(lineItems, item => {
-            const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
-            const suppliers: any = _.find(item.meta_data, { key: 'suppliers' });
+            // Seulemet l'item actuellement en cours de modification
+            if (item.id !== this.itemId) return item;
+
+            let suppliers: any = _.find(item.meta_data, { key: 'suppliers' });
             if (_.isUndefined(suppliers)) return item;
             let suppliersValue: Array<any> = _.isObject(suppliers) ? JSON.parse(suppliers.value) : [];
             if (_.isEmpty(suppliersValue)) return item;
 
-            let prices: Array<any> = [];
-            // Recuperer les fournisseurs
-            _.map(suppliersValue, sup => {
-                let fzProduct: any = _.find(this.allProducts, { user_id: sup.supplier });
+            let pdtsPrices: Array<number> = _.map(suppliersValue, sup => {
+                let fzProduct: any = _.find(this.allProducts, { id: sup.article_id });
                 if (_.isUndefined(fzProduct)) return sup;
                 const price: number = parseInt(fzProduct.price, 10);
                 const marge = clientRole === 'fz-company' ? (fzProduct.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
@@ -492,15 +493,20 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 // Ajouter la remise s'il existe
                 if (frmEditValue.hasDiscount) {
                     const discounts: any = _.find(item.meta_data, { key: 'discounts' });
-                    const discountValues: Array<any> = _.isUndefined(discounts) ? [] : JSON.parse(discounts.value);
-                    const _current_discount_value = _.isEmpty(discountValues) ? 0 : _.find(discountValues, { article_id: fzProduct.id }).discount;
-                    hisPrice = hisPrice + parseInt(_current_discount_value);
+                    if (!_.isUndefined(discounts)) {
+                        const discountValues: Array<any> = _.isUndefined(discounts) ? [] : JSON.parse(discounts.value);
+                        if (_.isEmpty(discountValues)) return sup;
+                        let _current_discount_value = _.find(discountValues, { article_id: fzProduct.id });
+                        _current_discount_value = _.isUndefined(_current_discount_value) ? 0 : _current_discount_value.discount;
+                        hisPrice = hisPrice + parseInt(_current_discount_value);
+                    }
                 }
-                prices.push(hisPrice);
+
+                return hisPrice;
             });
 
-            let price: number = _.max(prices);
-            item.price = price;
+            let price: number = _.max(pdtsPrices);
+            item.price = price.toString();
             item.total = Math.round(price * item.quantity).toString();
             item.subtotal = Math.round(price * item.quantity).toString();
 
@@ -512,10 +518,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
             Helpers.setLoading(false);
-            if (stockInsuffisantCondition) {
-                window.location.reload();
-            }
-
+            this.zone.run(() => { this.router.navigate(['/dashboard', 'quotation', this.orderId]) });
         });
     }
 
