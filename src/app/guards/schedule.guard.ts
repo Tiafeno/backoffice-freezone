@@ -18,17 +18,19 @@ export class ScheduleGuard implements CanActivate {
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
     const role = this.auth.getCurrentUserRole();
     if (role !== 'administrator') {
+      let hourResults: Array<boolean> = [];
       for (let date of this.dates) {
         const dateStart = moment(date.start, 'HH:mm:ss');
         const dateEnd = moment(date.end, 'HH:mm:ss');
         const isIn = moment().isBetween(dateStart, dateEnd, null, '[]'); 
-        if (!isIn) {
-          // Heure creuse
-          this.auth.logout();
-          this.errorMessage("Vous ne pouvez pas vous connecter à cette heure", "warning", "Avertissement");
-          //this.router.navigate(['login']);
-          return false;
-        }
+        hourResults.push(isIn);
+      }
+
+      if (_.indexOf(hourResults, true) > -1) {} else {
+        this.auth.logout();
+        this.errorMessage("Heure de connexion expirer", "warning", "Avertissement");
+        this.router.navigate(['login']);
+        return false;
       }
       
       let currentDay = moment().format('ddd');
