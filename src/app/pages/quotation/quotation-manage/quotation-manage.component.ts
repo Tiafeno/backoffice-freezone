@@ -36,7 +36,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
     public qtSupplierTable: any;
     public objMetaSuppliers: Array<any>;
-    public objMetaDiscount: Array<any>;
     public editForm: FormGroup;
     public articleEditor: any;
     public client: any;
@@ -56,9 +55,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         this.Woocommerce = this.apiWC.getWoocommerce();
         this.Wordpress = this.apiWP.getWordpress();
         this.editForm = new FormGroup({
-            dFake: new FormControl(''), // Valeur de la remise afficher du côté client
-            stockRequest: new FormControl(0), // Forcer la quantité de la demande pour les articles fournisseur disponible
-            hasDiscount: new FormControl(true) // Appliquer ou pas la remise pour cette article
+            stock_request: new FormControl(0), // Forcer la quantité de la demande pour les articles fournisseur disponible
+            discount: new FormControl(0), // Forcer la quantité de la demande pour les articles fournisseur disponible
+            discount_type: new FormControl('0') // Appliquer ou pas la remise pour cette article
         });
     }
 
@@ -79,18 +78,19 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 this.items = _.cloneDeep(this.order.line_items);
                 // Récuperer l'item en cours
                 let item: any = _.find(this.order.line_items, { id: this.itemId });
-                this.item = _.isUndefined(item) || !_.isObject(item) ? null : item;
+                this.item = _.isUndefined(item) || !_.isObjectLike(item) ? null : item;
                 // Récuperer la status de la demande
                 this.quotationPosition = parseInt(this.order.position, 10);
                 // Les meta data
                 const meta = this.item.meta_data;
-                const fakeDiscount: any = _.find(meta, { key: 'fake_discount' });
+                const discount: any = _.find(meta, { key: 'discount' });
+                const discountType: any = _.find(meta, { key: 'discount_type' });
                 const stockRequest: any = _.find(meta, { key: 'stock_request' });
-                const hasDiscount: any = _.find(meta, { key: 'has_discount' });
+
                 this.editForm.patchValue({
-                    dFake: _.isUndefined(fakeDiscount) ? '' : fakeDiscount.value,
-                    stockRequest: _.isUndefined(stockRequest) ? 0 : parseInt(stockRequest.value, 10),
-                    hasDiscount: _.isUndefined(hasDiscount) ? true : (parseInt(hasDiscount.value, 10) ? true : false)
+                    discount: _.isUndefined(discount) ? 0 : parseInt(discount.value),
+                    stock_request: _.isUndefined(stockRequest) ? 0 : parseInt(stockRequest.value, 10),
+                    discount_type: _.isUndefined(discountType) ? '0' : discountType.value
                 });
 
                 // Récupérer l'utilisateur (client) qui a fait la demande
@@ -134,16 +134,16 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                     .include(_.join(supplier_ids, ','))
                     .roles('fz-supplier')
                     .context('edit')
-                    .then(users => {
+                    .then(respSuppliers => {
                         const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
-                        const USERS: Array<any> = _.clone(users);
+                        const SUPPLIERS: Array<any> = _.clone(respSuppliers);
                         const frmEditValue: any = this.editForm.value;
                         this.qtSupplierTable = $('#quotation-supplier-table').DataTable({
                             // Installer le plugin WP Rest Filter (https://fr.wordpress.org/plugins/wp-rest-filter/)
                             fixedHeader: true,
                             responsive: false,
                             "sDom": 'rtip',
-                            data: USERS,
+                            data: SUPPLIERS, // Fournisseurs
                             columns: [
                                 {
                                     data: 'company_name', render: (data, type, row) => {
@@ -182,17 +182,8 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         if (_.isUndefined(pdt)) return 'Introuvable';
 
                                         const price: number = parseInt(pdt.price, 10);
-                                        const marge = clientRole === 'fz-company' ? (pdt.company_status === 'dealer' ? pdt.marge_dealer : pdt.marge) : pdt.marge_particular;
+                                        const marge = clientRole === 'fz-company' ? (this.client.company_status === 'dealer' ? pdt.marge_dealer : pdt.marge) : pdt.marge_particular;
                                         let hisPrice = this.services.getBenefit(price, parseInt(marge, 10));
-
-                                        // Ajouter la remise s'il existe
-
-                                        if (frmEditValue.hasDiscount) {
-                                            const discounts: any = _.find(this.item.meta_data, { key: 'discounts' });
-                                            const discountValues: Array<any> = _.isUndefined(discounts) ? [] : JSON.parse(discounts.value);
-                                            const _current_discount_value = _.isEmpty(discountValues) ? 0 : _.find(discountValues, { article_id: pdt.id }).discount;
-                                            hisPrice = hisPrice + parseInt(_current_discount_value);
-                                        }
 
                                         return this.services.currencyFormat(hisPrice);
                                     }
@@ -223,7 +214,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         let disabled: boolean = _.isEqual(this.quotationPosition, 2) ? false : dateLimit <= moment();
 
                                         return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
-                                                    value="${disabled ? 0 : inputValue}" 
+                                                    value="${inputValue}" 
                                                     min="0" 
                                                     max="${fzProduct.total_sales}" 
                                                     ${disabled ? " disabled='disabled' " : ''}
@@ -232,25 +223,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                                     data-article="${fzProduct.id}">`;
                                     }
                                 }, // champ quantité
-                                {
-                                    data: null,
-                                    render: (data, type, row) => {
-                                        let inputValue: number = 0;
-                                        let fzProduct: any = _.find(this.allProducts, { user_id: row.id });
-                                        const discount: any = _.find(this.item.meta_data, { key: "discounts" });
-                                        if (!_.isUndefined(discount) && !_.isEmpty(discount.value)) {
-                                            let dataParser: Array<any> = JSON.parse(discount.value); // [{article_id: 450, discount: 0} ...] 
-                                            if (_.isArray(dataParser)) {
-                                                inputValue = _.find(dataParser, { article_id: fzProduct.id }).discount;
-                                            } else {
-                                                Swal.fire('Avertissement', "Enregistrement erroné trouver dans la remise du produit: " + fzProduct.title.rendered, 'warning');
-                                            }
-
-                                        }
-
-                                        return `<input type="number" class="input-discount form-control discount_${fzProduct.id}" value="${inputValue}"  min="0" >`;
-                                    }
-                                } // Champ remise
                             ],
                             initComplete: () => {
                                 Helpers.setLoading(false);
@@ -284,25 +256,19 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     // stocker dans cette variable les valeurs ajouter pour ce demande d'item
                                     this.objMetaSuppliers = [];
                                     // Vérifier la quantité et la quantité ajouter pour les fournisseurs
-                                    const x: Array<number> = _.map(inputIncrement, iI => { return parseInt($(iI).val()); });
+                                    const allValue: Array<number> = _.map(inputIncrement, iI => { return parseInt($(iI).val()); });
                                     this.cd.detectChanges();
-
-                                    let value = $(element).val();
-                                    value = parseInt(value, 10);
-                                    if (this.item.quantity < _.sum(x)) {
-                                        element.val(Math.abs(parseInt(value) - 1));
+                                    if (this.item.quantity < _.sum(allValue)) {
+                                        let value = parseInt($(element).val(), 10);
+                                        element.val(Math.abs(value - 1));
                                         return false;
                                     };
-
-                                    //TODO: Ajouter la remise dans le prix
-
                                     _.map(inputIncrement, iI => {
                                         const inputVal = parseInt($(iI).val(), 10);
                                         const inputData: any = $(iI).data();
                                         if (0 !== inputVal) {
                                             this.objMetaSuppliers.push({
                                                 get: inputVal,
-                                                price: inputData.price,
                                                 supplier: parseInt(inputData.supplier, 10),
                                                 product_id: parseInt(inputData.product, 10),
                                                 article_id: parseInt(inputData.article, 10),
@@ -310,27 +276,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         }
                                     });
 
+                                    this.cd.detectChanges();
+                                    console.log(this.objMetaSuppliers);
                                 });
-
-                                $('#quotation-supplier-table tbody').on('change', '.input-discount', ev => {
-                                    ev.preventDefault();
-                                    const el = $(ev.currentTarget).parents('tr');
-                                    const item = this.qtSupplierTable.row(el).data();
-                                    const frmEditValue: any = this.editForm.value;
-
-                                    this.objMetaDiscount = [];
-                                    $(`input.input-discount`).each((index, value) => {
-                                        let discount: number = frmEditValue.hasDiscount ? parseInt($(value).val()) : 0; // en Ariary
-                                        let fzProduct: any = _.find(this.allProducts, { user_id: item.id });
-
-                                        this.objMetaDiscount.push({
-                                            discount: discount,
-                                            article_id: parseInt(fzProduct.id, 10),
-                                        });
-                                    });
-                                });
-
-
                             }
                         })
                     });
@@ -346,44 +294,11 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
     */
     async onSaveQuotationPdt() {
         // rétourner la fonction pour les conditions suivantes
-        if (!_.isObject(this.item)) return false;
+        if (!_.isObjectLike(this.item)) return false;
 
         let lineItems: Array<any> = this.items;
         let stockInsuffisantCondition: boolean = false;
         const frmEditValue: any = this.editForm.value;
-        // Mettre à jour et ajouter des remises pour les articles
-        if (!_.isEmpty(this.objMetaDiscount)) {
-            const discountKey: string = 'discounts';
-            lineItems = _.map(lineItems, item => {
-                // Récuperer seulement l'item en cours de modification
-                if (item.product_id !== this.item.product_id) return item;
-
-                // Récuperer les meta data
-                let metaData: Array<any> = _.cloneDeep(item.meta_data);
-                // Trouver les remises
-                let findDiscounts = _.find(metaData, { key: discountKey } as any);
-                // Ajouter le prix la plus élevé 
-                // Récuperer seuelement les données requis
-                const metaValue: Array<any> = _.map(this.objMetaDiscount, m => {
-                    return _.pick(m, ['discount', 'article_id']);
-                });
-                if (_.isUndefined(findDiscounts) || _.isNull(findDiscounts)) {
-                    // ajouter la remise dans la meta data
-                    metaData.push({ key: discountKey, 'value': JSON.stringify(metaValue) });
-                } else {
-                    // Corriger la valeur des remises dans la meta data
-                    metaData = _.map(metaData, meta => {
-                        if (meta.key === discountKey) {
-                            meta.value = JSON.stringify(metaValue);
-                        }
-                        return meta;
-                    });
-                }
-
-                item.meta_data = _.clone(metaData);
-                return item;
-            });
-        }
 
         // Mettre à jours les fournisseurs ajouter pour l'article
         if (!_.isEmpty(this.objMetaSuppliers)) {
@@ -393,7 +308,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             let collectQts = _.sum(allCollectQuantity);
 
             if (collectQts < this.item.quantity) {
-                const { value: result } = await Swal.fire({
+                const { value: dialogResult } = await Swal.fire({
                     title: 'Confirmation',
                     html: `La quantité demander par le client est supérieure au quantité disponible <br> Voulez-vous le remplacer par celle ci : ${collectQts}`,
                     type: 'warning',
@@ -402,8 +317,8 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                     cancelButtonText: 'Annuler',
                     focusConfirm: false,
                 });
-                stockInsuffisantCondition = result ? true : false;
-                if (result) this.editForm.patchValue({ stockRequest: collectQts });
+                stockInsuffisantCondition = dialogResult ? true : false;
+                if (dialogResult) this.editForm.patchValue({ stock_request: collectQts });
                 this.cd.detectChanges();
             }
 
@@ -413,29 +328,28 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             lineItems = _.map(lineItems, item => {
                 // Récuperer seulement l'item en cours de modification
                 if (item.product_id !== this.item.product_id) return item;
-
-                let stkRequest = stockInsuffisantCondition ? item.quantity : frmEditValue.stockRequest;
-                let meta_data: Array<any> = _.cloneDeep(item.meta_data); // Product meta
+                let meta_data: Array<{id?: number, key: string, value: any}> = _.cloneDeep(item.meta_data); // Product meta
+                let stkRequest = stockInsuffisantCondition ? item.quantity : frmEditValue.stock_request;
                 item.quantity = stockInsuffisantCondition ? _.sum(quantityItemTakes) : item.quantity;
+
                 // Meta data informations
+                const supValues: Array<any> = _.map(this.objMetaSuppliers, m => {
+                    return _.pick(m, ['get', 'supplier', 'product_id', 'article_id']);
+                });
+                /******************* MISE A JOUR DES METADATA ************************/
                 meta_data = _.map(meta_data, meta => {
                     switch (meta.key) {
                         case 'status':
-                            // L'etat d'une article est toujours traité pour la demande rejeté
+                            // Ajouter une posibilité de modification les demandes rejetée
                             if (_.isEqual(this.quotationPosition, 2)) {
                                 meta.value = 1;
                                 return meta;
                             }
 
                             // Verifier le status par la quantité ajouter
-                            if (_.isEmpty(this.objMetaSuppliers)) {
-                                meta.value = 0;
-                            } else {
-                                // vérifier si la quantité ajouter est valide ou pas
-                                // Si la quantité ajouter est inferieur à la quantité demander le status est ègale à 0 si le contraire 1
-                                meta.value = collectQts < this.item.quantity && !stockInsuffisantCondition ? 0 : 1;
-                            }
-
+                            // vérifier si la quantité ajouter est valide ou pas
+                            // Si la quantité ajouter est inferieur à la quantité demander le status est ègale à 0 si le contraire 1
+                            meta.value =_.isEmpty(this.objMetaSuppliers) ? 0 : (collectQts < this.item.quantity && !stockInsuffisantCondition ? 0 : 1);
                             if (!meta.value) return meta;
                             // Verifier si l'article est en review
                             const aIds: Array<any> = _.map(this.objMetaSuppliers, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
@@ -449,30 +363,43 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
                             meta.value = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
                             break;
-                        case 'suppliers':
-                            meta.value = JSON.stringify(this.objMetaSuppliers);
-                            break;
-
-                        case 'stock_request':
-                            meta.value = stkRequest;
-                            break;
 
                         default:
                             break;
                     }
                     return meta;
                 });
-                const hasSuppliers = _.find(meta_data, { key: 'suppliers' } as any);
-                const hasRequest = _.find(meta_data, { key: 'stock_request' } as any);
-                if (_.isUndefined(hasSuppliers)) meta_data.push({ key: 'suppliers', value: JSON.stringify(this.objMetaSuppliers) });
-                if (_.isUndefined(hasRequest)) meta_data.push({ key: 'stock_request', value: stkRequest });
+                /************************************************************************* */
+
+                meta_data = _.reject(meta_data, { key: 'stock_request' });
+                meta_data.push({ key: 'stock_request', value: stkRequest });
+
+                meta_data = _.reject(meta_data, { key: 'suppliers' });
+                meta_data.push({ key: 'suppliers', value: JSON.stringify(supValues) });
+
                 item.meta_data = _.clone(meta_data);
 
                 return item;
             });
-        }
+        } // .end if condition
 
-        // Ajouter les prix des articles
+        lineItems = _.map(lineItems, item => {
+            if (item.id !== this.itemId) return item;
+
+            const formValue = this.editForm.value;
+            let meta_data: Array<{ id?: number, key: string, value: any }> = _.cloneDeep(item.meta_data);
+
+            meta_data = _.reject(meta_data, { key: 'discount' });
+            meta_data.push({ key: 'discount', value: parseInt(formValue.discount, 10) });
+
+            meta_data = _.reject(meta_data, { key: 'discount_type' });
+            meta_data.push({ key: 'discount_type', value: parseInt(formValue.discount_type, 10) });
+
+            item.meta_data = meta_data;
+            return item;
+        });
+
+        /***************** PRIX ***********/
         const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
         lineItems = _.map(lineItems, item => {
             // Seulemet l'item actuellement en cours de modification
@@ -480,107 +407,36 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
             let suppliers: any = _.find(item.meta_data, { key: 'suppliers' });
             if (_.isUndefined(suppliers)) return item;
-            let suppliersValue: Array<any> = _.isObject(suppliers) ? JSON.parse(suppliers.value) : [];
+            let suppliersValue: Array<any> = _.isObjectLike(suppliers) ? JSON.parse(suppliers.value) : [];
             if (_.isEmpty(suppliersValue)) return item;
 
-            let pdtsPrices: Array<number> = _.map(suppliersValue, sup => {
+            let pdtPrices: Array<number> = _.map(suppliersValue, sup => {
                 let fzProduct: any = _.find(this.allProducts, { id: sup.article_id });
-                if (_.isUndefined(fzProduct)) return sup;
+                if (_.isUndefined(fzProduct)) return 0;
                 const price: number = parseInt(fzProduct.price, 10);
-                const marge = clientRole === 'fz-company' ? (fzProduct.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
+                const marge = clientRole === 'fz-company' ? (this.client.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
                 let hisPrice: number = this.services.getBenefit(price, parseInt(marge, 10));
-
-                // Ajouter la remise s'il existe
-                if (frmEditValue.hasDiscount) {
-                    const discounts: any = _.find(item.meta_data, { key: 'discounts' });
-                    if (!_.isUndefined(discounts)) {
-                        const discountValues: Array<any> = _.isUndefined(discounts) ? [] : JSON.parse(discounts.value);
-                        if (_.isEmpty(discountValues)) return sup;
-                        let _current_discount_value = _.find(discountValues, { article_id: fzProduct.id });
-                        _current_discount_value = _.isUndefined(_current_discount_value) ? 0 : _current_discount_value.discount;
-                        hisPrice = hisPrice + parseInt(_current_discount_value);
-                    }
-                }
 
                 return hisPrice;
             });
 
-            let price: number = _.max(pdtsPrices);
+            let price: number = _.max(pdtPrices);
             item.price = price.toString();
             item.total = Math.round(price * item.quantity).toString();
             item.subtotal = Math.round(price * item.quantity).toString();
 
             return item;
         });
+        /******************************* */
 
         Helpers.setLoading(true);
         const data: any = { line_items: lineItems };
 
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
+            this.objMetaSuppliers = [];
             Helpers.setLoading(false);
             this.zone.run(() => { this.router.navigate(['/dashboard', 'quotation', this.orderId]) });
         });
-    }
-
-
-    onSetFakeDiscount(event: any) {
-        event.preventDefault();
-        if (_.isEmpty(this.item)) return false;
-        if (!this.auth.isAdministrator()) {
-            Swal.fire('Désolé', "Vous n'avez pas l'autorisation pour effectuer cette action", "warning");
-            return false;
-        }
-        if (this.editForm.dirty) {
-            Helpers.setLoading(true);
-            const Value: any = this.editForm.value;
-            this.items = _.map(this.items, (__item__) => {
-                if (__item__.id === this.item.id) {
-                    let findFakeDiscount = _.find(__item__.meta_data, { key: 'fake_discount' });
-                    if (_.isUndefined(findFakeDiscount) || _.isNull(findFakeDiscount)) {
-                        __item__.meta_data.push({ key: 'fake_discount', 'value': Value.dFake });
-                    } else {
-                        __item__.meta_data = _.map(__item__.meta_data, data => {
-                            if (data.key === 'fake_discount') {
-                                data.value = Value.dFake
-                            }
-                            return data;
-                        });
-                    }
-
-                    return __item__;
-                }
-
-                return __item__;
-            });
-
-            this.cd.detectChanges();
-            Helpers.setLoading(false);
-        }
-    }
-
-    onChangehasDiscount(event: any) {
-        event.preventDefault();
-        const Value: any = this.editForm.value;
-
-        this.items = _.map(this.items, (__item__) => {
-            if (__item__.id === this.item.id) {
-                let hasDisc = _.find(__item__.meta_data, { key: 'has_discount' });
-                if (_.isUndefined(hasDisc) || _.isNull(hasDisc)) {
-                    __item__.meta_data.push({ key: 'has_discount', 'value': Value.hasDiscount ? 1 : 0 });
-                } else {
-                    __item__.meta_data = _.map(__item__.meta_data, data => {
-                        if (data.key === 'has_discount') {
-                            data.value = Value.hasDiscount ? 1 : 0
-                        }
-                        return data;
-                    });
-                }
-            }
-            return __item__;
-        });
-
-        this.cd.detectChanges();
-        Helpers.setLoading(false);
     }
 
     ngAfterViewInit() {

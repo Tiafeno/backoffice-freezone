@@ -16,7 +16,7 @@ declare var $: any;
 export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit {
     public ID: number = 0;
     public Quotation: any = {};
-    public Items: Array<any> = [];
+    private Items: Array<any> = [];
     public QtItems: Array<any> = [];
     public querySupplierProducts: Array<any> = [];
     public Billing: any = {};
@@ -26,7 +26,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
     private Woocommerce: any;
     private Wordpress: any;
-    private supplierSchema: Array<any> = [];
     private error: boolean = false;
     private Tax: number = 20; // Tax de 20%
     @Input() public order: any;
@@ -53,7 +52,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             .on('hide.bs.modal', e => {
                 this.QtItems = [];
                 this.Billing = {};
-                this.supplierSchema = [];
             });
     }
 
@@ -84,11 +82,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             item.price = '0';
             return item;
         });
-        let pricetax: number = (this.Billing.total * this.Tax) / 100;
         let data: any = {
             currency: 'MGA',
-            line_items: this.QtItems,
-            cart_tax: pricetax.toString()
+            line_items: this.QtItems
         };
         Helpers.setLoading(true);
         $('.modal').modal('hide');
@@ -107,35 +103,15 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.cd.detectChanges();
         Helpers.setLoading(true);
 
-        let aIds: Array<any> = this.getMeta('article_id');
+        let aIds: Array<any> = this.getMetabyProperty('article_id');
         const ARTICLES = await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
-        const CLIENT = await this.getUsers(this.order.customer_id); // Array of user or empty
-        this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
-        this.supplierSchema = await this.loadSchema();
-        this.supplierSchema = _.flatten(this.supplierSchema);
-        this.supplierSchema = _.map(this.supplierSchema, schema => {
-            const articleId: number = parseInt(schema.article_id);
-            const article: any = _.find(ARTICLES, { id: articleId });
-            if (_.isUndefined(article)) return schema;
-            // "marge" appartient au produit woocommerce
-            // Cette valeur est herité depuis le post type 'product'
-            schema.marge = parseInt(article.marge, 10);
-            schema.marge_dealer = parseInt(article.marge_dealer, 10);
-            schema.marge_particular = parseInt(article.marge_particular, 10);
-
-            let price = parseInt(article.price);
-            schema.price = price;
-
-            return schema;
-        });
-
         // Si la position ne sont pas: Envoyer, Rejeter et Accepter
         if (!_.includes([1, 2, 3], parseInt(this.order.position, 10))) {
             // Vérifier si la date de revision est périmé
             _.map(ARTICLES, (a) => {
                 let dateReview: any = moment(a.date_review);
                 let dateLimit: any = moment().subtract(1, 'days');
-                if (dateLimit > dateReview ) {
+                if (dateLimit > dateReview) {
                     this.error = true;
                 }
             });
@@ -151,49 +127,105 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return false;
             }
         }
-        
+
+        const CLIENT = await this.getUsers(this.order.customer_id); // Array of user or empty
+        this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
 
         this.QtItems = _.map(this.Items, item => {
+            let error_occured: boolean = false;
             // Récuperer tous les meta utiliser pour le produit
-            let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: item.product_id });
-            const allPriceForItem = _.map(SCHEMAS, schema => schema.price);
 
-            const metaDataSuppliers: any = _.find(item.meta_data, { key: 'suppliers' } as any);
-            const metaDataSuppliersValue = JSON.parse(metaDataSuppliers.value);
-            const allTakeForItem = _.map(metaDataSuppliersValue, supplier => parseInt(supplier.get, 10));
+            const meta_data: Array<{ id?: number, key: string, value: any }> = _.cloneDeep(item.meta_data);
+            const dataSuppliers: any = _.find(meta_data, { key: 'suppliers' });
+            if (_.isUndefined(dataSuppliers)) {
+                error_occured = true;
+                return item;
+            }
+            const __supplierVals__ = JSON.parse(dataSuppliers.value);
+            const allTakeForItem: Array<number> = _.map(__supplierVals__, sp => parseInt(sp.get));
+            //const allArticleIdsForItem: Array<number> = _.map(__supplierVals__, sp => parseInt(sp.article_id));
+
+            /**
+             * 0: Aucun
+             * 1: Remise
+             * 2: Rajout
+             */
+            const discountTypeFn = (): number => {
+                let type = _.find(meta_data, { key: 'discount_type' });
+                if (_.isUndefined(type)) return 0;
+                return _.isNaN(parseInt(type.value)) ? 0 : parseInt(type.value);
+            };
 
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
-            const take = _.sum(allTakeForItem);
-            if (take === 0) {
-                $('.modal').modal('hide');
-                Helpers.setLoading(false);
-                Swal.fire('Désolé', "Fournisseur non definie détecté", 'error');
+            const takes = _.sum(allTakeForItem);
+            if (takes === 0) {
+                error_occured = true;
+                Swal.fire('Désolé', `Fournisseur non definie détecté pour l'article: ${item.name}`, 'error');
                 return item;
             }
             // Récuperer le prix le plus grand pour chaque fournisseur ajouter
-            const price = _.max(allPriceForItem);
             // Vérifier le prix et la quantité ajouter
-            if (_.isUndefined(price) || item.quantity > take) {
+            if (item.quantity > takes) {
                 item.stock = item.total = item.subtotal = item.price = 0;
-
-                $('.modal').modal('hide');
-                Swal.fire('Désolé', 'Quantité ajouter incorrect', 'error');
+                error_occured = true;
+                Swal.fire('Désolé', `Quantité ajouter incorrect. Veuillez vérifier l'article: ${item.name}`, 'error');
                 return item;
+            }
+
+            if (error_occured) {
+                Helpers.setLoading(false);
+                $('.modal').modal('hide');
+            }
+
+            item.discountFn = (): number => {
+                let discount: any = _.find(meta_data, { key: 'discount' });
+                if (_.isUndefined(discount) || _.isNaN(parseInt(discount.value)) || parseInt(discount.value) === 0) return 0;
+                return parseInt(discount.value);
+            };
+
+            const discountPercentFn = (): number => {
+                return (item.price * item.discountFn()) / 100;
+            };
+
+            item.priceFn = () => {
+                switch (discountTypeFn()) {
+                    case 1:
+                        return item.price + discountPercentFn();
+                        break;
+                    case 2:
+                    default:
+                        return item.price;
+                        break;
+                }
+            };
+
+            item.subTotalNetFn = (): number => {
+                switch (discountTypeFn()) {
+                    case 2:
+                        return item.quantity * (item.price - discountPercentFn());
+                        break;
+                    case 1:
+                    case 0:
+                    default:
+                        return item.quantity * item.price;
+                        break;
+
+                }
             }
 
             return item;
         });
 
-        let totalItems: Array<any> = _.map(this.QtItems, item => { return parseInt(item.total, 10); });
-        this.Billing.subtotal = _.sum(totalItems);
-        this.Billing.total = _.sum(totalItems);
+        let allTotalHT: Array<number> = _.map(this.QtItems, item => item.priceFn() * item.quantity);
+        this.Billing.totalHT = _.sum(allTotalHT);
+        let allTotalNet: Array<number> = _.map(this.QtItems, item => item.subTotalNetFn());
+        this.Billing.totalNet = _.sum(allTotalNet);
 
-        let priceTax: number = (this.Billing.subtotal * this.Tax) / 100;
+        let priceTax: number = (this.Billing.totalNet * this.Tax) / 100;
         this.Billing.price_tax = priceTax;
-        this.Billing.total_tax = parseInt(this.Billing.subtotal) + priceTax;
+        this.Billing.total_tax = parseInt(this.Billing.totalNet) + priceTax;
 
         this.cd.detectChanges();
-
         Helpers.setLoading(false);
     }
 
@@ -231,7 +263,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
      *
      * @param property
      */
-    private getMeta(property: string): Array<any> {
+    private getMetabyProperty(property: string): Array<any> {
         return _.map(this.Items, item => {
             let metas = item.meta_data;
             let supplier: any = _.find(metas, { key: 'suppliers' });
@@ -243,24 +275,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         });
     }
 
-    /**
-     * Récupere tous les valeurs du "suppliers" des items dans un tableau
-     */
-    private loadSchema(): Promise<Array<any>> {
-        let container: Array<any> = [];
-        return new Promise((resolve) => {
-            _.map(this.Items, item => {
-                let metas = item.meta_data;
-                let supplier: any = _.find(metas, { key: 'suppliers' });
-                if (_.isUndefined(supplier)) return [];
-                let Value = _.isEmpty(supplier.value) ? [] : JSON.parse(supplier.value);
-                container.push(Value);
-            });
-
-            resolve(container);
-        })
-
-    }
 
     public initQuotation(): void {
 

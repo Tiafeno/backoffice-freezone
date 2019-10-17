@@ -11,28 +11,24 @@
 <div class="ibox-body">
   <div class="">
     <div>
-      <form [formGroup]="editForm" id="form-editor">
-        <div class="row d-flex">
-          <div class="col-sm-4">
-            <div class="form-group">
-              <div class="input-group">
-                <input class="form-control" (change)="onSetFakeDiscount($event)" formControlName="dFake" type="text"
-                  placeholder="Faux remise">
-              </div>
-              <!-- 
-              <p class="help-block font-11">
-                Ce champ permet d'ajouter ou modifier la remise afficher pour cette article dans la demande
-              </p> -->
-            </div>
+      <form [formGroup]="editForm" id="form-editor" class="form-horizontal">
 
+        <div class="form-group mb-4 row">
+          <label class="col-sm-4 col-form-label">
+            <input class="form-control" formControlName="discount" type="number" placeholder="Valeur en %">
+          </label>
+          <div class="col-sm-8 d-flex align-items-center">
+            <label class="radio radio-grey radio-primary radio-inline">
+              <input type="radio" formControlName="discount_type" value="0">
+              <span class="input-span"></span>Aucun</label>
+            <label class="radio radio-grey radio-primary radio-inline">
+              <input type="radio" formControlName="discount_type" value="1">
+              <span class="input-span"></span>Remise</label>
+            <label class="radio radio-grey radio-primary radio-inline">
+              <input type="radio" formControlName="discount_type" value="2">
+              <span class="input-span"></span>Rajout</label>
           </div>
-          <div class="col-sm-8 m-auto">
-            <div class="form-group">
-              <label class="checkbox checkbox-outline-danger">
-                <input type="checkbox" formControlName="hasDiscount" (change)="onChangehasDiscount($event)">
-                <span class="input-span"></span>Ajouter la remise à cet article</label>
-            </div>
-          </div>
+
         </div>
       </form>
     </div>
@@ -46,7 +42,6 @@
           <th>PRIX</th>
           <th>ARTICLE</th>
           <th class="pr-4" style="width:80px;">QTÉ</th>
-          <th class="pr-4" style="width:90px;">RAJOUT (AR)</th>
         </tr>
       </thead>
     </table>

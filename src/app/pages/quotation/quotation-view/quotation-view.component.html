@@ -59,6 +59,7 @@
                             <th class="pl-4">Désignation</th>
                             <th>Qté</th>
                             <th>P.U HT</th>
+                            <th>Rem</th>
                             <th class="text-right pr-4">Total</th>
                         </tr>
                     </thead>
@@ -68,8 +69,9 @@
                                 <div><strong>{{item.name}}</strong></div>
                             </td>
                             <td class="text-center">{{item.quantity}}</td>
-                            <td>{{item.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                            <td class="text-right pr-4">{{item.total | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                            <td>{{item.priceFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                            <td>{{item.discountFn() === 0 ? '-' : item.discountFn() + '%'}}</td>
+                            <td class="text-right pr-4">{{item.subTotalNetFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                         </tr>
                     </tbody>
                     <tfoot>
@@ -95,8 +97,8 @@
 
                 <tbody>
                   <tr>
-                    <td>{{Billing.subtotal | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                    <td>{{Billing.subtotal | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                    <td>{{Billing.totalHT | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                    <td>{{Billing.totalNet | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                     <td>{{Tax}}%</td>
                     <td>{{Billing.price_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                     <td></td>
