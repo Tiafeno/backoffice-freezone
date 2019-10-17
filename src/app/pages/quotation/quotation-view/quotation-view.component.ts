@@ -191,11 +191,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 switch (discountTypeFn()) {
                     case 1:
                         return item.price + discountPercentFn();
-                        break;
                     case 2:
                     default:
                         return item.price;
-                        break;
                 }
             };
 
@@ -203,12 +201,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 switch (discountTypeFn()) {
                     case 2:
                         return item.quantity * (item.price - discountPercentFn());
-                        break;
                     case 1:
                     case 0:
                     default:
                         return item.quantity * item.price;
-                        break;
 
                 }
             }
