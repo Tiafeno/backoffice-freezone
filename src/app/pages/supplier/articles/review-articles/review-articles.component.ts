@@ -76,18 +76,11 @@ export class ReviewArticlesComponent implements OnInit {
                    </button>
                    <ul class="fab-menu">
                       <li><button class="btn btn-primary btn-icon-only btn-circle btn-air edit-article"><i class="la la-edit"></i></button></li>
-                      <li><button class="btn btn-danger btn-icon-only btn-circle btn-air remove-article"><i class="la la-trash"></i></button></li>
                    </ul>
                 </div>`
         }
       ],
       initComplete: (setting, json) => {
-        $('#articles-review-table tbody').on('click', '.remove-article', ev => {
-          ev.preventDefault();
-          const __article: any = getElementData(ev);
-          this.Editor.onRemoveArticle(__article.ID);
-        });
-
         $('#articles-review-table tbody').on('click', '.edit-article', e => {
           e.preventDefault();
           const __article: any = getElementData(e);

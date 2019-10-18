@@ -170,6 +170,6 @@
     <div>
       <button class="btn btn-primary btn-rounded mr-3" type="submit" [disabled]=" ! canEdit">Mettre à jour</button>
     </div>
-    <a class="text-danger" (click)="onRemoveArticle(ID)"><i class="la la-trash font-20"></i></a>
+    <a class="text-danger"  appArticleRemover [articleId]="ID" (onRefresh)="refresh.emit()" ><i class="la la-trash font-20"></i></a>
   </div>
 </form>

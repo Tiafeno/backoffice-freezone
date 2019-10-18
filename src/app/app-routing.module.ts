@@ -76,6 +76,7 @@ import { FaqClientsComponent } from './pages/faq-client/faq-clients/faq-clients.
 import { QuotationCustomComponent } from './pages/quotation/quotation-custom/quotation-custom.component';
 import { QuotationRecapComponent } from './pages/quotation/quotation-recap/quotation-recap.component';
 import { QuotationManageComponent } from './pages/quotation/quotation-manage/quotation-manage.component';
+import { ArticleRemoverDirective } from './directives/article-remover.directive';
 
 
 const routes: Routes = [
@@ -334,7 +335,8 @@ const routes: Routes = [
         FaqClientEditComponent,
         FaqClientsComponent,
         MomentsPipe,
-        BenefitPipe
+        BenefitPipe,
+        ArticleRemoverDirective
     ],
     imports: [
         CommonModule,

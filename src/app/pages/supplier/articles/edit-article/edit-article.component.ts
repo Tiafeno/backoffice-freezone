@@ -265,31 +265,4 @@ export class EditArticleComponent implements OnInit {
     });
   }
 
-  /**
-   * Supprimer une article dans la base de donnée
-   * @param id
-   */
-  onRemoveArticle(id: number): void | boolean {
-    if (!_.isNumber(id)) return false;
-    if (this.security.hasAccess('s7')) {
-      $('#edit-article-supplier-modal').modal('hide');
-      Swal.fire({
-        title: 'Confirmation',
-        text: 'Voulez vous vraiment supprimer cette article?',
-        type: 'warning',
-        showCancelButton: true
-      }).then(result => {
-        if (result.value) {
-          Helpers.setLoading(true);
-          this.WP.fz_product().id(id).delete({ force: true, reassign: 1 }).then(() => {
-            this.refresh.emit();
-            Helpers.setLoading(false);
-            Swal.fire('Succès', 'Article supprimer avec succès', 'success');
-          });
-        }
-      });
-    }
-
-  }
-
 }
