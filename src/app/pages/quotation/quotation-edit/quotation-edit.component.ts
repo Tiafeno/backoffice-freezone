@@ -7,6 +7,7 @@ import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as moment from 'moment'
 import { QuotationViewComponent } from '../quotation-view/quotation-view.component';
 import { FzSecurityService } from '../../../_services/fz-security.service';
+import Swal from 'sweetalert2';
 declare var $: any;
 
 @Component({
@@ -82,7 +83,10 @@ export class QuotationEditComponent implements OnInit {
                .users()
                .id(this.ORDER.user_id)
                .context('edit')
-               .then(user => { this.Author = _.clone(user); });
+               .then(user => { this.Author = _.clone(user); })
+               .catch(error => {
+                  Swal.fire('Erreur', "Compte du client introuvable. Le compte a été supprimer", 'error');
+               });
 
             // Crée la liste des produits dans la commande
             this.Table = $('#quotation-edit-table').DataTable({
@@ -112,7 +116,7 @@ export class QuotationEditComponent implements OnInit {
                      }
                   },
                   {
-                     data: 'meta_data', render: data => {
+                     data: 'meta_data', render: (data: Array<{id?: number, key: string, value: any}>) => {
                         const meta: any = _.find(data, { key: 'status' });
                         const intStatus: number = _.isUndefined(meta) ? 0 : parseInt(meta.value, 10);
                         const status: string = intStatus === 0 ? 'En attente' : (intStatus === 1 ? "Traitée" : "N/A");
@@ -121,7 +125,7 @@ export class QuotationEditComponent implements OnInit {
                      }
                   }, // Etat de l'article
                   {
-                     data: 'meta_data', render: data => {
+                     data: 'meta_data', render: (data: Array<{id?: number, key: string, value: any}>) => {
                         let metaSupplier: any = _.find(data, { key: 'suppliers' });
                         if (!_.isObject(metaSupplier) || _.isEmpty(metaSupplier.value)) return 'Non définie';
                         let value: any = JSON.parse(metaSupplier.value);

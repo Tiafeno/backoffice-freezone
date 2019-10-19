@@ -28,13 +28,13 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
   @Input() Position: any = 0;
   @Input() Role: string = '';
 
-  @Input() 
+  @Input()
   set refresh(val: any) {
     this._qRefresh = _.clone(val);
-    if ( ! _.isNull(this.Table)) {
+    if (!_.isNull(this.Table)) {
       console.log(val);
     }
-      
+
   }
 
   get refresh(): any { return this._qRefresh; }
@@ -83,6 +83,7 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
         { data: 'ID', render: (data) => { return `n°${data}` } },
         {
           data: 'author', render: (data, type, row) => {
+            if (!_.isObjectLike(data)) return 'Client introuvable';
             return _.isEmpty(data.company_name) || _.isNull(data.company_name) ? `<span>${data.last_name} ${data.first_name}</span>` : data.company_name;
           }
         },
