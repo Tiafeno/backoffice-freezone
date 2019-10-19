@@ -109,11 +109,17 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         if (!_.includes([1, 2, 3], parseInt(this.order.position, 10))) {
             // Vérifier si la date de revision est périmé
             _.map(ARTICLES, (a) => {
-                let dateReview: any = moment(a.date_review);
-                let dateLimit: any = moment().subtract(1, 'days');
-                if (dateLimit > dateReview) {
-                    this.error = true;
-                }
+                const dateReview: any = moment(a.date_review);
+                const dateNow: any = moment();
+                const todayAt6 = moment({
+                    year: dateNow.year(),
+                    month: dateNow.month(),
+                    days: dateNow.date(),
+                    hour: 6,
+                    minute: 0
+                });
+                // Si la valeur est 'true', l'article n'est pas à jour
+                this.error = dateReview < todayAt6;
             });
 
             if (this.error) {

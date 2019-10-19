@@ -138,6 +138,14 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                         const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
                         const SUPPLIERS: Array<any> = _.clone(respSuppliers);
                         const frmEditValue: any = this.editForm.value;
+                        const dateNow = moment();
+                        const todayAt6 = moment({
+                            year: dateNow.year(),
+                            month: dateNow.month(),
+                            days: dateNow.date(),
+                            hour: 6,
+                            minute: 0
+                        });
                         this.qtSupplierTable = $('#quotation-supplier-table').DataTable({
                             // Installer le plugin WP Rest Filter (https://fr.wordpress.org/plugins/wp-rest-filter/)
                             fixedHeader: true,
@@ -168,9 +176,10 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         let pdt: any = _.find(this.allProducts, { user_id: userId });
                                         if (_.isUndefined(pdt)) return 'Introuvable';
 
-                                        let dateLimit: any = moment(pdt.date_review).subtract(-1, 'days');
-                                        let msg: string = _.isEqual(this.quotationPosition, 2) || dateLimit > moment() ? "Traité" : "En attente";
-                                        let style: string = _.isEqual(this.quotationPosition, 2) || dateLimit > moment() ? 'blue' : 'warning';
+                                        const dateReview = moment(pdt.date_review);
+
+                                        let msg: string = _.isEqual(this.quotationPosition, 2) || dateReview > todayAt6 ? "Traité" : "En attente";
+                                        let style: string = _.isEqual(this.quotationPosition, 2) || dateReview > todayAt6 ? 'blue' : 'warning';
 
                                         return `<span class="badge badge-${style}">${msg}</span>`;
                                     }
@@ -200,7 +209,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     data: null, render: (data, type, row) => {
                                         let inputValue: number = 0;
                                         const metaSuppliers: any = _.find(this.item.meta_data, { key: "suppliers" });
-                                        if (metaSuppliers && !_.isEmpty(metaSuppliers.value)) {
+                                        if (_.isObjectLike(metaSuppliers) && !_.isEmpty(metaSuppliers.value)) {
                                             let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: 2, product_id: 0, article_id: 0, price: 0} ...] 
                                             let input: Array<any> = _.map(dataParser, data => {
                                                 return row.id == data.supplier ? parseInt(data.get, 10) : 0;
@@ -209,9 +218,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         }
 
                                         let fzProduct: any = _.find(this.allProducts, { user_id: row.id });
-                                        const dateLimit: any = moment(fzProduct.date_review).subtract(-1, 'days');
+                                        const dateReview = moment(fzProduct.date_review);
                                         // vérifier si l'article est en mode rejetée
-                                        let disabled: boolean = _.isEqual(this.quotationPosition, 2) ? false : dateLimit <= moment();
+                                        let disabled: boolean = _.isEqual(this.quotationPosition, 2) ? false : dateReview < todayAt6;
 
                                         return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
                                                     value="${inputValue}" 
@@ -328,7 +337,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             lineItems = _.map(lineItems, item => {
                 // Récuperer seulement l'item en cours de modification
                 if (item.product_id !== this.item.product_id) return item;
-                let meta_data: Array<{id?: number, key: string, value: any}> = _.cloneDeep(item.meta_data); // Product meta
+                let meta_data: Array<{ id?: number, key: string, value: any }> = _.cloneDeep(item.meta_data); // Product meta
                 let stkRequest = stockInsuffisantCondition ? item.quantity : frmEditValue.stock_request;
                 item.quantity = stockInsuffisantCondition ? _.sum(quantityItemTakes) : item.quantity;
 
@@ -349,16 +358,22 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                             // Verifier le status par la quantité ajouter
                             // vérifier si la quantité ajouter est valide ou pas
                             // Si la quantité ajouter est inferieur à la quantité demander le status est ègale à 0 si le contraire 1
-                            meta.value =_.isEmpty(this.objMetaSuppliers) ? 0 : (collectQts < this.item.quantity && !stockInsuffisantCondition ? 0 : 1);
+                            meta.value = _.isEmpty(this.objMetaSuppliers) ? 0 : (collectQts < this.item.quantity && !stockInsuffisantCondition ? 0 : 1);
                             if (!meta.value) return meta;
                             // Verifier si l'article est en review
                             const aIds: Array<any> = _.map(this.objMetaSuppliers, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
                             const collectFZProducts: Array<any> = _.filter(this.allProducts, fz => { return _.indexOf(aIds, fz.id) >= 0; });
+                            const dateNow: any = moment();
+                            const todayAt6 = moment({
+                                year: dateNow.year(),
+                                month: dateNow.month(),
+                                days: dateNow.date(),
+                                hour: 6,
+                                minute: 0
+                            });
                             const cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {
-                                const dateNow: any = moment();
-                                let dateLimit: any = moment(prd.date_review).subtract(-1, 'days');
-
-                                return dateLimit > dateNow; // à jour
+                                let dateLimit: any = moment(prd.date_review);
+                                return dateLimit > todayAt6; // à jour
                             });
 
                             meta.value = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
