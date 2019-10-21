@@ -162,7 +162,7 @@ export class EditArticleComponent implements OnInit {
   }
 
   loadSuppliers(): Observable<any> {
-    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/users?roles=fz-supplier`;
+    const URL = `https://${environment.SITE_URL}/wp-json/wp/v2/users?roles=fz-supplier&per_page=100`;
     const postCache = this.postResponseCache.get(URL);
     if (postCache) { return of(postCache); }
     const response = this.http.get<any>(URL);
