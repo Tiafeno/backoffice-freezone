@@ -3,7 +3,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import * as _ from 'lodash';
 import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
 import { Helpers } from '../../helpers';
-declare var $:any;
+declare var $: any;
 
 @Component({
   selector: 'app-status-quotation-switcher',
@@ -15,13 +15,18 @@ export class StatusQuotationSwitcherComponent implements OnInit {
   public _quotation: any = '';
   private WC: any;
   public warning: boolean = false;
+  public positions: Array<{ key: number, value: string }> = [
+    { key: 0, value: 'En attente' },
+    { key: 3, value: 'Terminée' },
+  ];
 
-  @Input() 
-  set quotation(val: any) {
-    this._quotation = _.clone(val);
-    if (_.isObject(val)) {
+  @Input()
+  set quotation(order: any) {
+    this._quotation = _.clone(order);
+    if (_.isObjectLike(order)) {
       $('#quotation-switcher-modal').modal('show');
-      this.Form.patchValue({ status: parseInt(val.position) });
+      const statusValue: any = order.position == 1 || order.position == 2 ? '' : parseInt(order.position, 10);
+      this.Form.patchValue({ status: statusValue });
     }
     this.cd.detectChanges();
   }
@@ -36,25 +41,23 @@ export class StatusQuotationSwitcherComponent implements OnInit {
     this.Form = new FormGroup({
       status: new FormControl('', Validators.required)
     });
-   }
-
-  ngOnInit() {
-    
   }
 
+  ngOnInit() { }
+
   onUpdate(): void | boolean {
-    if (this.Form.invalid || !this.Form.dirty || _.isEmpty(this._quotation))  { 
+    if (this.Form.invalid || !this.Form.dirty || _.isEmpty(this._quotation)) {
       this.warning = true;
       return false;
     }
     this.warning = false;
     let Value: any = this.Form.value;
     Helpers.setLoading(true);
-    this.WC.put(`orders/${this._quotation.id}`, {position: Value.status}, (err, data, res) => {
+    this.WC.put(`orders/${this._quotation.id}`, { position: Value.status }, (err, data, res) => {
       Helpers.setLoading(false);
       $('#quotation-switcher-modal').modal('hide');
       document.location.reload();
-    })
+    });
   }
 
 }

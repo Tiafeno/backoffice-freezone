@@ -44,7 +44,7 @@ export class FzServicesService {
 
   public getSuppliers(): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.Wordpress.users().roles('fz-supplier').perPage(50).then(users => {
+      this.Wordpress.users().roles('fz-supplier').perPage(100).then(users => {
         const response: any = users;
         if (!_.isUndefined(response.code)) {
           reject(response.message);
