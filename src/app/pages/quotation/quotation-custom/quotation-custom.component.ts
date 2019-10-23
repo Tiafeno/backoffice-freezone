@@ -92,8 +92,9 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
             const Status: Array<any> = [
               { value: 0, label: 'En ettente', style: 'warning' },
               { value: 1, label: 'Envoyer', style: 'blue' },
-              { value: 2, label: 'Rejeté', style: 'danger' },
+              { value: 2, label: 'Rejeté',  style: 'danger' },
               { value: 3, label: 'Accepté', style: 'success' },
+              { value: 4, label: 'Terminé', style: 'success' },
             ];
             let position: any = _.find(Status, { value: data });
             if (_.isUndefined(position)) return 'Non definie';
@@ -121,6 +122,7 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
         }
       ],
       initComplete: (setting, json) => {
+
         $(`#quotation-${this.Balise}-table tbody`).on('click', '.edit-quotation', ev => {
           ev.preventDefault();
           let __quotation = this.getRowElement(ev);
@@ -164,7 +166,6 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
             });
           }
         });
-
       },
       ajax: {
         url: `${config.apiUrl}/quotations/`,

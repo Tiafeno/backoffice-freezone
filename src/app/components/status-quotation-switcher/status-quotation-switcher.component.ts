@@ -17,7 +17,7 @@ export class StatusQuotationSwitcherComponent implements OnInit {
   public warning: boolean = false;
   public positions: Array<{ key: number, value: string }> = [
     { key: 0, value: 'En attente' },
-    { key: 3, value: 'Terminée' },
+    { key: 4, value: 'Terminée' },
   ];
 
   @Input()
@@ -25,7 +25,7 @@ export class StatusQuotationSwitcherComponent implements OnInit {
     this._quotation = _.clone(order);
     if (_.isObjectLike(order)) {
       $('#quotation-switcher-modal').modal('show');
-      const statusValue: any = order.position == 1 || order.position == 2 ? '' : parseInt(order.position, 10);
+      const statusValue: any = _.includes([1, 2, 3], order.position) ? '' : parseInt(order.position, 10);
       this.Form.patchValue({ status: statusValue });
     }
     this.cd.detectChanges();

@@ -1,8 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { ScriptLoaderService } from '../../_services/script-loader.service';
-import { HttpClient } from '@angular/common/http';
-import { AuthorizationService } from '../../_services/authorization.service';
 import { NewCustomerComponent } from '../../components/new-customer/new-customer.component';
+import { AcceptedItemSuppliersComponent } from '../../components/accepted-item-suppliers/accepted-item-suppliers.component';
 
 @Component({
   selector: 'app-dashboard-7',
@@ -11,6 +10,8 @@ import { NewCustomerComponent } from '../../components/new-customer/new-customer
 export class Dashboard7Component implements OnInit, AfterViewInit {
 
   @ViewChild(NewCustomerComponent) newCustomer: NewCustomerComponent;
+  @ViewChild(AcceptedItemSuppliersComponent) acceptedItemSuppliers: AcceptedItemSuppliersComponent;
+
   constructor(
     private _script: ScriptLoaderService
   ) { }

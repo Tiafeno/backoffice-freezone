@@ -34,7 +34,6 @@ export class QuotationEditComponent implements OnInit {
 
    @ViewChild(QuotationViewComponent) QuotationView: QuotationViewComponent;
    
-
    constructor(
       private route: ActivatedRoute,
       private router: Router,

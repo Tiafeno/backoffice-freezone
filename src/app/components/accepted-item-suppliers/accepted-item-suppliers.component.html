@@ -1,3 +1,27 @@
-<p>
-  accepted-item-suppliers works!
-</p>
+<div class="ibox">
+  <div class="ibox-head">
+    <div class="ibox-title">FOURNISSEURS EN ATTENTE</div>
+  </div>
+  <div class="ibox-body">
+    <ul class="media-list media-list-divider mr-2 scroller" data-height="400px">
+
+      <li class="media align-items-center" *ngFor="let supplier of suppliers">
+        <div class="media-body d-flex align-items-center">
+          <div class="flex-1">
+            <div class="media-heading">{{supplier.reference}}</div>
+            <small class="text-muted">{{supplier.email}}</small>
+          </div>
+          <button class="btn btn-sm btn-outline-secondary btn-rounded" (click)="onMail(supplier.id)">Voir les articles</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="modal fade" id="suppliers-item-modal" data-backdrop="static">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+
+    </div>
+  </div>
+</div>
