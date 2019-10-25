@@ -43,9 +43,9 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
-                <label>Garantie fournisseur</label>
-                <input class="form-control" formControlName="garentee" min="0" type="text" id="garentee"
-                  placeholder="e.g: 2 mois">
+                <label>Garantie fournisseur (unité en mois)</label>
+                <input class="form-control" formControlName="garentee" min="0" max="12" type="number" id="garentee"
+                  placeholder="e.g: 2 pour 2 mois">
               </div>
             </div>
           </div>

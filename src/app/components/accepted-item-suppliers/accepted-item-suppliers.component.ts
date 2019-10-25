@@ -30,7 +30,9 @@ export class AcceptedItemSuppliersComponent implements OnInit {
         }).union().value();
 
         return supplier;
-      })
+      });
+      this.suppliers = _.map(items, item => item.data);
+
       console.log(items);
     });
   }
