@@ -162,6 +162,7 @@ export class SavMailComponent implements OnInit {
       this.queryMail.then(mails => {
         Helpers.setLoading(false);
         this.Mails = _.map(mails, mail => {
+          mail.content.rendered = mail.content.rendered.replace(/<[^>]*>?/gm, '');
           mail.sav = _.isNull(mail.sav_status) || _.isEmpty(mail.sav_status) ? 'Diagnostic non réalisé'
             : _.find(this.savStatus, { key: parseInt(mail.sav_status) }).value;
           return mail;

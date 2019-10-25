@@ -80,13 +80,13 @@ export class SavComponent implements OnInit {
           data: 'approximate_time', render: (data, type, row) => {
             let dt = '';
             dt = !_.isEmpty(data) ? moment(data).format('LL') : "Non assigné";
-            return `<span class="badge badge-default change-approximate-time">${dt}</span>`;
+            return `<span class="badge badge-default change-approximate-time" style="cursor: pointer">${dt}</span>`;
           }
         },
         {
           data: 'status_sav', render: (data, type, row) => {
             let dt = _.isObject(data) ? data.label : 'Diagnostic non réalisé';
-            return `<span class="badge badge-default change-status">${dt}</span>`;
+            return `<span class="badge badge-default change-status" style="cursor: pointer">${dt}</span>`;
           }
         },
         {
