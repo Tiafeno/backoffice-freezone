@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { config } from '../../../environments/environment';
 import * as _ from 'lodash';
+declare var $: any;
 
 @Component({
   selector: 'app-accepted-item-suppliers',
@@ -10,6 +11,8 @@ import * as _ from 'lodash';
 })
 export class AcceptedItemSuppliersComponent implements OnInit {
   public suppliers: Array<any>;
+  public articles: Array<any>;
+  public itemTable: any;
   constructor(
     private http: HttpClient
   ) { }
@@ -30,10 +33,44 @@ export class AcceptedItemSuppliersComponent implements OnInit {
         }).union().value();
 
         return supplier;
-      });
+      })
       this.suppliers = _.map(items, item => item.data);
+      this.articles = _.map(items, item => item.articles);
+    });
+  }
 
-      console.log(items);
+  public onMail(supplieId: number) {
+    if ($.fn.dataTable.isDataTable('#item-table')) {
+      this.itemTable.destroy();
+    }
+
+    this.itemTable = $('#item-table').DataTable({
+      fixedHeader: true,
+      responsive: false,
+      "sDom": 'rtip',
+      data: this.articles,
+      columns: [
+        { data: 'ID' },
+        {
+          data: 'name', render: (data, type, row) => {
+            return data;
+          }
+        },
+        {
+          data: 'item_quantity', render: (data, type, row) => {
+            return data;
+          }
+        },
+        {
+          data: 'item_price', render: (data) => {
+            return `<span class="badge badge-success">${data}</span>`;
+          }
+        }
+
+      ],
+      initComplete: () => {
+        $('#suppliers-item-modal').modal('show');
+      }
     });
   }
 

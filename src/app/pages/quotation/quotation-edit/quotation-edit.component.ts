@@ -155,24 +155,6 @@ export class QuotationEditComponent implements OnInit {
                      });
                   });
 
-                 /*  $('#quotation-view-supplier-modal').on('hide.bs.modal', e => {
-                     if ($.fn.dataTable.isDataTable('#quotation-supplier-table')) {
-                        this.qtSupplierTable.destroy();
-                     }
-                     this.objMetaSuppliers = [];
-                     Helpers.setLoading(true);
-                     this.WCAPI.get(`orders/${this.ID}`, (err, data, res) => {
-                        Helpers.setLoading(false);
-                        this.__ORDER__ = JSON.parse(res);
-                        this.__ITEMS__ = this.__ORDER__.line_items;
-                        this.Table.clear().draw();
-                        this.Table.rows.add(this.__ITEMS__);
-                        this.Table.columns.adjust().draw();
-
-                        this.cd.detectChanges();
-                     });
-
-                  }); */
                }
             })
          });

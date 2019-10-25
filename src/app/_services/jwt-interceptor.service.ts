@@ -3,6 +3,7 @@ import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/observable/throw';
+import Swal from 'sweetalert2';
 
 @Injectable()
 export class JwtInterceptorService implements HttpInterceptor {
@@ -23,6 +24,9 @@ export class JwtInterceptorService implements HttpInterceptor {
             location.reload();
             localStorage.removeItem('__fzCurrentUser');
           }, 1500);
+        } else {
+          console.log(err);
+          Swal.fire('Erreur', err.message, 'error');
         }
         Observable.throw(err); // send data to service which will inform the component of the error and in turn the user
       }
