@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { config } from '../../../environments/environment';
 import * as _ from 'lodash';
+import { FzServicesService } from '../../_services/fz-services.service';
 declare var $: any;
 
 @Component({
@@ -12,9 +13,11 @@ declare var $: any;
 export class AcceptedItemSuppliersComponent implements OnInit {
   public suppliers: Array<any>;
   public articles: Array<any>;
+  public items: any;
   public itemTable: any;
   constructor(
-    private http: HttpClient
+    private http: HttpClient,
+    private services: FzServicesService
   ) { }
 
   ngOnInit() {
@@ -35,11 +38,14 @@ export class AcceptedItemSuppliersComponent implements OnInit {
         return supplier;
       })
       this.suppliers = _.map(items, item => item.data);
-      this.articles = _.map(items, item => item.articles);
+      this.items = _.clone(items);
     });
   }
 
   public onMail(supplieId: number) {
+    let posts: any = _.find(this.items, {user_id: supplieId});
+    this.articles = posts.articles;
+    $('#suppliers-item-modal').modal('show');
     if ($.fn.dataTable.isDataTable('#item-table')) {
       this.itemTable.destroy();
     }
@@ -47,6 +53,7 @@ export class AcceptedItemSuppliersComponent implements OnInit {
     this.itemTable = $('#item-table').DataTable({
       fixedHeader: true,
       responsive: false,
+      pageLength: 40,
       "sDom": 'rtip',
       data: this.articles,
       columns: [
@@ -63,13 +70,14 @@ export class AcceptedItemSuppliersComponent implements OnInit {
         },
         {
           data: 'item_price', render: (data) => {
-            return `<span class="badge badge-success">${data}</span>`;
+            let price = this.services.currencyFormat(data);
+            return `<span class="font-bold">${price}</span>`;
           }
         }
 
       ],
       initComplete: () => {
-        $('#suppliers-item-modal').modal('show');
+        
       }
     });
   }

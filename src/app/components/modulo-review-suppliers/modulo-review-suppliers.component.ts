@@ -42,7 +42,6 @@ export class ModuloReviewSuppliersComponent implements OnInit {
       })
       
       this.suppliers = _.clone(suppliers);
-      console.log(suppliers);
       this.cd.detectChanges();
     });
   }
