@@ -78,6 +78,7 @@ import { QuotationRecapComponent } from './pages/quotation/quotation-recap/quota
 import { QuotationManageComponent } from './pages/quotation/quotation-manage/quotation-manage.component';
 import { ArticleRemoverDirective } from './directives/article-remover.directive';
 import { AcceptedItemSuppliersComponent } from './components/accepted-item-suppliers/accepted-item-suppliers.component';
+import { PrestationsComponent } from './pages/prestations/prestations.component';
 
 
 const routes: Routes = [
@@ -117,6 +118,11 @@ const routes: Routes = [
                 path: 'carousel',
                 canActivate: [NoCommercialAccessGuard],
                 component: CarouselComponent
+            },
+            {
+                path: 'prestations',
+                canActivate: [NoCommercialAccessGuard],
+                component: PrestationsComponent
             },
             {
                 path: 'faq-client',
@@ -336,6 +342,7 @@ const routes: Routes = [
         FaqClientEditComponent,
         FaqClientsComponent,
         AcceptedItemSuppliersComponent,
+        PrestationsComponent,
         MomentsPipe,
         BenefitPipe,
         ArticleRemoverDirective
