@@ -28,6 +28,7 @@ export class ApiWordpressService {
     const routeProducts = '/products/(?P<id>\\d+)';
     const routeGD = '/good-deal/(?P<id>\\d+)';
     const routeOrders = '/orders/(?P<id>\\d+)';
+    const routeCatalog = '/catalog/(?P<id>\\d+)';
     const Params: Array<string> = ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include', 'exclude', 'headers', 'roles', 'status'];
 
     this.wpEndPoint.fz_product = this.wpEndPoint.registerRoute(namespace, routeArticles, { params: Params });
@@ -40,6 +41,7 @@ export class ApiWordpressService {
       params: ['search', 'filter', 'sku']
     });
     this.wpEndPoint.good_deal = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeGD, { params: Params });
+    this.wpEndPoint.catalog = this.wpEndPoint.registerRoute(namespace, routeCatalog, { params: Params });
     this.wpEndPoint.orders = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeOrders);
 
     return this.wpEndPoint;
