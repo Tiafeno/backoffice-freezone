@@ -182,6 +182,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 Helpers.setLoading(false);
                 $('.modal').modal('hide');
             }
+            
+            item.discountTypeFn = (): number => {
+                return discountTypeFn();
+            };
 
             item.discountFn = (): number => {
                 let discount: any = _.find(meta_data, { key: 'discount' });
@@ -195,9 +199,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
             item.priceFn = () => {
                 switch (discountTypeFn()) {
-                    case 1:
+                    case 1: // Remise
+                        return item.price - discountPercentFn();
+                    case 2: // Rajout
                         return item.price + discountPercentFn();
-                    case 2:
                     default:
                         return item.price;
                 }
@@ -208,6 +213,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                     case 2:
                         return item.quantity * (item.price - discountPercentFn());
                     case 1:
+                        return item.priceFn() * item.quantity;
                     case 0:
                     default:
                         return item.quantity * item.price;
