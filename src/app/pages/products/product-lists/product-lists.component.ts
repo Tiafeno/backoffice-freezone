@@ -69,11 +69,6 @@ export class ProductListsComponent implements OnInit {
           }
         },
         {
-          data: 'marge', render: (data, type, row) => {
-            return parseInt(data, 10) + '%';
-          }
-        },
-        {
           data: 'categories', render: (data, type, row) => {
             return data;
             // let ctg: Array<any> = _.isEmpty(data) ? [] : _.clone(data);
@@ -100,7 +95,6 @@ export class ProductListsComponent implements OnInit {
                       <i class="fab-icon-active la la-close"></i>
                    </button>
                    <ul class="fab-menu">
-                      <li><button class="btn btn-primary btn-icon-only btn-circle btn-air edit-product"><i class="la la-edit"></i></button></li>
                       <li><button class="btn btn-danger btn-icon-only btn-circle btn-air remove-product"><i class="la la-trash"></i></button></li>
                    </ul>
                 </div>`

@@ -15,12 +15,12 @@
 
         <div class="form-group mb-4 row">
           <label class="col-sm-4 col-form-label">
-            <input class="form-control" formControlName="discount" type="number" placeholder="Valeur en %">
+            <input class="form-control" formControlName="discount" type="number" [disabled]="discount_type == 0" placeholder="Valeur en %">
           </label>
           <div class="col-sm-8 d-flex align-items-center">
             <label class="radio radio-grey radio-primary radio-inline">
               <input type="radio" formControlName="discount_type" value="0">
-              <span class="input-span"></span>Aucun</label>
+              <span class="input-span"></span>Aucune</label>
             <label class="radio radio-grey radio-primary radio-inline">
               <input type="radio" formControlName="discount_type" value="1">
               <span class="input-span"></span>Ajouter une remise</label>

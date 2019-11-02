@@ -199,10 +199,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
             item.priceFn = () => {
                 switch (discountTypeFn()) {
-                    case 1: // Remise
-                        return item.price - discountPercentFn();
                     case 2: // Rajout
                         return item.price + discountPercentFn();
+                    case 1: // Remise & Aucun
                     default:
                         return item.price;
                 }
@@ -213,7 +212,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                     case 2:
                         return item.quantity * (item.price - discountPercentFn());
                     case 1:
-                        return item.priceFn() * item.quantity;
+                        return (item.price - discountPercentFn()) * item.quantity;
                     case 0:
                     default:
                         return item.quantity * item.price;
