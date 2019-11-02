@@ -7,7 +7,8 @@ import { config } from '../../../../environments/environment';
 import Swal, { SweetAlertType } from 'sweetalert2';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { FzSecurityService } from '../../../_services/fz-security.service';
-declare var $:any;
+import * as moment from 'moment';
+declare var $: any;
 
 @Component({
   selector: 'app-quotation-mail',
@@ -46,10 +47,7 @@ export class QuotationMailComponent implements OnInit, OnChanges {
   ) {
     const message: string = `Chers clients, <br><br>
     Nous vous remercions pour votre demande de devis et en retour nous prions de trouver la pro forma correspondant à vos besoins. 
-    Dans l’attente de la confirmation de ce devis. <br> <br>
-
-    Cordialement <br>
-    L’équipe commerciale de Freezone`;
+    Dans l’attente de la confirmation de ce devis. <br> <br> Cordialement <br> L’équipe commerciale de Freezone`;
     this.Form = new FormGroup({
       subject: new FormControl('', Validators.required),
       content: new FormControl(message, Validators.required)
@@ -70,6 +68,7 @@ export class QuotationMailComponent implements OnInit, OnChanges {
   }
 
   onSend() {
+    moment.locale('fr');
     if (this.Form.invalid) return false;
     const Value: any = this.Form.value;
     if (this.security.hasAccess('s8')) {
@@ -78,21 +77,21 @@ export class QuotationMailComponent implements OnInit, OnChanges {
       fData.append('subject', Value.subject);
       fData.append('message', Value.content);
       // Mettre la demamde pour 'Envoyer'
-      this.Woocommerce.put(`orders/${this.Order.id}`, {position: 1} , (err, data, res) => {
+      this.Woocommerce.put(`orders/${this.Order.id}`, { position: 1, date_send: moment().format('YYYY-MM-DD HH:mm:ss') }, (err, data, res) => {
         // Envoyer le mail
         this.Http.post<any>(`${config.apiUrl}/mail/order/${this.Order.id}`, fData)
-        .subscribe(resp => {
-          Helpers.setLoading(false);
-          $('.modal').modal('hide');
-          const response: any = _.clone(resp);
-          const message: string = response.data;
-          const title: string = response.success ? "Succès" : "Désolé";
-          const type: SweetAlertType = response.success ? 'success' : "error";
-          Swal.fire(title, message, type);
-        }, err => {
-          Swal.fire('Désolé', "Une erreur s'est produit pendant l'envoie. Veuillez réessayer plus tard", 'error');
-          Helpers.setLoading(false);
-        });
+          .subscribe(resp => {
+            Helpers.setLoading(false);
+            $('.modal').modal('hide');
+            const response: any = _.clone(resp);
+            const message: string = response.data;
+            const title: string = response.success ? "Succès" : "Désolé";
+            const type: SweetAlertType = response.success ? 'success' : "error";
+            Swal.fire(title, message, type);
+          }, err => {
+            Swal.fire('Désolé', "Une erreur s'est produit pendant l'envoie. Veuillez réessayer plus tard", 'error');
+            Helpers.setLoading(false);
+          });
         this.cd.detectChanges();
       });
     }

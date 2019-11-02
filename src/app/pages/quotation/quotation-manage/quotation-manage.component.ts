@@ -25,7 +25,8 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
      * 0: En attente
      * 1: Envoyer
      * 2: Rejetés
-     * 3: Terminée
+     * 3: Accepter
+     * 4: Terminée
      */
     public quotationPosition: number = 0;
     private items: Array<any> = [];
@@ -45,7 +46,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private auth: AuthorizationService,
         private apiWC: ApiWoocommerceService,
         private apiWP: ApiWordpressService,
         private services: FzServicesService,
