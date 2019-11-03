@@ -8,6 +8,9 @@ import * as moment from 'moment'
 import { QuotationViewComponent } from '../quotation-view/quotation-view.component';
 import { FzSecurityService } from '../../../_services/fz-security.service';
 import Swal from 'sweetalert2';
+import { Metadata } from '../../../metadata';
+import { Article } from '../../articles';
+import { OrderItem } from '../../../order.item';
 declare var $: any;
 
 @Component({
@@ -31,6 +34,7 @@ export class QuotationEditComponent implements OnInit {
    public canChangeMargeDealer: boolean = true;
    public objectMeta: Array<any> = [];
    public loading: boolean = false;
+   public articles: Array<Article>;
 
    @ViewChild(QuotationViewComponent) QuotationView: QuotationViewComponent;
    
@@ -75,7 +79,8 @@ export class QuotationEditComponent implements OnInit {
          this.ID = parseInt(params.id);
          this.WCAPI.get(`orders/${this.ID}`, async (err, data, res) => {
             this.ORDER = JSON.parse(res);
-            const ITEMS = this.ORDER.line_items;
+            const ITEMS: Array<OrderItem> = this.ORDER.line_items;
+
          
             // Récuperer les informations du client
             await this.WPAPI
@@ -85,6 +90,27 @@ export class QuotationEditComponent implements OnInit {
                .then(user => { this.Author = _.clone(user); })
                .catch(error => {
                   Swal.fire('Erreur', "Compte du client introuvable. Le compte a été supprimer", 'error');
+               });
+
+            const itemArticleIdsFn = (productId: number): Array<number> => {
+               const item: OrderItem = _.find(ITEMS, {product_id: productId});
+               const metadata: Array<Metadata> = _.clone(item.meta_data);
+               const hasSupplier: any = _.find(metadata, {key: 'suppliers'});
+               if (_.isUndefined(hasSupplier)) return [];
+               let suppliers: any = JSON.parse(hasSupplier.value);
+               return _.map(suppliers, supplier => parseInt(supplier.article_id));
+            };
+
+            let allItemsArticleIds: Array<number> = _(ITEMS).map(item => {
+               return itemArticleIdsFn(item.product_id);
+            }).flatten().value();
+
+            await this.WPAPI
+               .fz_product()
+               .context('edit')
+               .param('include', allItemsArticleIds)
+               .then(response => {
+                   this.articles = _.clone(response);
                });
 
             // Crée la liste des produits dans la commande
@@ -97,23 +123,24 @@ export class QuotationEditComponent implements OnInit {
                   { data: 'name' },
                   { 
                      data: 'quantity' ,
-                     render: (data, type, row) => {
+                     render: (qty, type, row) => {
                         const meta_data = _.clone(row.meta_data);
                         const metaStockRequest: any = _.find(meta_data, {key: 'stock_request'});
                         const stockRequestValue = _.isUndefined(metaStockRequest) ? 0 : parseInt(metaStockRequest.value, 10);
-                        return _.isEqual(stockRequestValue, 0) ? data : stockRequestValue;
+                        return _.isEqual(stockRequestValue, 0) ? qty : stockRequestValue;
                      }
-                  }, // Quantité du client
+                  }, // Quantité voulu
                   {
-                     data: 'quantity',
-                     render: (data, type, row) => {
-                        const meta_data = _.clone(row.meta_data);
-                        const metaSuppliers: any = _.find(meta_data, {key: 'suppliers'});
-                        let quantityItemTakes = !_.isUndefined(metaSuppliers) ? _.map(JSON.parse(metaSuppliers.value), mt => parseInt(mt.get, 10)) : 0;
-                        quantityItemTakes = _.isArray(quantityItemTakes) ? _.sum(quantityItemTakes) : 0;
-                        return _.isEqual(quantityItemTakes, 0) ? 'Non definie' : quantityItemTakes;
+                     data: 'product_id',
+                     render: (pId, type, row) => {
+                        const articleIds: Array<number> = itemArticleIdsFn(parseInt(pId));
+                        if (_.isEmpty(articleIds)) return 'Non définie';
+                        const articles: Array<Article> = _(this.articles).filter(article => _.indexOf(articleIds, article.id) >= 0).value();
+                        const stocks: Array<number> = _.map(articles, article => parseInt(article.total_sales));
+
+                        return _.sum(stocks);
                      }
-                  },
+                  }, // quantité disponible pour le fournisseur
                   {
                      data: 'meta_data', render: (data: Array<{id?: number, key: string, value: any}>) => {
                         const meta: any = _.find(data, { key: 'status' });

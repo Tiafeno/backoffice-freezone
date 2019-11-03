@@ -10,6 +10,7 @@ import { FzServicesService } from '../../../_services/fz-services.service';
 import { EditArticleComponent } from '../../supplier/articles/edit-article/edit-article.component';
 import { FormGroup, FormControl } from '@angular/forms';
 import { AuthorizationService } from '../../../_services/authorization.service';
+import { Metadata } from '../../../metadata';
 declare var $: any;
 
 @Component({
@@ -137,7 +138,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                     .then(respSuppliers => {
                         const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
                         const SUPPLIERS: Array<any> = _.clone(respSuppliers);
-                        const frmEditValue: any = this.editForm.value;
                         const dateNow = moment();
                         const todayAt6 = moment({
                             year: dateNow.year(),
@@ -175,12 +175,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         let userId: any = data;
                                         let pdt: any = _.find(this.allProducts, { user_id: userId });
                                         if (_.isUndefined(pdt)) return 'Introuvable';
-
                                         const dateReview = moment(pdt.date_review);
-
                                         let msg: string = _.isEqual(this.quotationPosition, 2) || dateReview > todayAt6 ? "Traité" : "En attente";
                                         let style: string = _.isEqual(this.quotationPosition, 2) || dateReview > todayAt6 ? 'blue' : 'warning';
-
                                         return `<span class="badge badge-${style}">${msg}</span>`;
                                     }
                                 }, // statut product
@@ -323,7 +320,8 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                     type: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Oui',
-                    cancelButtonText: 'Annuler',
+                    cancelButtonText: 'Non',
+                    allowOutsideClick: false,
                     focusConfirm: false,
                 });
                 stockInsuffisantCondition = dialogResult ? true : false;
@@ -402,7 +400,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             if (item.id !== this.itemId) return item;
 
             const formValue = this.editForm.value;
-            let meta_data: Array<{ id?: number, key: string, value: any }> = _.cloneDeep(item.meta_data);
+            let meta_data: Array<Metadata> = _.cloneDeep(item.meta_data);
 
             meta_data = _.reject(meta_data, { key: 'discount' });
             meta_data.push({ key: 'discount', value: parseInt(formValue.discount, 10) });
