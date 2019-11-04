@@ -234,7 +234,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                             initComplete: () => {
                                 Helpers.setLoading(false);
                                 this.cd.detectChanges();
-
                                 $('#quotation-supplier-table tbody').on('click', '.view-supplier', ev => {
                                     ev.preventDefault();
                                     const element = $(ev.currentTarget);
@@ -244,17 +243,13 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         this.zone.run(() => this.router.navigate(['/supplier', elData.supplier, 'edit']));
                                     }, 600);
                                 });
-
                                 $('#quotation-supplier-table tbody').on('click', '.view-article', ev => {
                                     ev.preventDefault();
                                     let data: any = $(ev.currentTarget).data();
                                     this.articleEditor = _.clone(data.article);
                                     this.cd.detectChanges();
                                 });
-
-                                /**
-                                 * Ajouter tous les modifications dans les champs dans une variable 'qtyIncrement'
-                                 */
+                                // Ajouter tous les modifications dans les champs dans une variable 'qtyIncrement'
                                 $('#quotation-supplier-table tbody').on('change', '.input-increment', ev => {
                                     ev.preventDefault();
 
@@ -267,12 +262,10 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         element.val(Math.abs(value - 1));
                                         return false;
                                     };
-
                                 });
                             }
                         })
                     });
-
             }, error => {
                 Helpers.setLoading(false);
                 Swal.fire('Erreur', error, 'error');
@@ -287,7 +280,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         } else {
             this.editForm.get('discount').enable();
         }
-    }   
+    }
 
     /**
     * Enregistrer le meta data pour les produits dans la commande
@@ -338,7 +331,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         }
 
         const quantityItemTakes = _.map(this.qtyIncrement, mt => parseInt(mt.get, 10));
-
         // Vérifier si la remise est définie 
         lineItems = _.map(lineItems, item => {
             // Récuperer seulement l'item en cours de modification
@@ -393,31 +385,24 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
             meta_data = _.reject(meta_data, { key: 'stock_request' });
             meta_data.push({ key: 'stock_request', value: stkRequest });
-
             // Meta data informations
             const supValues: Array<any> = _.map(this.qtyIncrement, m => {
                 return _.pick(m, ['get', 'supplier', 'product_id', 'article_id']);
             });
             meta_data = _.reject(meta_data, { key: 'suppliers' });
             meta_data.push({ key: 'suppliers', value: JSON.stringify(supValues) });
-
             item.meta_data = _.clone(meta_data);
-
             return item;
         });
 
         lineItems = _.map(lineItems, item => {
             if (item.id !== this.itemId) return item;
-
             const formValue = this.editForm.value;
             let meta_data: Array<Metadata> = _.cloneDeep(item.meta_data);
-
             meta_data = _.reject(meta_data, { key: 'discount' });
             meta_data.push({ key: 'discount', value: parseInt(formValue.discount, 10) });
-
             meta_data = _.reject(meta_data, { key: 'discount_type' });
             meta_data.push({ key: 'discount_type', value: parseInt(formValue.discount_type, 10) });
-
             item.meta_data = meta_data;
             return item;
         });
