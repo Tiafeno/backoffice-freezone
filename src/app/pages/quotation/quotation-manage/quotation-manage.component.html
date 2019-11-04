@@ -15,14 +15,14 @@
 
         <div class="form-group mb-4 row">
           <label class="col-sm-4 col-form-label">
-            <input class="form-control" formControlName="discount" type="number" [disabled]="discount_type == 0" placeholder="Valeur en %">
+            <input class="form-control" formControlName="discount" min="0" type="number" placeholder="Valeur en %">
           </label>
           <div class="col-sm-8 d-flex align-items-center">
             <label class="radio radio-grey radio-primary radio-inline">
-              <input type="radio" formControlName="discount_type" value="0">
+              <input type="radio" formControlName="discount_type" value="0" [checked]="isRegulatoryAuditDisabled()">
               <span class="input-span"></span>Aucune</label>
             <label class="radio radio-grey radio-primary radio-inline">
-              <input type="radio" formControlName="discount_type" value="1">
+              <input type="radio" formControlName="discount_type" value="1" [checked]="isRegulatoryAuditDisabled()">
               <span class="input-span"></span>Ajouter une remise</label>
             <!-- <label class="radio radio-grey radio-primary radio-inline">
               <input type="radio" formControlName="discount_type" value="2">

@@ -3,9 +3,10 @@ import * as _ from 'lodash';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertType } from 'sweetalert2';
 import * as moment from 'moment';
 import { FzServicesService } from '../../../_services/fz-services.service';
+import { Metadata } from '../../../metadata';
 declare var $: any;
 
 @Component({
@@ -95,6 +96,12 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         });
     }
 
+    public errorOccured(title: string, message: string, code: SweetAlertType) {
+        Swal.fire(title, message, code);
+        Helpers.setLoading(false);
+        $('.modal').modal('hide');
+    }
+
     /**
      * Cette fonction sera exécuter quand la boit de dialogue s'affiche
      */
@@ -138,18 +145,12 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
 
         this.QtItems = _.map(this.Items, item => {
-            let error_occured: boolean = false;
             // Récuperer tous les meta utiliser pour le produit
-
-            const meta_data: Array<{ id?: number, key: string, value: any }> = _.cloneDeep(item.meta_data);
+            const meta_data: Array<Metadata> = _.cloneDeep(item.meta_data);
             const dataSuppliers: any = _.find(meta_data, { key: 'suppliers' });
-            if (_.isUndefined(dataSuppliers)) {
-                error_occured = true;
-                return item;
-            }
+            if (_.isUndefined(dataSuppliers)) { return item; }
             const __supplierVals__ = JSON.parse(dataSuppliers.value);
             const allTakeForItem: Array<number> = _.map(__supplierVals__, sp => parseInt(sp.get));
-            //const allArticleIdsForItem: Array<number> = _.map(__supplierVals__, sp => parseInt(sp.article_id));
 
             /**
              * 0: Aucun
@@ -162,26 +163,27 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return _.isNaN(parseInt(type.value)) ? 0 : parseInt(type.value);
             };
 
+            const hasStockRequest = (): boolean => {
+                let stockR = _.find(meta_data, { key: 'stock_request' });
+                if (_.isUndefined(stockR)) return false;
+                return _.isEqual( parseInt(stockR.value, 10), 0) ? false : true;
+            };
+
+
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
             const takes = _.sum(allTakeForItem);
-            if (takes === 0) {
-                error_occured = true;
-                Swal.fire('Désolé', `Fournisseur non definie détecté pour l'article: ${item.name}`, 'error');
+            if (takes === 0 && !hasStockRequest()) {
+                this.errorOccured('Désolé', `Fournisseur non definie détecté pour l'article: ${item.name}`, 'error');
                 return item;
             }
             // Récuperer le prix le plus grand pour chaque fournisseur ajouter
             // Vérifier le prix et la quantité ajouter
-            if (item.quantity > takes) {
+            if (item.quantity > takes && !hasStockRequest()) {
                 item.stock = item.total = item.subtotal = item.price = 0;
-                error_occured = true;
-                Swal.fire('Désolé', `Quantité ajouter incorrect. Veuillez vérifier l'article: ${item.name}`, 'error');
+                this.errorOccured('Désolé', `Quantité ajouter incorrect. Veuillez vérifier l'article: ${item.name}`, 'error');
                 return item;
             }
 
-            if (error_occured) {
-                Helpers.setLoading(false);
-                $('.modal').modal('hide');
-            }
             
             item.discountTypeFn = (): number => {
                 return discountTypeFn();
