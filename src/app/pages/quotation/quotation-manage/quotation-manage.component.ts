@@ -30,6 +30,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
      */
     public quotationPosition: number = 0;
     private items: Array<any> = [];
+    private itemsZero: Array<any> = [];
     private itemId: number = 0;
     private Woocommerce: any;
     private Wordpress: any;
@@ -57,7 +58,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         this.editForm = new FormGroup({
             stock_request: new FormControl(0), // Forcer la quantité de la demande pour les articles fournisseur disponible
             discount: new FormControl({ value: 0, disabled: false }), // Forcer la quantité de la demande pour les articles fournisseur disponible
-            discount_type: new FormControl('0') // Appliquer ou pas la remise pour cette article
+            discount_type: new FormControl(0) // Appliquer ou pas la remise pour cette article
         });
     }
 
@@ -76,6 +77,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 this.order = JSON.parse(res);
                 // Récuperer l'item dans la demande
                 this.items = _.cloneDeep(this.order.line_items);
+                this.itemsZero = _.cloneDeep(this.order.line_items_zero);
                 // Récuperer l'item en cours
                 let item: any = _.find(this.order.line_items, { id: this.itemId });
                 this.item = _.isUndefined(item) || !_.isObjectLike(item) ? null : item;
@@ -90,7 +92,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 this.editForm.patchValue({
                     discount: _.isUndefined(discount) ? 0 : parseInt(discount.value),
                     stock_request: _.isUndefined(stockRequest) ? 0 : parseInt(stockRequest.value, 10),
-                    discount_type: _.isUndefined(discountType) ? '0' : discountType.value
+                    discount_type: _.isUndefined(discountType) ? 0 : parseInt(discountType.value, 10)
                 });
 
                 this.isRegulatoryAuditDisabled();
@@ -341,8 +343,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
             // Redefinir la quantité du produit
             item.quantity = stockInsuffisantCondition ? _.sum(quantityItemTakes) : item.quantity;
-
-            /******************* MISE A JOUR DES METADATA ************************/
             meta_data = _.map(meta_data, meta => {
                 switch (meta.key) {
                     case 'status':
@@ -381,7 +381,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 }
                 return meta;
             });
-            /************************************************************************* */
 
             meta_data = _.reject(meta_data, { key: 'stock_request' });
             meta_data.push({ key: 'stock_request', value: stkRequest });
@@ -407,7 +406,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             return item;
         });
 
-        /***************** PRIX ***********/
+        //  price, total & subtotal
         const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
         lineItems = _.map(lineItems, item => {
             // Seulemet l'item actuellement en cours de modification
@@ -435,10 +434,16 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
 
             return item;
         });
-        /******************************* */
+
+
 
         Helpers.setLoading(true);
-        const data: any = { line_items: lineItems };
+        const data: any = {
+            line_items: lineItems,
+            line_items_zero: _(lineItems).filter(item => {
+                return _.isEqual(item.quantity, 0);
+            }).push(this.itemsZero).flatten().value()
+        };
 
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
             this.qtyIncrement = [];

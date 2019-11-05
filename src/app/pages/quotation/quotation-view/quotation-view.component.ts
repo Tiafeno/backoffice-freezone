@@ -7,6 +7,7 @@ import Swal, { SweetAlertType } from 'sweetalert2';
 import * as moment from 'moment';
 import { FzServicesService } from '../../../_services/fz-services.service';
 import { Metadata } from '../../../metadata';
+import { OrderItem } from '../../../order.item';
 declare var $: any;
 
 @Component({
@@ -110,8 +111,20 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.cd.detectChanges();
         Helpers.setLoading(true);
 
-        let aIds: Array<any> = this.getMetabyProperty('article_id');
-        const ARTICLES = await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
+        let aIds: Array<any> = _(this.Items).map((item: OrderItem) => {
+            let metadata: Array<Metadata> = item.meta_data;
+            let suppliers: any = _.find(metadata, {key: 'suppliers'});
+            if (_.isUndefined(suppliers)) return null;
+            suppliers = JSON.parse(suppliers.value);
+            if (_.isEmpty(suppliers)) return null;
+
+            return _(suppliers).map(sup => {
+                return parseInt(sup.article_id, 10);
+            }).value();
+
+        }).flatten().filter(value => value !== null).value();
+        console.log(aIds);
+        const ARTICLES = _.isEmpty(aIds) ? [] : await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
         // Si la position ne sont pas: Envoyer, Rejeter, Accepter et Terminée
         if (!_.includes([1, 2, 3, 4], parseInt(this.order.position, 10))) {
             // Vérifier si la date de revision est périmé
@@ -168,7 +181,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 if (_.isUndefined(stockR)) return false;
                 return _.isEqual( parseInt(stockR.value, 10), 0) ? false : true;
             };
-
 
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
             const takes = _.sum(allTakeForItem);
@@ -242,7 +254,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         if (!_.isUndefined(changes.order.currentValue) && !_.isEmpty(changes.order.currentValue)) {
             this.ID = changes.order.currentValue.id;
             this.Quotation = _.cloneDeep(changes.order.currentValue);
-            this.Items = _.cloneDeep(this.Quotation.line_items);
+            this.Items = _(this.Quotation.line_items).push(this.Quotation.line_items_zero).flatten().value();
             this.billingAdress = _.clone(this.Quotation.billing);
             this.shippingAdress = _.clone(this.Quotation.shipping);
 
@@ -265,25 +277,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             }).catch(err => { resolve([]); });
         });
     }
-
-    /**
-     * Cette fonction permet de récupérer la valeur d'une propriété
-     * définie dans l'item meta "suppliers"
-     *
-     * @param property
-     */
-    private getMetabyProperty(property: string): Array<any> {
-        return _.map(this.Items, item => {
-            let metas = item.meta_data;
-            let supplier: any = _.find(metas, { key: 'suppliers' });
-            if (_.isUndefined(supplier)) return [];
-            // récuperer la valeur du meta item
-            let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : [];
-            // Récupere seulement la propriété définie
-            return _.map(Value, data => data[property]);
-        });
-    }
-
 
     public initQuotation(): void {
 
