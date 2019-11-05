@@ -120,9 +120,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
             return _(suppliers).map(sup => {
                 return parseInt(sup.article_id, 10);
-            }).value();
-
+            }).filter(!_.isNaN).value();
         }).flatten().filter(value => value !== null).value();
+        
         console.log(aIds);
         const ARTICLES = _.isEmpty(aIds) ? [] : await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
         // Si la position ne sont pas: Envoyer, Rejeter, Accepter et Terminée
