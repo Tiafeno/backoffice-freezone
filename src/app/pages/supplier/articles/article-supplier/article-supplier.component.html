@@ -5,8 +5,10 @@
       <app-filter-article [word]="findWord" (search)="onSubmit($event)"></app-filter-article>
       <div class="mb-3">
         <span>
-          <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-article-supplier-modal">Ajouter un article</button>
-          <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#import-article-modal">+ Importer des articles (Non recommandé)</button>
+          <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-article-supplier-modal">Ajouter
+            un article</button>
+          <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#import-article-modal">+ Importer des
+            articles (Non recommandé)</button>
         </span>
       </div>
       <div class="ibox">
@@ -16,19 +18,19 @@
               <span *ngIf="findWord"> pour: <span class="text-primary">“{{findWord}}”</span></span>
             </h3>
           </div>
-          <div class="table-responsive" *ngIf="Products.length > 0">
+          <div *ngIf="Products.length > 0">
             <table class="table">
               <thead style="background-color: lavender;">
                 <tr>
                   <th>Image</th>
                   <th>Designation</th>
                   <th>Statut</th>
-                  <th>Prix</th>
-                  <th>Prix P.</th>
+                  <th>Prix de vente</th>
+                  <th>Prix Part.</th>
                   <th>%UF</th>
                   <th>Prix UF</th>
                   <th>%R</th>
-                  <th>Prix R</th>
+                  <th>Prix Rev.</th>
                   <th>F.</th>
                   <th></th>
                 </tr>
@@ -36,40 +38,47 @@
               <tbody>
                 <tr *ngFor="let article of Products">
                   <td>
-                    <img class="mr-3 update-thumbnail" [attr.data-product]="article.product_id" [attr.data-article]="article.id"
-                    [src]="article.product_thumbnail.src" alt="image" width="60">
+                    <img class="update-thumbnail" [attr.data-product]="article.product_id"
+                      [attr.data-article]="article.id" [src]="article.product_thumbnail.src" alt="image" width="60">
                   </td>
-                  <td width="250">
-                    <a class="link-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
+                  <td>
+                    <a class="text-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
                   </td>
-                  <td><span class="badge"
-                            [ngClass]="{'badge-blue': article.product_status === 'publish',
-                            'badge-pink': article.product_status === 'draft',
-                            'badge-warning': article.product_status === 'pending'}"
-                            (click)="onChangeStatus(article)" style="cursor: pointer">
-                    {{article.product_status === 'publish' ? 'PUBLIER' : (article.product_status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
+                  <td><span class="badge" [ngClass]="{'badge-blue': article.status === 'publish',
+                            'badge-pink': article.status === 'draft',
+                            'badge-warning': article.status === 'pending'}" (click)="onChangeStatus(article)"
+                      style="cursor: pointer">
+                      {{article.status === 'publish' ? 'PUBLIER' : (article.status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                   </td>
-
-                  <td *ngIf="isNumber(article.price)">{{article.price | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
+                  <td *ngIf="isNumber(article.price)">
+                    <span data-toggle="tooltip" data-placement="top"
+                      title="{{article.price * 5 | currency:'FMG':'symbole':'4.0-2':'fr'}}">
+                      {{article.price | currency:'MGA':'symbole':'4.0-2':'fr'}}
+                    </span>
+                  </td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
-
-                  <td *ngIf="isNumber(article.price_particular)">{{article.price_particular | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
-                  <td *ngIf="!isNumber(article.price_particular)"><span class="badge badge-default">{{article.price_particular}}</span></td>
-
+                  <td *ngIf="isNumber(article.price_particular)">
+                    {{article.price_particular | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}
+                  </td>
+                  <td *ngIf="!isNumber(article.price_particular)"><span
+                      class="badge badge-default">{{article.price_particular}}</span>
+                  </td>
                   <td>{{article.marge}}</td>
                   <td>{{article.priceUF | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td>{{article.marge_dealer}}</td>
                   <td>{{article.price_dealer | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
                   <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']"
-                        routerLinkActive="active" class="badge badge-info">
-                    {{article.supplier.reference}}
-                  </a></td>
-                  <td  width="20">
-                    <div class="row">
-                      <div class="col-6">
-                          <a class="text-light font-16" (click)="onChangeRoute('/articles/edit/' + article.product_id)" ><i class="ti-pencil-alt"></i></a>
-                      </div>
-                    </div>
+                      routerLinkActive="active" class="badge badge-info">
+                      {{article.supplier.reference}}
+                    </a>
+                  </td>
+                  <td>
+                    <a class="text-blue font-16" data-toggle="tooltip" data-placement="top" title="Modifier"
+                      (click)="onChangeRoute('/articles/edit/' + article.product_id)">
+                      <i class="ti-pencil-alt"></i></a>
+                    <a class="font-16 text-danger" data-toggle="tooltip" data-placement="top" title="Supprimer"
+                      appArticleRemover [articleId]="article.id" (onRefresh)="onRefreshResults()"><i
+                        class="ti-trash"></i></a>
                   </td>
                 </tr>
               </tbody>
@@ -92,7 +101,7 @@
 
       <div class="modal fade" id="edit-article-supplier-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
-          
+
           <app-edit-article [article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
         </div>
       </div>
@@ -129,7 +138,7 @@
                   </div>
                 </div>
               </div>
-          
+
             </div>
             <div class="modal-footer justify-content-between bg-primary-50">
               <div>

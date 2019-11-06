@@ -84,7 +84,7 @@ export class ArticleSupplierComponent implements OnInit {
    public onChangeRoute(link: string) {
       this.zone.run(() => { this.router.navigateByUrl(link); })
    }
-  
+
 
    /**
     * Cette evennement ce declanche quand on click sur modifier une article
@@ -264,7 +264,7 @@ export class ArticleSupplierComponent implements OnInit {
          } else {
             product.price_dealer = 'Non définie';
          }
-         
+
          if (!_.isNaN(_marge)) {
             product.priceUF = this.services.getBenefit(price, _marge);
          } else {
@@ -287,10 +287,14 @@ export class ArticleSupplierComponent implements OnInit {
          afterPageOnClick: (data, pagination) => {
             this.onChangePage(parseInt(pagination, 10));
          },
-         afterRender: (data, pagination) => {}
+         afterRender: (data, pagination) => { }
       });
       this.cd.detectChanges();
       this.onLoadLists();
+
+      // Activate Tooltips
+      $('[data-toggle="tooltip"]').tooltip();
+
       Helpers.setLoading(false);
    }
 

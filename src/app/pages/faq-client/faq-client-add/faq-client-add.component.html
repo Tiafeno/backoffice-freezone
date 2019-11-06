@@ -1,3 +1,70 @@
-<p>
-  faq-client-add works!
-</p>
+<style type="text/css">
+  .ng-invalid.ng-dirty {
+    border: 1px solid #e49494;
+  }
+
+</style>
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-lg-8">
+
+      <div class="ibox ibox-fullheight">
+        <form class="ibox-body" [formGroup]="Form" id="faq-add-form" (ngSubmit)="onAddFaq()">
+          <p class="lead mb-4">Ajouter un F.A.Q</p>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label class="font-light">Titre</label>
+                <input class="form-control" autocomplete="off" formControlName="title" type="text" placeholder="">
+                <div *ngIf="f.title.errors && f.title.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label class="font-light">Description</label>
+                <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="content"
+                  name="projet" [init]="tinyMCESettings"></editor>
+                <div *ngIf="f.content.errors && f.content.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Categorie(s)</label>
+                <ng-select placeholder="" formControlName="ctg" bindLabel="label" bindValue="value"
+                  [hideSelected]="true" [multiple]="false" [items]="categories" required>
+                  <ng-template ng-option-tmp let-item="item">
+                    {{item.label}}
+                  </ng-template>
+                </ng-select>
+                <div *ngIf="f.ctg.errors && f.ctg.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center mb-4">
+            <div class="row">
+              <button class="btn btn-primary  col-4" type="submit">AJOUTER</button>
+              <a class="btn btn-secondary ml-3 col-4" [routerLink]="['/faq-client', 'view']"
+                routerLinkActive="active">RETOUR</a>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+    <div class="col-lg-4">
+    </div>
+  </div>
+</div>

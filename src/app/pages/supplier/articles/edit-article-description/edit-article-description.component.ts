@@ -35,8 +35,8 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
     browser_spellcheck: true,
     min_height: 320,
     height: 320,
-    toolbar: 'undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',
-    plugins: ['lists'],
+    toolbar: ' undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist table numlist outdent indent | image removeformat ',
+    plugins: ['lists table image '],
   };
   constructor(
     private route: ActivatedRoute,

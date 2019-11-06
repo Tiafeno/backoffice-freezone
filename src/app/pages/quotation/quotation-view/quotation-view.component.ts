@@ -3,9 +3,11 @@ import * as _ from 'lodash';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
-import Swal from 'sweetalert2';
+import Swal, { SweetAlertType } from 'sweetalert2';
 import * as moment from 'moment';
 import { FzServicesService } from '../../../_services/fz-services.service';
+import { Metadata } from '../../../metadata';
+import { OrderItem } from '../../../order.item';
 declare var $: any;
 
 @Component({
@@ -16,7 +18,7 @@ declare var $: any;
 export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit {
     public ID: number = 0;
     public Quotation: any = {};
-    public Items: Array<any> = [];
+    private Items: Array<any> = [];
     public QtItems: Array<any> = [];
     public querySupplierProducts: Array<any> = [];
     public Billing: any = {};
@@ -26,7 +28,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
     private Woocommerce: any;
     private Wordpress: any;
-    private supplierSchema: Array<any> = [];
     private error: boolean = false;
     private Tax: number = 20; // Tax de 20%
     @Input() public order: any;
@@ -53,13 +54,12 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             .on('hide.bs.modal', e => {
                 this.QtItems = [];
                 this.Billing = {};
-                this.supplierSchema = [];
             });
     }
 
     public onSendMail(): void | boolean {
-        // Envoyer et Terminer
-        if (!_.includes([1, 3], parseInt(this.order.position, 10))) {
+        // Si la position ne sont pas: Envoyer, Rejeter, Accepter & Terminée
+        if (!_.includes([1, 2, 3, 4], parseInt(this.order.position, 10))) {
             // Ne pas envoyer le devis si le client est toujours en attente
             if (!_.isEmpty(this.ownerClient.company_name) && this.ownerClient.company_status === "pending") {
                 Swal.fire('Désolé', "L'entreprise est en attente de confirmation", "warning");
@@ -84,11 +84,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             item.price = '0';
             return item;
         });
-        let pricetax: number = (this.Billing.total * this.Tax) / 100;
         let data: any = {
             currency: 'MGA',
-            line_items: this.QtItems,
-            cart_tax: pricetax.toString()
+            line_items: this.QtItems
         };
         Helpers.setLoading(true);
         $('.modal').modal('hide');
@@ -99,6 +97,12 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         });
     }
 
+    public errorOccured(title: string, message: string, code: SweetAlertType) {
+        Swal.fire(title, message, code);
+        Helpers.setLoading(false);
+        $('.modal').modal('hide');
+    }
+
     /**
      * Cette fonction sera exécuter quand la boit de dialogue s'affiche
      */
@@ -107,37 +111,35 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.cd.detectChanges();
         Helpers.setLoading(true);
 
-        let aIds: Array<any> = this.getMeta('article_id');
-        const ARTICLES = await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
-        const CLIENT = await this.getUsers(this.order.customer_id); // Array of user or empty
-        this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
-        this.supplierSchema = await this.loadSchema();
-        this.supplierSchema = _.flatten(this.supplierSchema);
-        this.supplierSchema = _.map(this.supplierSchema, schema => {
-            const articleId: number = parseInt(schema.article_id);
-            const article: any = _.find(ARTICLES, { id: articleId });
-            if (_.isUndefined(article)) return schema;
-            // "marge" appartient au produit woocommerce
-            // Cette valeur est herité depuis le post type 'product'
-            schema.marge = parseInt(article.marge, 10);
-            schema.marge_dealer = parseInt(article.marge_dealer, 10);
-            schema.marge_particular = parseInt(article.marge_particular, 10);
+        let aIds: Array<any> = _(this.Items).map((item: OrderItem) => {
+            let metadata: Array<Metadata> = item.meta_data;
+            let suppliers: any = _.find(metadata, {key: 'suppliers'});
+            if (_.isUndefined(suppliers)) return null;
+            suppliers = JSON.parse(suppliers.value);
+            if (_.isEmpty(suppliers)) return null;
 
-            let price = parseInt(article.price);
-            schema.price = price;
-
-            return schema;
-        });
-
-        // Envoyer et Terminer
-        if (!_.includes([1, 3], parseInt(this.order.position, 10))) {
+            return _(suppliers).map(sup => {
+                return parseInt(sup.article_id, 10);
+            }).filter(!_.isNaN).value();
+        }).flatten().filter(value => value !== null).value();
+        
+        console.log(aIds);
+        const ARTICLES = _.isEmpty(aIds) ? [] : await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
+        // Si la position ne sont pas: Envoyer, Rejeter, Accepter et Terminée
+        if (!_.includes([1, 2, 3, 4], parseInt(this.order.position, 10))) {
             // Vérifier si la date de revision est périmé
             _.map(ARTICLES, (a) => {
-                let dateReview: any = moment(a.date_review);
-                let dateLimit: any = moment().subtract(1, 'days');
-                if (dateLimit > dateReview && this.order.status !== 'completed') {
-                    this.error = true;
-                }
+                const dateReview: any = moment(a.date_review);
+                const dateNow: any = moment();
+                const todayAt6 = moment({
+                    year: dateNow.year(),
+                    month: dateNow.month(),
+                    days: dateNow.date(),
+                    hour: 6,
+                    minute: 0
+                });
+                // Si la valeur est 'true', l'article n'est pas à jour
+                this.error = dateReview < todayAt6;
             });
 
             if (this.error) {
@@ -151,49 +153,100 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return false;
             }
         }
-        
 
-        this.QtItems = _.map(this.Items, product => {
+        const CLIENT = await this.getUsers(this.order.customer_id); // Array of user or empty
+        this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
+
+        this.QtItems = _.map(this.Items, item => {
             // Récuperer tous les meta utiliser pour le produit
-            let SCHEMAS: any = _.filter(this.supplierSchema, { product_id: product.product_id });
-            const allPriceForItem = _.map(SCHEMAS, schema => schema.price);
+            const meta_data: Array<Metadata> = _.cloneDeep(item.meta_data);
+            const dataSuppliers: any = _.find(meta_data, { key: 'suppliers' });
+            if (_.isUndefined(dataSuppliers)) { return item; }
+            const __supplierVals__ = JSON.parse(dataSuppliers.value);
+            const allTakeForItem: Array<number> = _.map(__supplierVals__, sp => parseInt(sp.get));
 
-            const metaDataSuppliers: any = _.find(product.meta_data, { key: 'suppliers' } as any);
-            const metaDataSuppliersValue = JSON.parse(metaDataSuppliers.value);
-            const allTakeForItem = _.map(metaDataSuppliersValue, supplier => parseInt(supplier.get, 10));
+            /**
+             * 0: Aucun
+             * 1: Remise
+             * 2: Rajout
+             */
+            const discountTypeFn = (): number => {
+                let type = _.find(meta_data, { key: 'discount_type' });
+                if (_.isUndefined(type)) return 0;
+                return _.isNaN(parseInt(type.value)) ? 0 : parseInt(type.value);
+            };
+
+            const hasStockRequest = (): boolean => {
+                let stockR = _.find(meta_data, { key: 'stock_request' });
+                if (_.isUndefined(stockR)) return false;
+                return _.isEqual( parseInt(stockR.value, 10), 0) ? false : true;
+            };
 
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
-            const take = _.sum(allTakeForItem);
-            if (take === 0) {
-                $('.modal').modal('hide');
-                Helpers.setLoading(false);
-                Swal.fire('Désolé', "Fournisseur non definie détecté", 'error');
-                return product;
+            const takes = _.sum(allTakeForItem);
+            if (takes === 0 && !hasStockRequest()) {
+                this.errorOccured('Désolé', `Fournisseur non definie détecté pour l'article: ${item.name}`, 'error');
+                return item;
             }
             // Récuperer le prix le plus grand pour chaque fournisseur ajouter
-            const price = _.max(allPriceForItem);
             // Vérifier le prix et la quantité ajouter
-            if (_.isUndefined(price) || product.quantity > take) {
-                product.stock = product.total = product.subtotal = product.price = 0;
-
-                $('.modal').modal('hide');
-                Swal.fire('Désolé', 'Quantité ajouter incorrect', 'error');
-                return product;
+            if (item.quantity > takes && !hasStockRequest()) {
+                item.stock = item.total = item.subtotal = item.price = 0;
+                this.errorOccured('Désolé', `Quantité ajouter incorrect. Veuillez vérifier l'article: ${item.name}`, 'error');
+                return item;
             }
 
-            return product;
+            
+            item.discountTypeFn = (): number => {
+                return discountTypeFn();
+            };
+
+            item.discountFn = (): number => {
+                let discount: any = _.find(meta_data, { key: 'discount' });
+                if (_.isUndefined(discount) || _.isNaN(parseInt(discount.value)) || parseInt(discount.value) === 0) return 0;
+                return parseInt(discount.value);
+            };
+
+            const discountPercentFn = (): number => {
+                return (item.price * item.discountFn()) / 100;
+            };
+
+            item.priceFn = () => {
+                switch (discountTypeFn()) {
+                    case 2: // Rajout
+                        return item.price + discountPercentFn();
+                    case 1: // Remise & Aucun
+                    default:
+                        return item.price;
+                }
+            };
+
+            item.subTotalNetFn = (): number => {
+                switch (discountTypeFn()) {
+                    case 2:
+                        return item.quantity * (item.price - discountPercentFn());
+                    case 1:
+                        return (item.price - discountPercentFn()) * item.quantity;
+                    case 0:
+                    default:
+                        return item.quantity * item.price;
+
+                }
+            }
+
+            return item;
         });
 
-        let totalItemsArray: Array<any> = _.map(this.QtItems, item => { return parseInt(item.total, 10); });
-        this.Billing.subtotal = _.sum(totalItemsArray);
-        this.Billing.total = _.sum(totalItemsArray);
+        let allTotalHT: Array<number> = _.map(this.QtItems, item => item.priceFn() * item.quantity);
+        this.Billing.totalHT = _.sum(allTotalHT);
+        let allTotalNet: Array<number> = _.map(this.QtItems, item => item.subTotalNetFn());
+        this.Billing.totalNet = _.sum(allTotalNet);
 
-        let priceTax: number = (this.Billing.subtotal * this.Tax) / 100;
+        let priceTax: number = (this.Billing.totalNet * this.Tax) / 100;
         this.Billing.price_tax = priceTax;
-        this.Billing.total_tax = parseInt(this.Billing.subtotal) + priceTax;
+        this.Billing.total_tax = parseInt(this.Billing.totalNet) + priceTax;
 
         this.cd.detectChanges();
-
         Helpers.setLoading(false);
     }
 
@@ -201,7 +254,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         if (!_.isUndefined(changes.order.currentValue) && !_.isEmpty(changes.order.currentValue)) {
             this.ID = changes.order.currentValue.id;
             this.Quotation = _.cloneDeep(changes.order.currentValue);
-            this.Items = _.cloneDeep(this.Quotation.line_items.line_items);
+            this.Items = _(this.Quotation.line_items).push(this.Quotation.line_items_zero).flatten().value();
             this.billingAdress = _.clone(this.Quotation.billing);
             this.shippingAdress = _.clone(this.Quotation.shipping);
 
@@ -223,47 +276,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 resolve(users);
             }).catch(err => { resolve([]); });
         });
-    }
-
-    /**
-     * Cette fonction permet de récupérer la valeur d'une propriété
-     * définie dans l'item meta "suppliers"
-     *
-     * @param property
-     */
-    private getMeta(property: string): Array<any> {
-        return _.map(this.Items, item => {
-            let metas = item.meta_data;
-            let supplier: any = _.find(metas, { key: 'suppliers' });
-            if (_.isUndefined(supplier)) return [];
-            // récuperer la valeur du meta item
-            let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
-            // Rétourner une tableau vide s'il est vide ou null
-            if (_.isNull(Value) || !_.isArray(Value)) return [];
-            // Récupere seulement la propriété définie
-            return _.map(Value, data => data[property]);
-        });
-    }
-
-    /**
-     * Récupere tous les valeurs du "suppliers" des items dans un tableau
-     */
-    private loadSchema(): Promise<Array<any>> {
-        let container: Array<any> = [];
-        return new Promise((resolve) => {
-            _.map(this.Items, item => {
-                let metas = item.meta_data;
-                let supplier: any = _.find(metas, { key: 'suppliers' });
-                if (_.isUndefined(supplier)) return;
-                let Value = !_.isEmpty(supplier.value) ? JSON.parse(supplier.value) : null;
-                if (_.isArray(Value) && !_.isEmpty(Value)) {
-                    container.push(Value);
-                }
-            });
-
-            resolve(container);
-        })
-
     }
 
     public initQuotation(): void {

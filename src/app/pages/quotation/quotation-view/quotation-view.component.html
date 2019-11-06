@@ -19,8 +19,6 @@
                         {{ownerClient.company_name}}
                     </h5>
                     <div class="text-light">{{ownerClient.address}}, {{billingAdress.postcode}} {{billingAdress.city}}.</div>
-                    <div class="text-light">{{ownerClient.email}}</div>
-                    <div class="text-light mb-4">{{ownerClient.phone}}</div>
 
                     <div class="row mb-2" *ngIf="ownerClient.stat">
                       <div class="col-6 text-muted">STAT:</div>
@@ -61,6 +59,7 @@
                             <th class="pl-4">Désignation</th>
                             <th>Qté</th>
                             <th>P.U HT</th>
+                            <th>Rem</th>
                             <th class="text-right pr-4">Total</th>
                         </tr>
                     </thead>
@@ -70,8 +69,9 @@
                                 <div><strong>{{item.name}}</strong></div>
                             </td>
                             <td class="text-center">{{item.quantity}}</td>
-                            <td>{{item.price | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                            <td class="text-right pr-4">{{item.total | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                            <td>{{item.priceFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                            <td>{{item.discountTypeFn() === 0 ? '-' : item.discountFn() + '%'}}</td>
+                            <td class="text-right pr-4">{{item.subTotalNetFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                         </tr>
                     </tbody>
                     <tfoot>
@@ -97,8 +97,8 @@
 
                 <tbody>
                   <tr>
-                    <td>{{Billing.subtotal | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                    <td>{{Billing.subtotal | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                    <td>{{Billing.totalHT | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+                    <td>{{Billing.totalNet | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                     <td>{{Tax}}%</td>
                     <td>{{Billing.price_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
                     <td></td>
@@ -113,6 +113,6 @@
 </div>
 <div class="modal-footer justify-content-between bg-primary-50">
   <div>
-    <button class="btn btn-primary btn-rounded mr-3" [disabled]="(order && order.status === 'completed') || order.position == 1" (click)="onSendMail()">Envoyer par email</button>
+    <button class="btn btn-primary btn-rounded mr-3" (click)="onSendMail()">Envoyer par email</button>
   </div>
 </div>

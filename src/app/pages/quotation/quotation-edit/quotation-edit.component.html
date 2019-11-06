@@ -3,7 +3,7 @@
     <span class="mr-4 static-badge badge-pink"><i class="la la-shopping-cart font-36"></i></span>
     <div>
       <h5 class="font-strong">Demande #{{ID}}</h5>
-      <div class="text-light" *ngIf="Author">Par {{Author.nickname}}, {{__ORDER__.date_created}}</div>
+      <div class="text-light" *ngIf="Author">Par {{Author.nickname}}, {{ORDER.date_created}}</div>
     </div>
   </div>
 </div>
@@ -14,7 +14,8 @@
       <thead class="thead-default thead-lg">
         <tr>
           <th class="pl-4">DESIGNATION</th>
-          <th>QTÉ</th>
+          <th>QTÉ VOULU</th>
+          <th>QTÉ DISP</th>
           <th>ÉTAT</th>
           <th>FOURNISSEUR</th>
           <th class="pr-4" style="width:91px;"></th>
@@ -26,58 +27,20 @@
 <div class="ibox-footer">
   <div>
     <div class="btn-group mb-3">
-      <button class="btn btn-info mr-3" data-toggle="modal" data-target="#quotation-view-modal">Afficher la demande</button>
+      <button class="btn btn-pink mr-3" data-toggle="modal" data-target="#quotation-view-modal">Voir le devis</button>
+      <a class="btn btn-blue mr-3" [routerLink]="['/dashboard', 'quotation', ID, 'recap']" routerLinkActive="active" >Récapitulatif</a>
       <a class="btn btn-secondary" [routerLink]="['/dashboard']" routerLinkActive="active" >Retour</a>
     </div>
   </div>
 </div>
 
-<!--  Affiche les fournisseurs pour un produit selectionner -->
-<div class="modal fade" id="quotation-view-supplier-modal">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content" *ngIf="Item">
-      <div class="modal-header px-4 py-3 bg-primary-400">
-        <div>
-          <h5 class="modal-title text-white">Liste fournisseur pour</h5>
-          <p class="mb-0"> <a class="text-white font-14" href="javascript:;"><b>{{Item.name}}</b></a></p>
-          <p class="mb-0"> <a class="text-white font-14" href="javascript:;">Quantité: <b>{{Item.quantity}}</b></a></p>
-        </div>
-        <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">×</span>
-        </button>
-      </div>
-      <div class="modal-body p-4">
-        <div>
-          <table class="table table-hover" id="quotation-supplier-table">
-            <thead class="thead-default thead-lg">
-              <tr>
-                <th>FOURNISSEUR</th>
-                <th>REFERENCE</th>
-                <th>QTÉ</th>
-                <th>ÉTAT</th>
-                <th>PRIX</th>
-                <th>ARTICLE</th>
-                <th class="pr-4" style="width:91px;"></th>
-              </tr>
-            </thead>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer justify-content-between bg-primary-50">
-        <div>
-          <button class="btn btn-primary btn-rounded mr-3" [disabled]="loading"
-            (click)="onSaveQuotationPdt()">Enregistrer</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <!-- Affiche le devis en complet -->
 <div class="modal fade" id="quotation-view-modal">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <app-quotation-view [order]="__ORDER__"></app-quotation-view>
+      <app-quotation-view [order]="ORDER"></app-quotation-view>
     </div>
   </div>
 </div>
@@ -86,13 +49,8 @@
 <div class="modal fade" id="quotation-mail-modal">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <app-quotation-mail [order]="__ORDER__"></app-quotation-mail>
+      <app-quotation-mail [order]="ORDER"></app-quotation-mail>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="edit-article-supplier-modal">
-  <div class="modal-dialog" role="document">
-    <app-edit-article [article]="Editor" (refresh)="closeSupplierView()"></app-edit-article>
-  </div>
-</div>

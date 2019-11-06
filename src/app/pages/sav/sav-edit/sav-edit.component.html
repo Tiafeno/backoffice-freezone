@@ -46,7 +46,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-4">
               <div class="form-group mb-4">
                 <label class="font-light">Status du produit</label>
 
@@ -59,13 +59,23 @@
               </div>
             </div>
 
-            <div class="col-sm-6">
+            <div class="col-sm-4">
               <div class="form-group mb-4">
                 <label class="font-light">Fournisseur du produit</label>
                 <select formControlName="product_provider" class="form-control">
                   <option value="">-- Selectionner un le fournisseur --</option>
                   <option value="1">Free Zone</option>
                   <option value="2">Autre fournisseur</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-sm-4">
+              <div class="form-group mb-4">
+                <label class="font-light">Délais de garantie</label>
+                <select formControlName="garentee" class="form-control">
+                  <option value="">-- Aucun --</option>
+                  <option [value]="item" *ngFor="let item of garenteeRange">{{ item }} mois</option>
                 </select>
               </div>
             </div>

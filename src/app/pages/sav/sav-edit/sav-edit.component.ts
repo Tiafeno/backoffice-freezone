@@ -24,6 +24,7 @@ export class SavEditComponent implements OnInit {
     { label: 'Sous garantie', value: 1 },
     { label: 'Hors garantie', value: 2 }
   ];
+  public garenteeRange: Array<number>;
   public tinyMCESettings: any = {
     language_url: '/assets/js/langs/fr_FR.js',
     menubar: false,
@@ -48,6 +49,7 @@ export class SavEditComponent implements OnInit {
     private cd: ChangeDetectorRef
   ) { 
     this.Wordpress = this.apiWP.getWordpress();
+    this.garenteeRange = _.range(1, 13, 1);
     this.Form = new FormGroup({
       bill: new FormControl(''),
       client: new FormControl(''),
@@ -58,7 +60,8 @@ export class SavEditComponent implements OnInit {
       product: new FormControl(''),
       product_provider: new FormControl(''),
       serial_number: new FormControl(''),
-      status_product: new FormControl('', Validators.required)
+      status_product: new FormControl('', Validators.required),
+      garentee: new FormControl('')
     });
   }
 
@@ -108,6 +111,7 @@ export class SavEditComponent implements OnInit {
       serial_number: Value.serial_number,
       status_product: Value.status_product,
       quotation_ref: Value.quotation_ref,
+      garentee: Value.garentee,
       title: Value.product
     }).then(resp => {
       Helpers.setLoading(false);

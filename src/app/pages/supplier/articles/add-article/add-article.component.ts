@@ -43,17 +43,18 @@ export class AddArticleComponent implements OnInit {
       title: new FormControl('', Validators.required),
       mark: new FormControl('', Validators.required),
       price: new FormControl(0, Validators.required),
-      pricePro: new FormControl(0, Validators.required),
-      priceDealer: new FormControl(0, Validators.required),
-      priceParticular: new FormControl(0, Validators.required),
+      pricePro: new FormControl(0),
+      priceDealer: new FormControl(0),
+      priceParticular: new FormControl(0),
       margePro: new FormControl(null, Validators.required),
       margeDealer: new FormControl(null, Validators.required),
       margeParticular: new FormControl(null, Validators.required),
+      garentee: new FormControl(null),
       product_cat: new FormControl(null, Validators.required),
       user_id: new FormControl(null, Validators.required),
       stock: new FormControl(1, Validators.required)
     });
-    this.WP = this.apiWP.getWPAPI();
+    this.WP = this.apiWP.getWordpress();
     this.WC = this.apiWC.getWoocommerce();
 
     this.typeaheadCategories
@@ -138,6 +139,7 @@ export class AddArticleComponent implements OnInit {
       Form.append('marge', Value.margePro);
       Form.append('marge_dealer', Value.margeDealer);
       Form.append('marge_particular', Value.margeParticular);
+      Form.append('garentee', Value.garentee);
       Form.append('date_review', moment().subtract(2, 'days').format('YYYY-MM-DD HH:mm:ss'));
 
       this.http.post<any>(`${config.apiUrl}/create/article`, Form).subscribe(response => {

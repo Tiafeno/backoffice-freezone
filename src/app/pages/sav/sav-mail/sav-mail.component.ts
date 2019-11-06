@@ -7,6 +7,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { HttpClient } from '@angular/common/http';
 import { config } from '../../../../environments/environment';
+import Swal from 'sweetalert2';
 declare var $: any;
 
 @Component({
@@ -25,8 +26,16 @@ export class SavMailComponent implements OnInit {
   public perPage: number = 20;
   public formNewMail: FormGroup;
   public viewMail: any = false;
+  public isAdmin: boolean = false;
 
   public dataOnlineUser: any = false;
+  public savStatus: Array<{ key: number, value: string }> = [
+    { key: 1, value: 'Diagnostic réalisé' },
+    { key: 2, value: 'Diagnostic non réalisé' },
+    { key: 3, value: 'A réparer' },
+    { key: 4, value: 'Ne pas réparer' },
+    { key: 5, value: 'Terminer' },
+  ];
   constructor(
     private route: ActivatedRoute,
     private apiWp: ApiWordpressService,
@@ -41,7 +50,7 @@ export class SavMailComponent implements OnInit {
       message: new FormControl('', Validators.required)
     });
     this.dataOnlineUser = this.auth.getCurrentUser().data;
-    console.log(this.dataOnlineUser);
+    this.isAdmin = this.auth.isAdministrator();
   }
 
   ngOnInit() {
@@ -49,6 +58,7 @@ export class SavMailComponent implements OnInit {
     this.route.parent.params.subscribe(params => {
       this.savID = params.id;
       this.queryMail = this.queryMail
+        .status('any')
         .context('edit')
         .param('meta_key', "attach_post")
         .param('meta_value', this.savID)
@@ -83,7 +93,7 @@ export class SavMailComponent implements OnInit {
           Helpers.setLoading(false);
           this.onRefreshResults();
         });
-        
+
       });
     } else {
       (<any>Object).values(this.formNewMail.controls).forEach(element => {
@@ -93,9 +103,9 @@ export class SavMailComponent implements OnInit {
   }
 
   public openViewMail($event: any, mail: any) {
-      $event.preventDefault();
-      this.viewMail = _.clone(mail);
-      this.cd.detectChanges();
+    $event.preventDefault();
+    this.viewMail = _.clone(mail);
+    this.cd.detectChanges();
   }
 
   /**
@@ -119,6 +129,31 @@ export class SavMailComponent implements OnInit {
 
   public isNumber(val) { return typeof val === 'number'; }
 
+  public removeMail(id: number) {
+    if (this.isAdmin) {
+      Swal.fire({
+        title: 'Confirmation',
+        html: "voulez vous vraiment supprimer ce message?",
+        confirmButtonText: 'Oui',
+        cancelButtonText: 'Annuler',
+        showCancelButton: true,
+      }).then(result => {
+        if (result.value) {
+          $('#mail-view-modal').modal('hide');
+          Helpers.setLoading(true);
+          this.Wordpress.mailing().id(id).delete({ force: true }).then(resp => {
+            Helpers.setLoading(false);
+            this.onRefreshResults();
+          });
+        }
+      });
+
+
+    } else {
+      Swal.fire('Autorisation', "Vous n'avez pas l'autorisation de supprimer un historique", 'error');
+    }
+  }
+
   private getQuery() {
     Helpers.setLoading(true);
     this.queryMail.headers().then(headers => {
@@ -126,7 +161,12 @@ export class SavMailComponent implements OnInit {
       this.pagination._total = parseInt(headers['x-wp-total'], 10);
       this.queryMail.then(mails => {
         Helpers.setLoading(false);
-        this.Mails = _.clone(mails);
+        this.Mails = _.map(mails, mail => {
+          mail.content.rendered = mail.content.rendered.replace(/<[^>]*>?/gm, '');
+          mail.sav = _.isNull(mail.sav_status) || _.isEmpty(mail.sav_status) ? 'Diagnostic non réalisé'
+            : _.find(this.savStatus, { key: parseInt(mail.sav_status) }).value;
+          return mail;
+        });
         this.cd.detectChanges();
         this.paginationContainer.pagination({
           dataSource: _.range(this.pagination._total),
@@ -139,12 +179,12 @@ export class SavMailComponent implements OnInit {
           className: 'page-item',
           activeClassName: 'active',
           afterPageOnClick: (data, pagination) => {
-             this.onChangePage(parseInt(pagination, 10));
+            this.onChangePage(parseInt(pagination, 10));
           },
           afterRender: (data, pagination) => {
- 
+
           }
-       });
+        });
       });
     }).catch(err => {
       Helpers.setLoading(false);

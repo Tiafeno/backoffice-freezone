@@ -14,7 +14,7 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
-                <label class="font-light">Nom</label>
+                <label class="font-light">Nom <span style="color: red">*</span></label>
                 <input class="form-control" autocomplete="off" formControlName="last_name" type="text" id="last_name"
                   name="last_name" placeholder="">
               </div>
@@ -31,7 +31,7 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
-                <label class="font-light">Adresse E-mail</label>
+                <label class="font-light">Adresse E-mail <span style="color: red">*</span></label>
                 <input class="form-control" autocomplete="off" formControlName="email" type="text" id="email"
                   name="email" placeholder="">
               </div>
@@ -41,7 +41,7 @@
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
-                <label class="font-light">Adresse</label>
+                <label class="font-light">Adresse <span style="color: red">*</span></label>
                 <input class="form-control" autocomplete="off" formControlName="address" id="address" name="address"
                   type="text" placeholder="">
                 <div *ngIf="f.address.errors && f.address.dirty">
@@ -65,7 +65,7 @@
           <div class="row" *ngIf="clientRole === 'fz-company'">
             <div class="col-md-12">
               <div class="form-group mb-4">
-                <label class="font-light">Professionnel ou Revendeur ?</label>
+                <label class="font-light">Utilisateur final/Revendeur  ? <span style="color: red">*</span></label>
                 <ng-select name="company_status" placeholder="Veuillez selectionner" formControlName="company_status"
                   bindLabel="label" bindValue="value" [hideSelected]="false" [multiple]="false" [items]="Status"
                   required>
@@ -84,7 +84,7 @@
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group mb-4">
-                  <label class="font-light">STAT</label>
+                  <label class="font-light">STAT <span style="color: red">*</span></label>
                   <input class="form-control" autocomplete="off" formControlName="stat" id="stat" type="text"
                     placeholder="">
                 </div>
@@ -92,7 +92,7 @@
 
               <div class="col-sm-6">
                 <div class="form-group mb-4">
-                  <label class="font-light">NIF</label>
+                  <label class="font-light">NIF <span style="color: red">*</span></label>
                   <input class="form-control" autocomplete="off" formControlName="nif" id="nif" type="text"
                     placeholder="">
                 </div>
@@ -102,7 +102,7 @@
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group mb-4">
-                  <label class="font-light">RC</label>
+                  <label class="font-light">RC <span style="color: red">*</span></label>
                   <input class="form-control" autocomplete="off" formControlName="rc" id="rc" type="text"
                     placeholder="">
                 </div>
@@ -110,7 +110,7 @@
 
               <div class="col-sm-6">
                 <div class="form-group mb-4">
-                  <label class="font-light">CIF</label>
+                  <label class="font-light">CIF <span style="color: red">*</span></label>
                   <input class="form-control" autocomplete="off" formControlName="cif" id="cif" type="text"
                     placeholder="">
                 </div>
@@ -122,7 +122,7 @@
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group mb-4">
-                  <label class="font-light">CIN</label>
+                  <label class="font-light">CIN <span style="color: red">*</span></label>
                   <input class="form-control" autocomplete="off" formControlName="cin" id="cin" type="text"
                     placeholder="">
                 </div>
@@ -130,7 +130,7 @@
 
               <div class="col-sm-6">
                 <div class="form-group mb-4">
-                  <label class="font-light">Date de délivrance</label>
+                  <label class="font-light">Date de délivrance <span style="color: red">*</span></label>
                   <input class="form-control" autocomplete="off" formControlName="date_cin" id="date_cin" type="text"
                     placeholder="">
                 </div>
@@ -173,12 +173,6 @@
                 <label class="font-light">Code postal</label>
                 <input class="form-control" autocomplete="off" formControlName="postcode" id="postcode" name="postcode"
                   type="number" placeholder="">
-              </div>
-
-              <div class="form-group mb-4">
-                <label class="font-light">Nom de l'entreprise</label>
-                <input class="form-control" autocomplete="off" formControlName="company" id="company" name="company"
-                  type="text" placeholder="">
               </div>
 
             </div>
@@ -227,12 +221,7 @@
                 <input class="form-control" autocomplete="off" formControlName="postcode" id="postcode" name="postcode"
                   type="number" placeholder="">
               </div>
-
-              <div class="form-group mb-4">
-                <label class="font-light">Nom de l'entreprise</label>
-                <input class="form-control" autocomplete="off" formControlName="company" id="company" name="company"
-                  type="text" placeholder="">
-              </div>
+              
             </div>
           </div>
 

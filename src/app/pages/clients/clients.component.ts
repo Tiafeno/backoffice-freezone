@@ -61,7 +61,7 @@ export class ClientsComponent implements OnInit {
   }
 
   public fnOnUpdateStatus() {
-    if (this.FormStatus.valid) {
+    if (this.FormStatus.valid && this.FormStatus.dirty) {
       Helpers.setLoading(true);
       const Value: any = this.FormStatus.value;
       let requestWP;
@@ -96,6 +96,7 @@ export class ClientsComponent implements OnInit {
     this.WPAPI.users().param('roles', 'editor').context('edit').then(resp => {
       this.Responsibles = _.clone(resp);
       this.responsibleLoading = false;
+      this.cd.detectChanges();
     });
 
     const productsTable = $('#clients-table');
@@ -115,8 +116,13 @@ export class ClientsComponent implements OnInit {
           }
         },
         {
-          data: 'first_name', render: (data, type, row) => {
-            return `<span class="edit-product font-strong">${data} ${row.last_name}</span>`;
+          data: 'meta_data', render: (data, type, row) => {
+            // Nom de l'entreprise ou la société
+            let companyName: any = _.find(data, { key: 'company_name' });
+            let role: string = row.role;
+            let name = role === 'fz-company' ? companyName.value : `${row.last_name} ${row.first_name}`;
+
+            return `<span class="edit-product font-strong">${name}</span>`;
           }
         },
         {
@@ -133,9 +139,9 @@ export class ClientsComponent implements OnInit {
             let disable_value = parseInt(meta_disable.value, 10);
             let pending_value = parseInt(meta_pending.value, 10);
 
-            let status: string = disable_value === 1 ? 'Désactiver' : (pending_value === 1 ? 'En attente' : "Active");
+            let status: string = disable_value === 1 ? 'Désactiver' : (pending_value === 1 ? 'En attente' : "Actif");
             let style: string = disable_value === 1 ? 'danger' : (pending_value === 1 ? 'warning' : "primary");
-            return `<span class="badge badge-${style} uppercase switch-status">${status}</span>`;
+            return `<span class="badge badge-${style} uppercase switch-status" style="cursor: pointer;">${status}</span>`;
           }
         },
         {
@@ -150,12 +156,12 @@ export class ClientsComponent implements OnInit {
             const role: any = _.isArray(data) ? data[0] : data;
             const status: string = role === 'fz-company' ? 'Entreprise' : 'Particulier';
             const style: string = role === 'fz-company' ? 'blue' : 'success';
-            return `<span class="badge badge-${style} uppercase" style="cursor: pointer;">${status}</span>`;
+            return `<span class="badge badge-${style} uppercase">${status}</span>`;
           }
         },
         {
           data: 'date_created', render: (data) => {
-            return moment(data).fromNow();
+            return moment(data).format('LLL');
           }
         },
         {
@@ -207,9 +213,11 @@ export class ClientsComponent implements OnInit {
           const __clt: any = getElementData(e);
 
           let meta_disable: any = _.find(__clt.meta_data, { key: 'ja_disable_user' });
-          const editStatus = _.isUndefined(meta_disable) ? 0 : meta_disable.value;
+          let meta_pending: any = _.find(__clt.meta_data, { key: 'fz_pending_user' });
+          const editDisabled = _.isUndefined(meta_disable) ? 0 : parseInt(meta_disable.value, 10);
+          const editPending = _.isUndefined(meta_pending) ? 0 : parseInt(meta_pending.value, 10);
 
-          this.FormStatus.patchValue({ status: editStatus, id: __clt.id });
+          this.FormStatus.patchValue({ status: editDisabled ? 1 : (editPending ? 'pending' : 0), id: __clt.id });
           this.cd.detectChanges();
           $('#switch-status-modal').modal('show');
         });

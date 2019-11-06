@@ -20,41 +20,28 @@ export class ApiWordpressService {
     const namespaceWoocommerce = 'wc/v3';
 
     const routeArticles = '/fz_product/(?P<id>\\d+)';
-    this.wpEndPoint.fz_product = this.wpEndPoint.registerRoute(namespace, routeArticles, {
-      params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include']
-    });
-
     const routeSav = '/fz_sav/(?P<id>\\d+)';
-    this.wpEndPoint.savs = this.wpEndPoint.registerRoute(namespace, routeSav, {
-      params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include']
-    });
-
+    const routeFaqClient = '/fz_faq_client/(?P<id>\\d+)';
     const routeMailing = '/fz_mailing/(?P<id>\\d+)';
-    this.wpEndPoint.mailing = this.wpEndPoint.registerRoute(namespace, routeMailing, {
-      params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include', 'headers']
-    });
-
     const routeMailTemplate = '/_fz_mail_template/(?P<id>\\d+)';
-    this.wpEndPoint.mail_template = this.wpEndPoint.registerRoute(namespace, routeMailTemplate, {
-      params: ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include', 'headers']
-    });
- 
     const routeUsers = '/users/(?P<id>\\d+)';
-    this.wpEndPoint.users = this.wpEndPoint.registerRoute(namespace, routeUsers, {
-      params: ['roles', 'context', 'include', 'exclude', 'per_page', 'orderby', 'filter']
-    });
-
     const routeProducts = '/products/(?P<id>\\d+)';
+    const routeGD = '/good-deal/(?P<id>\\d+)';
+    const routeOrders = '/orders/(?P<id>\\d+)';
+    const routeCatalog = '/catalog/(?P<id>\\d+)';
+    const Params: Array<string> = ['filter', 'perPage', 'page', 'offset', 'search', 'context', 'head', 'include', 'exclude', 'headers', 'roles', 'status'];
+
+    this.wpEndPoint.fz_product = this.wpEndPoint.registerRoute(namespace, routeArticles, { params: Params });
+    this.wpEndPoint.savs = this.wpEndPoint.registerRoute(namespace, routeSav, { params: Params });
+    this.wpEndPoint.faq_client = this.wpEndPoint.registerRoute(namespace, routeFaqClient, { params: Params });
+    this.wpEndPoint.mailing = this.wpEndPoint.registerRoute(namespace, routeMailing, { params: Params });
+    this.wpEndPoint.mail_template = this.wpEndPoint.registerRoute(namespace, routeMailTemplate, { params: Params });
+    this.wpEndPoint.users = this.wpEndPoint.registerRoute(namespace, routeUsers, { params: Params });
     this.wpEndPoint.products = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeProducts, {
       params: ['search', 'filter', 'sku']
     });
-
-    const routeGD = '/good-deal/(?P<id>\\d+)';
-    this.wpEndPoint.good_deal = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeGD, {
-      params: ['search', 'context', 'include', 'exclude', 'filter']
-    });
-
-    const routeOrders = '/orders/(?P<id>\\d+)';
+    this.wpEndPoint.good_deal = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeGD, { params: Params });
+    this.wpEndPoint.catalog = this.wpEndPoint.registerRoute(namespace, routeCatalog, { params: Params });
     this.wpEndPoint.orders = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeOrders);
 
     return this.wpEndPoint;

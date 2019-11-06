@@ -17,9 +17,9 @@
         <div class="col-md-8">
           <div class="form-group mb-4">
             <ng-select name="supplier" placeholder="Selectionner un fournisseur" formControlName="user_id"
-                       bindLabel="company_name" bindValue="id" [multiple]="false" [items]="Suppliers" required>
+              bindLabel="company_name" bindValue="id" [multiple]="false" [items]="Suppliers" required>
               <ng-template ng-option-tmp let-item="item">
-                {{item.company_name}} <br/>
+                {{item.company_name}} <br />
                 <small>{{item.reference}}</small>
               </ng-template>
             </ng-select>
@@ -33,19 +33,30 @@
         <div class="col-md-12">
           <div class="form-group mb-4">
             <label>Produit</label>
-            <input name="product" placeholder="Designation du produit" formControlName="product" class="form-control"/>
+            <input name="product" placeholder="Designation du produit" formControlName="product" class="form-control" />
           </div>
         </div>
       </div>
-      <div class="text-muted mb-2 mt-3">Fournisseur</div>
+
       <div class="row">
         <div class="col-12">
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
+                <label>Garantie fournisseur (unité en mois)</label>
+                <input class="form-control" formControlName="garentee" min="0" max="12" type="number" id="garentee"
+                  placeholder="e.g: 2 pour 2 mois">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
                 <label>Prix de revient</label>
-                <input class="form-control" formControlName="price" min="0" (ngModelChange)="onChangePrice($event)" type="number" id="price"
-                       placeholder="Ajouter un prix en AR">
+                <input class="form-control" formControlName="price" min="0" (ngModelChange)="onChangePrice($event)"
+                  type="number" id="price" placeholder="Ajouter un prix en AR">
                 <div *ngIf="f.price.errors && f.price.dirty">
                   <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
                 </div>
@@ -53,21 +64,22 @@
             </div>
           </div>
         </div>
+
         <div class="col-12">
+          <div class="text-muted mb-2 mt-3">Utilisateur final</div>
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
                 <label>Prix de vente UF</label>
-                <input class="form-control" onkeypress="return false;" min="0" formControlName="pricePro" type="number" id="price_uf"
-                       placeholder="">
-                <p class="help-block font-11">Le prix est en Ariary</p>
+                <input class="form-control" onkeypress="return false;" min="0" formControlName="pricePro" type="number"
+                  id="price_uf" placeholder="">
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group mb-4">
                 <label>Marge</label>
-                <input class="form-control" formControlName="marge" min="0" (ngModelChange)="onChangeMarge($event)" type="number" id="marge"
-                       placeholder="Ajouter une marge">
+                <input class="form-control" formControlName="marge" min="0" (ngModelChange)="onChangeMarge($event)"
+                  type="number" id="marge" placeholder="Ajouter une marge">
                 <div *ngIf="f.marge.errors && f.marge.dirty">
                   <label id="marge-error" class="help-block error">Ce champ est obligatoire.</label>
                 </div>
@@ -82,8 +94,8 @@
         <div class="col-md-6">
           <div class="form-group mb-4">
             <label>Prix R.</label>
-            <input class="form-control" onkeypress="return false;" min="0" formControlName="priceDealer" type="number" id="price_dealer"
-                   placeholder="Ajouter un prix en AR">
+            <input class="form-control" onkeypress="return false;" min="0" formControlName="priceDealer" type="number"
+              id="price_dealer" placeholder="Ajouter un prix en AR">
             <div *ngIf="f.priceDealer.errors && f.priceDealer.dirty">
               <label id="price-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
@@ -92,8 +104,8 @@
         <div class="col-md-6">
           <div class="form-group mb-4">
             <label>Marge R.</label>
-            <input class="form-control" formControlName="margeDealer" min="0" type="number" (ngModelChange)="onChangeMargeDealer($event)" id="marge_dealer"
-                   placeholder="Ajouter une marge">
+            <input class="form-control" formControlName="margeDealer" min="0" type="number"
+              (ngModelChange)="onChangeMargeDealer($event)" id="marge_dealer" placeholder="Ajouter une marge">
             <div *ngIf="f.margeDealer.errors && f.margeDealer.dirty">
               <label id="marge-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
@@ -106,8 +118,8 @@
         <div class="col-md-6">
           <div class="form-group mb-2">
             <label>Prix P.</label>
-            <input class="form-control" onkeypress="return false;" min="0" formControlName="priceParticular" type="number" id="price_particular" 
-                   placeholder="">
+            <input class="form-control" onkeypress="return false;" min="0" formControlName="priceParticular"
+              type="number" id="price_particular" placeholder="">
             <div *ngIf="f.priceParticular.errors && f.priceParticular.dirty">
               <label id="price-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
@@ -116,8 +128,8 @@
         <div class="col-md-6">
           <div class="form-group mb-2">
             <label>Marge P.</label>
-            <input class="form-control" formControlName="margeParticular" min="0" type="number" (ngModelChange)="onChangeMargeParticular($event)" id="marge_particular"
-                   placeholder="Ajouter une marge">
+            <input class="form-control" formControlName="margeParticular" min="0" type="number"
+              (ngModelChange)="onChangeMargeParticular($event)" id="marge_particular" placeholder="Ajouter une marge">
             <div *ngIf="f.margeParticular.errors && f.margeParticular.dirty">
               <label id="marge-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
@@ -130,7 +142,7 @@
           <div class="form-group mb-4">
             <label>Quantité disponible(s)</label>
             <input class="form-control" formControlName="stock" min="0" type="number" id="stock" name="stock"
-                   placeholder="Ajouter la quantité disponible">
+              placeholder="Ajouter la quantité disponible">
             <div *ngIf="f.stock.errors && f.stock.dirty">
               <label id="qty-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
@@ -147,7 +159,7 @@
         </div>
       </div>
       <div class="text-muted font-11">
-        Sed tristique lacinia enim, sit amet consequat ante suscipit at. Quisque a eros vitae elit molestie tristique.
+        Les prix sont en Ariary
       </div>
 
     </div>
@@ -157,6 +169,6 @@
     <div>
       <button class="btn btn-primary btn-rounded mr-3" type="submit" [disabled]=" ! canEdit">Mettre à jour</button>
     </div>
-    <a class="text-danger" (click)="onRemoveArticle(ID)"><i class="la la-trash font-20"></i></a>
+    <a class="text-danger"  appArticleRemover [articleId]="ID" (onRefresh)="refresh.emit()" ><i class="la la-trash font-20"></i></a>
   </div>
 </form>

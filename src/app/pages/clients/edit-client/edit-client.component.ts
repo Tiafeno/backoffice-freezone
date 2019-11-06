@@ -27,9 +27,9 @@ export class EditClientComponent implements OnInit {
   public Status: Array<any> = [
     { label: 'En attente', value: 'pending' },
     { label: 'Revendeur', value: 'dealer' },
-    { label: 'Professionnel (UF)', value: 'professional' },
+    { label: 'Utilisateur final', value: 'professional' },
   ];
-  
+
   @ViewChild(ResponsibleComponent) private Responsible: ResponsibleComponent;
   constructor(
     private apiWc: ApiWoocommerceService,
@@ -64,14 +64,12 @@ export class EditClientComponent implements OnInit {
       address_2: new FormControl(''),
       city: new FormControl(''),
       postcode: new FormControl(''),
-      company: new FormControl(''),
       email: new FormControl(''),
       first_name: new FormControl(''),
       last_name: new FormControl(''),
       phone: new FormControl(''),
-      state: new FormControl(''),
+      state: new FormControl('Madagascar'),
     });
-
 
     this.shipForm = new FormGroup({
       address_1: new FormControl(''),
@@ -80,8 +78,7 @@ export class EditClientComponent implements OnInit {
       first_name: new FormControl(''),
       last_name: new FormControl(''),
       postcode: new FormControl(''),
-      company: new FormControl(''),
-      state: new FormControl(''),
+      state: new FormControl('Madagascar'),
     });
 
     if (this.auth.getCurrentUserRole() === 'editor') {
@@ -109,10 +106,10 @@ export class EditClientComponent implements OnInit {
         this.role = _.isArray(customer.role) ? customer.role[0] : customer.role;
         this.Form.patchValue({
           first_name: this.Customer.first_name,
-          last_name:  this.Customer.last_name,
+          last_name: this.Customer.last_name,
           address: this.getMetaDataValue('address'),
-          phone:   this.getMetaDataValue('phone'),
-          email:   this.Customer.email,
+          phone: this.getMetaDataValue('phone'),
+          email: this.Customer.email,
         });
         // Ajouter les valeurs dans le formulaire
         if (this.role === 'fz-company') {
@@ -120,7 +117,7 @@ export class EditClientComponent implements OnInit {
           this.Form.patchValue({
             stat: this.getMetaDataValue('stat'),
             nif: this.getMetaDataValue('nif'),
-            rc:  this.getMetaDataValue('rc'),
+            rc: this.getMetaDataValue('rc'),
             cif: this.getMetaDataValue('cif'),
             company_status: companyStatus
           });
@@ -156,10 +153,10 @@ export class EditClientComponent implements OnInit {
       const Value: any = this.Form.value;
 
       if (Value.company_status === 'pending') {
-        Swal.fire('Avertissement', "Vous n'avez pas encore definie le client en professionnel ou revendeur", 'warning');
+        Swal.fire('Avertissement', "Vous n'avez pas encore definie le client en utilisateur final ou en revendeur", 'warning');
         return false;
       }
-      
+
       const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'company_status'];
       this.MetaData = _.map(this.Customer.meta_data, (meta) => {
         if (meta.key === 'address') meta.value = Value.address;
@@ -204,7 +201,7 @@ export class EditClientComponent implements OnInit {
           Swal.fire('Désolé', response.message, 'error');
           return false;
         }
-        
+
         const responsible: any = this.getMetaDataValue("responsible");
         if (_.isNull(responsible) || _.isEmpty(responsible)) {
           Swal.fire('Succès', "Information mise à jour aves succès. Veuillez ajouter une commercial pour ce client.", 'info')

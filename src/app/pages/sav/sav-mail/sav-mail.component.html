@@ -7,16 +7,11 @@
     <div class="flexbox-b mb-5">
         <span class="mr-4 static-badge badge-pink"><i class="la la-envelope"></i></span>
         <div>
-            <h5 class="font-strong">Boites aux lettres commercial</h5>
+            <h5 class="font-strong">Historiques</h5>
             <div class="text-light">{{dataOnlineUser.data.user_email}}</div>
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-3 col-md-4">
-            <a class="btn btn-primary btn-block" data-toggle="modal" data-target="#new-mail-modal" href="javascript:;">
-                <span class="btn-icon"><i class="la la-pencil"></i>Nouveau</span>
-            </a>
-        </div>
         <div class="col-lg-9 col-md-8">
             <div class="ibox" id="mailbox-container">
                 <div class="flexbox-b p-4">
@@ -24,17 +19,23 @@
                 </div>
                 <table class="table table-hover table-inbox" id="table-inbox">
                     <tbody class="rowlinkx" data-link="row">
+
                         <tr [attr.data-id]="i + 1" *ngFor="let mail of Mails; let i = index">
-                            <td class="pl-4">{{mail.sender.last_name}} {{mail.sender.first_name}}</td>
+                            <td class="pl-4">{{mail.title.rendered}}</td>
+                            <td class="pl-4">{{mail.sav}}</td>
                             <td>
                                 <a class="d-block" 
                                 (click)="openViewMail($event, mail)"
                                  data-toggle="modal"
-                                 data-target="#mail-view-modal" [innerHTML]="mail.content.rendered"></a>
+                                 data-target="#mail-view-modal">{{mail.content.rendered}}</a>
                             </td>
-                            <td></td>
+                            <td>{{mail.sender.email}}</td>
                             <td class="text-right">{{mail.date}}</td>
                         </tr>
+                        <tr *ngIf="Mails.length <= 0">
+                            <td>Aucun message</td>
+                        </tr>
+
                     </tbody>
                 </table>
                 <div class="inner-left preview pb-4" id="pagination">
@@ -107,6 +108,7 @@
                 <div class="modal-footer justify-content-between bg-primary-50">
                     <div>
                         <button class="btn btn-secondary btn-rounded mr-3" data-dismiss="modal" aria-label="Close">Fermer</button>
+                        <button class="btn btn-danger btn-rounded mr-3" *ngIf="isAdmin" (click)="removeMail(viewMail.id)">Supprimer</button>
                     </div>
                 </div>
             </div>

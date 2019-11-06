@@ -1,4 +1,4 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output, ChangeDetectorRef} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import * as _ from 'lodash';
 import {ApiWordpressService} from '../../_services/api-wordpress.service';
@@ -19,7 +19,8 @@ export class TypeClientSwitcherComponent implements OnInit {
   @Output() refresh = new EventEmitter();
 
   constructor(
-    private apiWP: ApiWordpressService
+    private apiWP: ApiWordpressService,
+    private cd: ChangeDetectorRef
   ) {
     this.Form = new FormGroup({
       type: new FormControl('', Validators.required)
@@ -35,6 +36,7 @@ export class TypeClientSwitcherComponent implements OnInit {
       this.Client = _.clone(client);
       const roleOffice: any = parseInt(client.role_office, 10);
       this.Form.patchValue({type: _.isNaN(roleOffice) ? 0 : roleOffice });
+      this.cd.detectChanges();
       $('#switch-type-modal').modal('show');
     }
   }

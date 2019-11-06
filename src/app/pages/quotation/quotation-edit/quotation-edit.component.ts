@@ -1,15 +1,16 @@
-import { Component, OnInit, ViewEncapsulation, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild, NgZone } from '@angular/core';
 import { Helpers } from '../../../helpers';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
-import Swal from 'sweetalert2';
 import * as moment from 'moment'
 import { QuotationViewComponent } from '../quotation-view/quotation-view.component';
-import { EditArticleComponent } from '../../supplier/articles/edit-article/edit-article.component';
 import { FzSecurityService } from '../../../_services/fz-security.service';
-import { FzServicesService } from '../../../_services/fz-services.service';
+import Swal from 'sweetalert2';
+import { Metadata } from '../../../metadata';
+import { Article } from '../../articles';
+import { OrderItem } from '../../../order.item';
 declare var $: any;
 
 @Component({
@@ -21,34 +22,29 @@ declare var $: any;
 export class QuotationEditComponent implements OnInit {
    private WCAPI: any;
    private WPAPI: any;
-   public __ORDER__: any;
-   private __ITEMS__: Array<any> = [];
-   private __FZPRODUCTS__: Array<any> = [];
+   public ORDER: any; // Continent tous les données de la demande ou commande
 
-   public ID: number;
+   public ID: number; // ID de la demande ou commande
    public Editor: any;
    public designationTrigger: any = null;
    public Author: any;
    public Table: any;
    public qtSupplierTable: any;
-   public Item: any;
    public canChangeMarge: boolean = true;
    public canChangeMargeDealer: boolean = true;
    public objectMeta: Array<any> = [];
    public loading: boolean = false;
+   public articles: Array<Article>;
 
    @ViewChild(QuotationViewComponent) QuotationView: QuotationViewComponent;
-   @ViewChild(EditArticleComponent) EditArticle: EditArticleComponent;
 
    constructor(
       private route: ActivatedRoute,
       private router: Router,
       private apiWC: ApiWoocommerceService,
       private apiWP: ApiWordpressService,
-      private cd: ChangeDetectorRef,
       private zone: NgZone,
       private security: FzSecurityService,
-      private services: FzServicesService
    ) {
       this.WCAPI = this.apiWC.getWoocommerce();
       this.WPAPI = this.apiWP.getWPAPI();
@@ -57,13 +53,6 @@ export class QuotationEditComponent implements OnInit {
       this.canChangeMargeDealer = this.security.hasAccess('s5', false);
    }
 
-   public currencyFormat(numb: number, cur: string = "MGA"): string {
-      return new Intl.NumberFormat('de-DE', {
-         style: "currency",
-         minimumFractionDigits: 0,
-         currency: cur
-      }).format(numb);
-   }
 
    public closeSupplierView() {
       setTimeout(() => {
@@ -89,326 +78,174 @@ export class QuotationEditComponent implements OnInit {
       this.route.parent.params.subscribe(params => {
          this.ID = parseInt(params.id);
          this.WCAPI.get(`orders/${this.ID}`, async (err, data, res) => {
-            Helpers.setLoading(false);
-            this.__ORDER__ = JSON.parse(res);
-            this.__ITEMS__ = this.__ORDER__.line_items.line_items;
+            this.ORDER = JSON.parse(res);
+            let line_items: Array<OrderItem> = this.ORDER.line_items;
+            let line_items_zero: Array<OrderItem> = this.ORDER.line_items_zero;
+            const ITEMS: Array<OrderItem> = _([]).push(_.xorWith(line_items_zero, line_items, _.isEqual)).flatten().value();
+
+
             // Récuperer les informations du client
             await this.WPAPI
                .users()
-               .id(this.__ORDER__.line_items.user_id)
+               .id(this.ORDER.user_id)
                .context('edit')
-               .then(user => { this.Author = _.clone(user); });
+               .then(user => { this.Author = _.clone(user); })
+               .catch(error => {
+                  Swal.fire('Erreur', "Compte du client introuvable. Le compte a été supprimer", 'error');
+               });
+
+            const itemArticleIdsFn = (productId: number): Array<number> => {
+               const item: OrderItem = _.find(ITEMS, { product_id: productId });
+               const metadata: Array<Metadata> = _.clone(item.meta_data);
+               const hasSupplier: any = _.find(metadata, { key: 'suppliers' });
+               if (_.isUndefined(hasSupplier)) return [];
+               let suppliers: any = JSON.parse(hasSupplier.value);
+               return _.map(suppliers, supplier => parseInt(supplier.article_id));
+            };
+
+            const getReflectItemArticleIds = (item: OrderItem): Array<any> => {
+               let hasSuppliers: any = _.find(item.meta_data, {key: 'suppliers'});
+               if (_.isUndefined(hasSuppliers)) return [];
+               const suppliers: any = JSON.parse(hasSuppliers.value);
+               let collectArticleIds: Array<number> = _.map(suppliers, meta => { return parseInt(meta.article_id, 10); });
+               return _(this.articles).filter(article => _.indexOf(collectArticleIds, article.id) >= 0).value();
+            };
+
+            const getReflectItemQuantity = (item: OrderItem): number => {
+               const articles: Array<Article> = getReflectItemArticleIds(item);
+               const stocks: Array<number> = _.map(articles, article => parseInt(article.total_sales));
+               return _.sum(stocks);
+            };
+
+            const hasReflectItemStockRequest = (item: OrderItem): boolean => {
+               let has: any = _.find(item.meta_data, {key: 'stock_request'});
+               if (_.isUndefined(has)) return false;
+
+               return 0 === parseInt(has.value) || _.isNaN(parseInt(has.value)) ? false : true;
+            };
+
+            const getNoticeFn = (status: number): string => {
+               const msg: string = status === 0 ? 'En attente' : (status === 1 ? "Traitée" : "N/A");
+               const style: string = status === 0 ? 'warning' : (status === 1 ? "success" : "danger");
+               return `<span class="badge badge-${style}">${msg}</span>`;
+            };
+
+            let allItemsArticleIds: Array<number> = _(ITEMS).map(item => {
+               return itemArticleIdsFn(item.product_id);
+            }).flatten().value();
+
+            await this.WPAPI
+               .fz_product()
+               .context('edit')
+               .param('include', allItemsArticleIds)
+               .then(response => {
+                  this.articles = _.clone(response);
+               });
 
             // Crée la liste des produits dans la commande
             this.Table = $('#quotation-edit-table').DataTable({
                fixedHeader: true,
                responsive: false,
                "sDom": 'rtip',
-               data: this.__ITEMS__,
+               data: ITEMS,
                columns: [
                   { data: 'name' },
-                  { data: 'quantity' },
                   {
-                     data: 'meta_data', render: (data) => {
-                        const meta: any = _.find(data, { key: 'status' });
-                        const intStatus: number = parseInt(meta.value, 10);
-                        const status: string = intStatus === 0 ? 'En attente' : (intStatus === 1 ? "Traitée" : "Rejeté");
-                        const style: string = intStatus === 0 ? 'warning' : (intStatus === 1 ? "success" : "danger");
-                        return `<span class="badge badge-${style}">${status}</span>`;
+                     data: 'quantity',
+                     render: (qty, type, item) => {
+                        const meta_data = _.clone(item.meta_data);
+                        const metaStockRequest: any = _.find(meta_data, { key: 'stock_request' });
+                        const stockRequestValue = _.isUndefined(metaStockRequest) ? 0 : parseInt(metaStockRequest.value, 10);
+                        return _.isEqual(stockRequestValue, 0) ? qty : stockRequestValue;
                      }
-                  },
+                  }, // Quantité voulu
                   {
-                     data: 'meta_data', render: (data) => {
+                     data: 'product_id',
+                     render: (pId, type, item) => {
+                        if (_.isEqual(item.quantity, 0)) return 0;
+                        const articleIds: Array<number> = itemArticleIdsFn(parseInt(pId));
+                        if (_.isEmpty(articleIds)) return 'Non définie';
+                        const articles: Array<Article> = _(this.articles).filter(article => _.indexOf(articleIds, article.id) >= 0).value();
+                        const stocks: Array<number> = _.map(articles, article => parseInt(article.total_sales));
+
+                        return _.sum(stocks);
+                     }
+                  }, // quantité disponible pour le fournisseur
+                  {
+                     data: 'meta_data', render: (data: Array<Metadata>, type, item) => {
+
+                        // Ajouter une posibilité de modification les demandes rejetée
+                        if (_.isEqual(parseInt(this.ORDER.position), 2)) {
+                           return getNoticeFn(1);
+                        }
+
+                        // Verifier le status par la quantité ajouter
+                        // vérifier si la quantité ajouter est valide ou pas
+                        // Si la quantité ajouter est inferieur à la quantité demander le status est ègale à 0 si le contraire 1
+                        let result = (getReflectItemQuantity(item) < item.quantity && !hasReflectItemStockRequest(item)) ? 0 : 1;
+                        if (!result) return getNoticeFn(result);
+
+                        // Verifier si l'article est en review
+                        const aIds: Array<any> = getReflectItemArticleIds(item);
+                        const collectFZProducts: Array<any> = _.filter(this.articles, fz => { return _.indexOf(aIds, fz.id) >= 0; });
+                        const dateNow: any = moment();
+                        const todayAt6 = moment({
+                           year: dateNow.year(),
+                           month: dateNow.month(),
+                           days: dateNow.date(),
+                           hour: 6,
+                           minute: 0
+                        });
+                        const cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {
+                           let dateLimit: any = moment(prd.date_review);
+                           return dateLimit > todayAt6; // à jour
+                        });
+
+                        result = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
+                        return getNoticeFn(result);
+                     }
+                  }, // Etat de l'article
+                  {
+                     data: 'meta_data', render: (data: Array<Metadata>, type, item) => {
+                        if (_.isEqual(item.quantity, 0)) return '-';
+
                         let metaSupplier: any = _.find(data, { key: 'suppliers' });
-                        if (!_.isObject(metaSupplier)) return 'Non définie';
+                        if (!_.isObject(metaSupplier) || _.isEmpty(metaSupplier.value)) return 'Non définie';
                         let value: any = JSON.parse(metaSupplier.value);
                         value = _.filter(value, item => item.get !== 0);
                         let countSuppliers = Object.keys(value);
                         if (_.isEmpty(countSuppliers)) return 'Non définie';
                         return `<span class="badge badge-default">${countSuppliers.length} Fournisseur(s)</span>`;
                      }
-                  },
+                  }, // Nombre de fournisseur ajouter
                   {
-                     data: null, render: (data) => {
+                     data: 'quantity', render: qty => {
+                        if (_.isEqual(qty, 0)) return '-';
                         return `<span class="btn btn-sm btn-primary edit-item">Gerer</span>`
                      }
                   }
 
                ],
                initComplete: () => {
-
+                  Helpers.setLoading(false);
                   // Gerer une article
                   $('#quotation-edit-table tbody').on('click', '.edit-item', e => {
                      e.preventDefault();
                      this.designationTrigger = e.currentTarget;
                      const el = $(e.currentTarget).parents('tr');
                      const item = this.Table.row(el).data();
-                     this.Item = _.cloneDeep(item); // Contient l'item en cours de traitement
-                     Helpers.setLoading(true);
                      // Récuperer tous les articles de ce produit
-                     this.WPAPI
-                        .fz_product()
-                        .context('edit')
-                        .param('meta_key', "product_id")
-                        .param('meta_value', this.Item.product_id)
-                        .then(_response => {
-                           let __FZPRODUCTS__: Array<any> = _.clone(_response);
-                           this.__FZPRODUCTS__ = _.cloneDeep(__FZPRODUCTS__);// Collect tous les articles pour ce produit
-                           // Vérfier si la liste des fournisseur disponible pour l'article est vide
-                           if (_.isEmpty(__FZPRODUCTS__)) {
-                              Swal.fire('Désolé', "Aucun fournisseur ne posséde cette article ou qu'il est encore en attente.", "warning");
-                              Helpers.setLoading(false);
-                              return false;
-                           }
-                           // Récuperer les fournisseurs (utilisateur) qui possède cette article
-                           let user_ids: Array<number> = _.map(this.__FZPRODUCTS__, p => parseInt(p.user_id, 10));
-                           this.WPAPI
-                              .users()
-                              .include(_.join(user_ids, ','))
-                              .roles('fz-supplier')
-                              .context('edit')
-                              .then(_users => {
-                                 const clientRole: string = _.isArray(this.Author.roles) ? this.Author.roles[0] : this.Author.roles;
-                                 let __USERS__: Array<any> = _.clone(_users);
-                                 this.qtSupplierTable = $('#quotation-supplier-table').DataTable({
-                                    // Installer le plugin WP Rest Filter (https://fr.wordpress.org/plugins/wp-rest-filter/)
-                                    fixedHeader: true,
-                                    responsive: false,
-                                    "sDom": 'rtip',
-                                    data: __USERS__,
-                                    columns: [
-                                       {
-                                          data: 'company_name', render: (data, type, row) => {
-                                             return `<span>${data}</span>`
-                                          }
-                                       },
-                                       {
-                                          data: 'reference', render: (data, type, row) => {
-                                             return `<span class="badge badge-default view-supplier" style="cursor: pointer" data-supplier="${row.id}">${data}</span>`
-                                          }
-                                       },
-                                       {
-                                          data: 'id', render: (data, type, row) => { // stock
-                                             let userId: any = data;
-                                             let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-                                             return pdt.total_sales;
-                                          }
-                                       },
-                                       {
-                                          data: 'id', render: (data) => {
-                                             let userId: any = data;
-                                             let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-
-                                             let dateLimit: any = moment(pdt.date_review).subtract(-1, 'days');
-                                             let msg: string = dateLimit > moment() ? "Traité" : "En attente";
-                                             let style: string = dateLimit > moment() ? 'blue' : 'warning';
-                                             return `<span class="badge badge-${style}">${msg}</span>`;
-                                          }
-                                       }, // statut product
-                                       {
-                                          data: 'id', render: data => {
-                                             const userId: any = data;
-                                             const pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-                                             const price: number = parseInt(pdt.price, 10);
-                                             const marge = clientRole === 'fz-company' ? (pdt.company_status === 'dealer' ? pdt.marge_dealer : pdt.marge) : pdt.marge_particular;
-
-                                             const hisPrice = this.services.getBenefit(price, parseInt(marge, 10));
-                                             return this.currencyFormat(hisPrice);
-                                          }
-                                       }, // price product
-                                       {
-                                          data: 'id', render: data => {
-                                             let userId: any = data;
-                                             let pdt: any = _.find(this.__FZPRODUCTS__, { user_id: userId });
-                                             let article: any = JSON.stringify(pdt);
-                                             return `<span class='badge badge-success view-article' style='cursor: pointer' data-article='${article}'>Voir</span>`;
-                                          }
-                                       }, // Produit
-                                       {
-                                          data: null, render: (data, type, row) => {
-                                             let inputValue: number = 0;
-                                             const metaSuppliers: any = _.find(this.Item.meta_data, { key: "suppliers" });
-                                             if (metaSuppliers && !_.isEmpty(metaSuppliers.value)) {
-                                                /**
-                                                 * @return Array
-                                                 */
-                                                let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: "2", product_id: 0, article_id: 0}] 
-                                                _.map(dataParser, (parse) => {
-                                                   if (row.id === parse.supplier) {
-                                                      inputValue = parseInt(parse.get);
-                                                   }
-                                                });
-                                             }
-
-                                             let fzProduct: any = _.find(this.__FZPRODUCTS__, { user_id: row.id });
-
-                                             const price: number = parseInt(fzProduct.price, 10);
-                                             const marge = clientRole === 'fz-company' ? (fzProduct.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
-                                             const hisPrice = this.services.getBenefit(price, parseInt(marge, 10));
-
-                                             const dateLimit: any = moment(fzProduct.date_review).subtract(-1, 'days');
-                                             let disabled: boolean = dateLimit < moment();
-
-                                             return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
-                                       value="${disabled ? 0 : inputValue}" min="0" max="${fzProduct.total_sales}" ${disabled ? "disabled='disabled'" : ''}
-                                       data-product="${fzProduct.product_id}" 
-                                       data-supplier="${row.id}" 
-                                       data-price="${hisPrice}" 
-                                       data-article="${fzProduct.id}">`;
-                                          }
-                                       }
-                                    ],
-                                    initComplete: () => {
-                                       Helpers.setLoading(false);
-                                       $('#quotation-view-supplier-modal').modal('show');
-
-                                       $('#quotation-supplier-table tbody').on('click', '.view-supplier', ev => {
-                                          ev.preventDefault();
-                                          const element = $(ev.currentTarget);
-                                          const elData: any = $(element).data();
-                                          $('.modal').modal('hide');
-                                          setTimeout(() => {
-                                             this.zone.run(() => this.router.navigate(['/supplier', elData.supplier, 'edit']));
-                                          }, 600);
-                                       });
-
-                                       $('#quotation-supplier-table tbody').on('click', '.view-article', ev => {
-                                          ev.preventDefault();
-                                          let data: any = $(ev.currentTarget).data();
-                                          this.Editor = _.clone(data.article);
-                                          this.cd.detectChanges();
-                                       });
-
-                                       $('#quotation-supplier-table tbody').on('change', '.input-increment', ev => {
-                                          ev.preventDefault();
-
-                                          let element = $(ev.currentTarget);
-                                          let currentValue = $(element).val();
-                                          currentValue = parseInt(currentValue, 10);
-                                          let countInputSet = 0;
-                                          this.objectMeta = [];
-                                          // Vérifier la quantité et la quantité ajouter pour les fournisseurs
-                                          $(`input.input-increment`).each((index, value) => {
-                                             let inputVal: any = $(value).val();
-                                             console.log('input increment:' + inputVal);
-                                             inputVal = parseInt(inputVal, 10);
-                                             const inputData: any = $(value).data();
-                                             countInputSet += inputVal;
-                                             if (0 !== inputVal)
-                                                this.objectMeta.push({
-                                                   supplier: parseInt(inputData.supplier, 10),
-                                                   get: parseInt(inputVal, 10),
-                                                   product_id: parseInt(inputData.product, 10),
-                                                   article_id: inputData.article,
-                                                   price: inputData.price
-                                                });
-                                          });
-                                          this.cd.detectChanges();
-
-                                          if (this.Item.quantity < countInputSet) {
-                                             element.val(Math.abs(parseInt(currentValue) - 1));
-                                             return false;
-                                          };
-                                          
-                                       });
-
-                                       
-                                    }
-                                 })
-                              });
-
-                        });
-                  });
-
-                  $('#quotation-view-supplier-modal').on('hide.bs.modal', e => {
-                     if ($.fn.dataTable.isDataTable('#quotation-supplier-table')) {
-                        this.qtSupplierTable.destroy();
-                     }
-                     this.objectMeta = [];
-                     Helpers.setLoading(true);
-                     this.WCAPI.get(`orders/${this.ID}`, (err, data, res) => {
-                        Helpers.setLoading(false);
-                        this.__ORDER__ = JSON.parse(res);
-                        this.__ITEMS__ = this.__ORDER__.line_items.line_items;
-                        this.Table.clear().draw();
-                        this.Table.rows.add(this.__ITEMS__);
-                        this.Table.columns.adjust().draw();
-
-                        this.cd.detectChanges();
+                     this.zone.run(() => {
+                        this.router.navigate(['/dashboard', 'quotation', this.ID, 'item', item.id]);
                      });
-
                   });
+
                }
             })
          });
       });
    }
 
-   /**
-    * Enregistrer le meta data pour les produits dans la commande
-    */
-   onSaveQuotationPdt() {
-      if (_.isEmpty(this.Item) || _.isEmpty(this.objectMeta)) return false;
-      Helpers.setLoading(true);
-      this.loading = true;
-      let lineItems: Array<any>;
-      lineItems = _.map(this.__ITEMS__, (item) => {
-         if (item.product_id !== this.Item.product_id) return item;
-         
-         const prices = _.map(this.objectMeta, (mt) => parseInt(mt.price, 10));
-         item.price = _.max(prices);
-         item.total = Math.round(_.max(prices) * item.quantity).toString();
-         item.subtotal = Math.round(_.max(prices) * item.quantity).toString();
 
-         let metaData: Array<any> = _.cloneDeep(item.meta_data); // Product meta
-         metaData = _.map(metaData, meta => {
-            if (meta.key === 'status') {
-               if (_.isEmpty(this.objectMeta)) {
-                  meta.value = 0;
-               } else {
-                  let qts: Array<number> = _.map(this.objectMeta, meta => { return parseInt(meta.get, 10); });
-                  let collectQts = _.sum(qts);
-                  meta.value = collectQts < this.Item.quantity ? 0 : 1;
-               }
-
-               if (!meta.value) return meta;
-               // Verifier si l'article est en review
-               const aIds: Array<any> = _.map(this.objectMeta, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
-               const collectFZProducts: Array<any> = _.filter(this.__FZPRODUCTS__, (fz) => { return _.indexOf(aIds, fz.id) >= 0; });
-               const cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {
-                  const dateNow: any = moment();
-                  let dateLimit: any = moment(prd.date_review).subtract(-1, 'days');
-
-                  return dateLimit > dateNow; // à jour
-               });
-
-               meta.value = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
-
-            } else if (meta.key === 'suppliers') {
-               meta.value = JSON.stringify(this.objectMeta);
-            }
-            return meta;
-         });
-         const filterMetaSuppliers = _.filter(metaData, { key: 'suppliers' } as any);
-         if (_.isEmpty(filterMetaSuppliers)) metaData.push({ key: 'suppliers', value: JSON.stringify(this.objectMeta) });
-         item.meta_data = _.clone(metaData);
-         return item;
-      });
-
-      const data: any = { line_items: lineItems };
-      this.WCAPI.put(`orders/${this.ID}`, data, (err, d, res) => {
-         let response: any = JSON.parse(res);
-         this.__ITEMS__ = response.line_items.line_items;
-         this.Table.clear().draw();
-         this.Table.rows.add(this.__ITEMS__);
-         this.Table.columns.adjust().draw();
-
-         Helpers.setLoading(false);
-         this.loading = false;
-         this.cd.detectChanges();
-         $('#quotation-view-supplier-modal').modal('hide');
-
-      });
-   }
 
 }

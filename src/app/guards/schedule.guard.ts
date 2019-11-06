@@ -4,6 +4,8 @@ import { Observable } from 'rxjs/Observable';
 import { AuthorizationService } from '../_services/authorization.service';
 import * as moment from 'moment';
 import * as _ from 'lodash';
+import { Helpers } from '../helpers';
+import Swal, { SweetAlertType } from 'sweetalert2';
 
 @Injectable()
 export class ScheduleGuard implements CanActivate {
@@ -16,26 +18,37 @@ export class ScheduleGuard implements CanActivate {
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
     const role = this.auth.getCurrentUserRole();
     if (role !== 'administrator') {
+      let hourResults: Array<boolean> = [];
       for (let date of this.dates) {
         const dateStart = moment(date.start, 'HH:mm:ss');
         const dateEnd = moment(date.end, 'HH:mm:ss');
-        const isIn = moment().isBetween(dateStart, dateEnd, 'hours'); 
-        if (!isIn) {
-          // Heure creuse
-          this.router.navigate(['login']);
-          return false;
-        }
+        const isIn = moment().isBetween(dateStart, dateEnd, null, '[]'); 
+        hourResults.push(isIn);
+      }
+
+      if (_.indexOf(hourResults, true) > -1) {} else {
+        this.auth.logout();
+        this.errorMessage("Heure de connexion expirer", "warning", "Avertissement");
+        this.router.navigate(['login']);
+        return false;
       }
       
       let currentDay = moment().format('ddd');
       const isIn: number = _.indexOf(this.days, currentDay);
       if (isIn >= 0 && (currentDay === 'Sat' || currentDay === 'Sun')) {
           // Heure creuse
-          this.router.navigate(['login']);
+          this.auth.logout();
+          //this.router.navigate(['login']);
+          this.errorMessage("Vous ne pouvez pas vous connecter à ce jour", 'error', 'Désolé');
           return false;
       }
     }
     
     return true;
+  }
+
+  public errorMessage(message: string, type: SweetAlertType = 'success', title: string = '') {
+    Helpers.setLoading(false); // Au cas ou!
+    Swal.fire(title, message, type);
   }
 }

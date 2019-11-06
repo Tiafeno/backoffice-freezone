@@ -38,6 +38,7 @@
     </a>
     <ul class="nav-2-level collapse" routerLinkActive="in">
       <li><a routerLink="/articles" routerLinkActive="active">Tous les articles</a></li>
+      <li><a routerLink="/product" routerLinkActive="active">Gestions des produits</a></li>
       <li><a routerLink="/supplier/article/review" routerLinkActive="active">Attente de MAJ</a></li>
     </ul>
   </li>
@@ -69,7 +70,7 @@
   <li routerLinkActive="active">
     <a href="href=&quot;javascript:;&quot;">
       <i class="sidebar-item-icon ti-layout-media-overlay-alt-2"></i>
-      <span class="nav-label">Services</span>
+      <span class="nav-label">S.A.V</span>
       <i class="fa fa-angle-left arrow"></i>
     </a>
     <ul class="nav-2-level collapse" routerLinkActive="in">
@@ -78,9 +79,21 @@
     </ul>
   </li>
   <li routerLinkActive="active">
+    <a [routerLink]="['/prestations']" routerLinkActive="active" >
+      <i class="sidebar-item-icon ti-layout-tab-v"></i>
+      <span class="nav-label">Prestations</span>
+    </a>
+  </li>
+  <li routerLinkActive="active">
     <a [routerLink]="['/faq']" routerLinkActive="active" >
       <i class="sidebar-item-icon ti-help-alt"></i>
       <span class="nav-label">Techniques de vente</span>
+    </a>
+  </li>
+  <li routerLinkActive="active">
+    <a [routerLink]="['/faq-client']" routerLinkActive="active" >
+      <i class="sidebar-item-icon ti-help-alt"></i>
+      <span class="nav-label">FAQ Client</span>
     </a>
   </li>
   <li routerLinkActive="active">

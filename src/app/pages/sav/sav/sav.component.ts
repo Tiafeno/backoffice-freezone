@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { config } from '../../../../environments/environment';
 import * as moment from 'moment';
 import * as _ from 'lodash';
@@ -7,6 +7,8 @@ import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { Helpers } from '../../../helpers';
 import { Router } from '@angular/router';
 import { FzSecurityService } from '../../../_services/fz-security.service';
+import { HttpClient } from '@angular/common/http';
+import { AuthorizationService } from '../../../_services/authorization.service';
 declare var $: any;
 
 @Component({
@@ -21,7 +23,10 @@ export class SavComponent implements OnInit {
     private apiWP: ApiWordpressService,
     private zone: NgZone,
     private router: Router,
-    private security: FzSecurityService
+    private Http: HttpClient,
+    private auth: AuthorizationService,
+    private security: FzSecurityService,
+    private cd: ChangeDetectorRef
   ) {
     this.Wordpress = this.apiWP.getWordpress();
   }
@@ -75,13 +80,13 @@ export class SavComponent implements OnInit {
           data: 'approximate_time', render: (data, type, row) => {
             let dt = '';
             dt = !_.isEmpty(data) ? moment(data).format('LL') : "Non assigné";
-            return `<span class="badge badge-default change-approximate-time">${dt}</span>`;
+            return `<span class="badge badge-default change-approximate-time" style="cursor: pointer">${dt}</span>`;
           }
         },
         {
           data: 'status_sav', render: (data, type, row) => {
-            let dt = _.isObject(data) ? data.label : 'Non assigné';
-            return `<span class="badge badge-default change-status">${dt}</span>`;
+            let dt = _.isObject(data) ? data.label : 'Diagnostic non réalisé';
+            return `<span class="badge badge-default change-status" style="cursor: pointer">${dt}</span>`;
           }
         },
         {
@@ -104,46 +109,155 @@ export class SavComponent implements OnInit {
 
         $('#sav-table tbody').on('click', '.change-status', async ev => {
           ev.preventDefault();
-          if ( ! this.security.hasAccess('s15', true)) {
+          if (!this.security.hasAccess('s15', true)) {
             return false;
           }
-          const data: any = getElementData(ev);
-          let status = _.isObject(data.status_sav) ? data.status_sav.value : '';
-          status = _.isEmpty(status) ? '2' : status;
-          const { value: currentStatus } = await Swal.fire({
-            title: 'Modifier le statut',
-            input: 'select',
-            inputOptions: {
-              '1': '1 - Diagnostic réalisé',
-              '2': '2 - Diagnostic non réalisé',
-              '3': '3 - A réparer',
-              '4': '4 - Ne pas réparer',
-              '5': '5 - Terminer'
-            },
-            inputPlaceholder: 'Select a status',
-            showCancelButton: true,
-            confirmButtonText: 'Enregister',
+          const __DATA__: any = getElementData(ev);
+          const __STATUS__ = {
+            '1': '1 - Diagnostic réalisé',
+            '2': '2 - Diagnostic non réalisé',
+            '3': '3 - A réparer',
+            '4': '4 - Ne pas réparer',
+            '5': '5 - Terminer'
+          };
+          let statusValue = _.isObjectLike(__DATA__.status_sav) ? __DATA__.status_sav.value : '';
+          statusValue = _.isEqual(statusValue, '') ? '2' : statusValue; // Diagnostic non réalisé par default
+          let mailSubject = null; // Contient l'objet du mail
+          let mailStatus = null;
+          Swal.mixin({
+            confirmButtonText: 'Suivant &rarr;',
             cancelButtonText: 'Annuler',
-            inputValue: status,
-            inputValidator: (value) => {
-              return new Promise(resolve => {
-                if (_.isEmpty(value)) {
-                  resolve("Ce champ est requis");
-                  return;
-                }
-                this.Wordpress.savs().id(data.ID).update({
-                  status_sav: value
-                }).then(resp => {
+            showCancelButton: true,
+            progressSteps: ['1', '2', '3']
+          }).queue([
+            {
+              input: 'text',
+              title: 'Objet de cette changement',
+              text: 'Veuillez ajouter une objet pour cette modification',
+              inputValidator: (value) => {
+                return new Promise((resolve, reject) => {
+                  if (_.isEmpty(value)) {
+                    resolve('Ce champ est obligatoire');
+                  }
+
                   resolve();
-                }).catch(err => { resolve(err); });
+                });
+              },
+              allowOutsideClick: () => !Swal.isLoading(),
+              preConfirm: (value) => {
+                return new Promise(resolve => {
+                  mailSubject = value;
+                  resolve(true);
+                })
+              }
+            },
+            // Statut
+            {
+              input: 'select',
+              inputPlaceholder: 'Selectionnez un statut',
+              inputValue: statusValue,
+              inputOptions: __STATUS__,
+              title: 'Statut du S.A.V',
+              text: 'Changer le statut',
+              showLoaderOnConfirm: true,
+              allowOutsideClick: () => !Swal.isLoading(),
+              preConfirm: (value) => {
+                return new Promise((resolve, reject) => {
+                  if (_.isEqual(value, '')) {
+                    Swal.showValidationMessage("Ce champ est requis");
+                    resolve(false);
+                  }
+                  mailStatus = parseInt(value, 10);
+                  // Envoyer une requete pour modifier la statut
+                  this.Wordpress.savs().id(__DATA__.ID).update({
+                    status_sav: value
+                  }).then(resp => {
+                      resolve(true);
+
+                    }).catch(err => {
+                      Swal.showValidationMessage(err);
+                      resolve(false);
+                    });
+                  this.cd.detectChanges();
+                })
+
+              }
+            },
+            // Message pour l'email
+            {
+              title: 'Message',
+              text: 'Envoyer un message pour le client',
+              input: 'textarea',
+              inputPlaceholder: 'Ecrivez votre message ici...',
+              inputAttributes: {
+                'aria-label': 'Ecrivez votre message ici...'
+              },
+              confirmButtonText: 'Enregistrer & Envoyer',
+              inputValidator: (value) => {
+                return new Promise((resolve, reject) => {
+                  if (_.isEmpty(value)) { resolve('Ce champ est obligatoire'); }
+                  resolve();
+                });
+              },
+              showLoaderOnConfirm: true,
+              allowOutsideClick: () => !Swal.isLoading(),
+              preConfirm: (msg) => {
+                return new Promise((resolve, reject) => {
+                  if (_.isEqual(msg, '')) {
+                    Swal.showValidationMessage("Ce champ est requis");
+                    resolve(false);
+                  }
+                  const dataOnlineUser = this.auth.getCurrentUser().data;
+                  const subject = mailSubject;
+                  const message = msg;
+
+                  const args: any = {
+                    status: 'draft',
+                    title: subject,
+                    content: message,
+                    attach_post: __DATA__.ID,
+                    sav_status: mailStatus,
+                    sender: dataOnlineUser.ID,
+                    response_post: 0
+                  };
+                  this.Wordpress.mailing().create(args).then(resp => {
+                    const Form: FormData = new FormData();
+                    Form.append('sender', dataOnlineUser.ID.toString());
+                    Form.append('sav_id', __DATA__.ID.toString());
+                    Form.append('subject', subject);
+                    Form.append('message', message);
+                    Form.append('mailing_id', resp.id.toString());
+                    // Envoyer le mail
+                    this.Http.post<any>(`${config.apiUrl}/mail/sav/${__DATA__.ID}`, Form).subscribe(resp => {
+                      resolve(true);
+                    }, err => {
+                      Swal.showValidationMessage("Une erreur s'est produit pendant l'envoie");
+                      resolve(false);
+                    });
+
+                    this.cd.detectChanges();
+
+                  }).catch(err => {
+                    Swal.showValidationMessage(err);
+                    resolve(false);
+                  });
+                }) // .end promise
+
+              }
+            }
+          ]).then((result) => {
+            if (result.value) {
+              Swal.fire({
+                title: 'Succès!',
+                html: "Modification apporté avec succès",
+                confirmButtonText: 'OK'
+              }).then(successResp => {
+                this.reload();
               });
+
             }
           })
 
-          if (currentStatus) {
-            Swal.fire("Statut mis à jour avec succès");
-            this.reload();
-          }
         });
 
         $('#sav-table tbody').on('click', '.change-approximate-time', async ev => {
@@ -173,8 +287,8 @@ export class SavComponent implements OnInit {
                   resolve('You need to write something!')
                   return;
                 }
-                const isMoment  =  moment(value, 'DD-MM-YYYY');
-                if ( ! isMoment.isValid()) {
+                const isMoment = moment(value, 'DD-MM-YYYY');
+                if (!isMoment.isValid()) {
                   resolve("Veuillez remplir le champ correctement");
                   return;
                 }
