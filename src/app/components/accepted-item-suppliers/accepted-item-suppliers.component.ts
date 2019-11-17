@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { config } from '../../../environments/environment';
 import * as _ from 'lodash';
 import { FzServicesService } from '../../_services/fz-services.service';
+import { AuthorizationService } from '../../_services/authorization.service';
+import Swal from 'sweetalert2';
 declare var $: any;
 
 @Component({
@@ -17,7 +19,8 @@ export class AcceptedItemSuppliersComponent implements OnInit {
   public itemTable: any;
   constructor(
     private http: HttpClient,
-    private services: FzServicesService
+    private services: FzServicesService,
+    private auth: AuthorizationService
   ) { }
 
   ngOnInit() {
@@ -45,6 +48,10 @@ export class AcceptedItemSuppliersComponent implements OnInit {
   public onMail(supplieId: number) {
     let posts: any = _.find(this.items, {user_id: supplieId});
     this.articles = posts.articles;
+    if (!this.auth.isAdministrator()) {
+      Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+      return false;
+    }
     $('#suppliers-item-modal').modal('show');
     if ($.fn.dataTable.isDataTable('#item-table')) {
       this.itemTable.destroy();

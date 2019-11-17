@@ -5,9 +5,9 @@
       <app-filter-article [word]="findWord" (search)="onSubmit($event)"></app-filter-article>
       <div class="mb-3">
         <span>
-          <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-article-supplier-modal">Ajouter
+          <button class="btn btn-sm btn-primary" data-toggle="modal" id="add-article">Ajouter
             un article</button>
-          <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#import-article-modal">+ Importer des
+          <button class="btn btn-sm btn-warning" data-toggle="modal" id="import-article">+ Importer des
             articles (Non recommandé)</button>
         </span>
       </div>
@@ -93,19 +93,21 @@
         </div>
       </div>
 
+      <!-- Ajouter une article -->
       <div class="modal fade" id="add-article-supplier-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <app-add-article (refresh)="onRefreshResults()"></app-add-article>
         </div>
       </div>
 
+      <!-- Modifier une article -->
       <div class="modal fade" id="edit-article-supplier-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
-
           <app-edit-article [article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
         </div>
       </div>
 
+      <!-- Importer des articles via un fichier CSV -->
       <div class="modal fade" id="import-article-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <app-import-article (refresh)="onRefreshResults()"></app-import-article>
@@ -118,6 +120,7 @@
         </div>
       </div>
 
+      <!-- Ajouter ou remplacer les image à la une des produits -->
       <div class="modal fade" id="update-thumbnail-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <form class="modal-content" [formGroup]="thumbForm" (ngSubmit)="onSubmitThumbnail()">

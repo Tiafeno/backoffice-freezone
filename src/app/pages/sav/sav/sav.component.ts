@@ -26,7 +26,7 @@ export class SavComponent implements OnInit {
     private Http: HttpClient,
     private auth: AuthorizationService,
     private security: FzSecurityService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
   ) {
     this.Wordpress = this.apiWP.getWordpress();
   }
@@ -310,8 +310,12 @@ export class SavComponent implements OnInit {
         // Supprimer une service
         $('#sav-table tbody').on('click', '.remove-sav', ev => {
           ev.preventDefault();
-          const element = $(ev.currentTarget);
-          const elData: any = $(element).data();
+          if (!this.auth.isAdministrator()) {
+            Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+            return false;
+          }
+          const el: any = $(ev.currentTarget).parents('tr');
+          const data: any = this.Table.row(el).data();
           Swal.fire({
             title: 'Confirmation',
             html: `Voulez vous vraiment supprimer cette post?`,
@@ -320,7 +324,7 @@ export class SavComponent implements OnInit {
           }).then(result => {
             if (result.value) {
               Helpers.setLoading(true);
-              this.Wordpress.savs().id(elData.id).delete({ force: true }).then(resp => {
+              this.Wordpress.savs().id(data.ID).delete({ force: true }).then(resp => {
                 Helpers.setLoading(false);
                 this.reload();
               });
@@ -328,18 +332,20 @@ export class SavComponent implements OnInit {
           });
         });
 
+        // Modifier une service
         $('#sav-table tbody').on('click', '.edit-sav', ev => {
           ev.preventDefault();
-          const element = $(ev.currentTarget);
-          const elData: any = $(element).data();
-          this.zone.run(() => { this.router.navigate(['/sav', elData.id, 'edit']) });
+          const el: any = $(ev.currentTarget).parents('tr');
+          const data: any = this.Table.row(el).data();
+          this.zone.run(() => { this.router.navigate(['/sav', data.ID, 'edit']) });
         });
 
+        // Envoyer un email
         $('#sav-table tbody').on('click', '.mail-sav', ev => {
           ev.preventDefault();
-          const element = $(ev.currentTarget);
-          const elData: any = $(element).data();
-          this.zone.run(() => { this.router.navigate(['/sav', elData.id, 'mail']) });
+          const el: any = $(ev.currentTarget).parents('tr');
+          const data: any = this.Table.row(el).data();
+          this.zone.run(() => { this.router.navigate(['/sav', data.ID, 'mail']) });
         });
 
       },

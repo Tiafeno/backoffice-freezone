@@ -75,6 +75,23 @@ export class ArticleSupplierComponent implements OnInit {
          this.cd.detectChanges();
       });
 
+      $('#add-article').on('click', e => {
+         e.preventDefault();
+         if (!this.authorisation.isAdministrator()) { 
+            Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+            return false;
+         }
+         $('#add-article-supplier-modal').modal('show');
+      });
+
+      $('#import-article').on('click', e => {
+         e.preventDefault();
+         if (!this.authorisation.isAdministrator()) { 
+            Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+            return false;
+         }
+         $('#import-article-modal').modal('show');
+      });
    }
 
    public onSearchWord($event): void {
