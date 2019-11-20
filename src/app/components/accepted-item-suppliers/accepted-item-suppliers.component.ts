@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { FzServicesService } from '../../_services/fz-services.service';
 import { AuthorizationService } from '../../_services/authorization.service';
 import Swal from 'sweetalert2';
+import { MSG } from '../../defined';
 declare var $: any;
 
 @Component({
@@ -28,14 +29,11 @@ export class AcceptedItemSuppliersComponent implements OnInit {
       const suppliers: Array<{ articles: any, data: any, user_id: number }> = _.clone(resp);
       let items = _.map(suppliers, (supplier) => {
         supplier.articles = _(supplier.articles).map(article => {
-
           const supArts: Array<{ ID: number, item_quantity: any }> = _.cloneDeep(supplier.articles);
-
           let currentUnionArticles = _.filter(supArts, { ID: article.ID });
           let itemQuantity = _.map(currentUnionArticles, i => parseInt(i.item_quantity, 10));
           article.item_quantity = _.sum(itemQuantity);
           return article;
-
         }).union().value();
 
         return supplier;
@@ -49,7 +47,7 @@ export class AcceptedItemSuppliersComponent implements OnInit {
     let posts: any = _.find(this.items, {user_id: supplieId});
     this.articles = posts.articles;
     if (!this.auth.isAdministrator()) {
-      Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+      Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
       return false;
     }
     $('#suppliers-item-modal').modal('show');

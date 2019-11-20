@@ -14,6 +14,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FzServicesService } from '../../../../_services/fz-services.service';
 import * as moment from 'moment';
+import { MSG } from '../../../../defined';
 
 declare var $: any;
 
@@ -78,7 +79,7 @@ export class ArticleSupplierComponent implements OnInit {
       $('#add-article').on('click', e => {
          e.preventDefault();
          if (!this.authorisation.isAdministrator()) { 
-            Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+            Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
             return false;
          }
          $('#add-article-supplier-modal').modal('show');
@@ -87,7 +88,7 @@ export class ArticleSupplierComponent implements OnInit {
       $('#import-article').on('click', e => {
          e.preventDefault();
          if (!this.authorisation.isAdministrator()) { 
-            Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+            Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
             return false;
          }
          $('#import-article-modal').modal('show');
@@ -123,7 +124,7 @@ export class ArticleSupplierComponent implements OnInit {
          this.articleEdit = _.clone(article);
          $('#status-product-modal').modal('show');
       } else {
-         Swal.fire('Accès', "Accès non-aurotisé", 'error');
+         Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
       }
    }
 
@@ -271,13 +272,13 @@ export class ArticleSupplierComponent implements OnInit {
          product.marge = this.adminAccess ? (_.isNaN(_marge) ? 'Non définie' : _marge + '%') : "Restreint";
 
          if (!_.isNaN(_margeParticular)) {
-            product.price_particular = this.adminAccess ? this.services.getBenefit(price, _margeParticular) : 'Restreint';
+            product.price_particular = this.services.getBenefit(price, _margeParticular);
          } else {
             product.price_particular = 'Non définie';
          }
 
          if (!_.isNaN(_margeDealer)) {
-            product.price_dealer = this.adminAccess ? this.services.getBenefit(price, _margeDealer) : 'Restreint';
+            product.price_dealer = this.services.getBenefit(price, _margeDealer);
          } else {
             product.price_dealer = 'Non définie';
          }
