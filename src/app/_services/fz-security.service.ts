@@ -21,6 +21,7 @@ export class FzSecurityService {
     { code: 's13', name: "Modifier le statut du client" },
     { code: 's14', name: "Ajouter ou Remplacer les images des articles" },
     { code: 's15', name: "Modifier la status du SAV" },
+    { code: 's16', name: "Modifier la date approcimative du SAV" },
   ];
   private access: Array<object> = [
     {
@@ -41,6 +42,7 @@ export class FzSecurityService {
         { code: 's13', access: true },
         { code: 's14', access: true },
         { code: 's15', access: true },
+        { code: 's16', access: true },
       ]
     },
     {
@@ -61,6 +63,7 @@ export class FzSecurityService {
         { code: 's13', access: false },
         { code: 's14', access: false },
         { code: 's15', access: false },
+        { code: 's16', access: false },
       ]
     },
     {
@@ -81,6 +84,7 @@ export class FzSecurityService {
         { code: 's13', access: false },
         { code: 's14', access: true },
         { code: 's15', access: true },
+        { code: 's16', access: true },
       ]
     }
   ];

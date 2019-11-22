@@ -263,6 +263,9 @@ export class SavComponent implements OnInit {
 
         $('#sav-table tbody').on('click', '.change-approximate-time', async ev => {
           ev.preventDefault();
+          if (!this.security.hasAccess('s16', true)) {
+            return false;
+          }
           const data: any = getElementData(ev);
           let approximateTime: any = moment(data.approximate_time);
           let inputDateValue = '';
