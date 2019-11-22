@@ -220,6 +220,7 @@ const routes: Routes = [
                     { path: 'lists', component: ArticleSupplierComponent },
                     {
                         path: 'edit/:id',
+                        canActivate: [NoCommercialAccessGuard],
                         component: EditArticleDescriptionComponent
                     }
                 ]

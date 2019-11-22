@@ -19,6 +19,7 @@ import { ApiWordpressService } from '../../../../_services/api-wordpress.service
 import * as moment from 'moment';
 import { FzSecurityService } from '../../../../_services/fz-security.service';
 import { FzServicesService } from '../../../../_services/fz-services.service';
+import { Supplier } from '../../../../supplier';
 
 declare var $: any;
 
@@ -32,7 +33,7 @@ export class EditArticleComponent implements OnInit {
   private WP: any;
   public Form: FormGroup;
   public Products: Array<any> = [];
-  public Suppliers: Array<any> = [];
+  public Suppliers: Array<Supplier> = [];
   public supplierReference: string = null;
   public postResponseCache = new Map();
   public notice: any = null;

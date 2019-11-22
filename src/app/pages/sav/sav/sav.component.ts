@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { FzSecurityService } from '../../../_services/fz-security.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthorizationService } from '../../../_services/authorization.service';
+import { MSG } from '../../../defined';
 declare var $: any;
 
 @Component({
@@ -311,7 +312,7 @@ export class SavComponent implements OnInit {
         $('#sav-table tbody').on('click', '.remove-sav', ev => {
           ev.preventDefault();
           if (!this.auth.isAdministrator()) {
-            Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+            Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
             return false;
           }
           const el: any = $(ev.currentTarget).parents('tr');

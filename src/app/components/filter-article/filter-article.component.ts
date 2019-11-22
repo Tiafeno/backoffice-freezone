@@ -2,6 +2,8 @@ import { Component, OnInit, Input, Output, EventEmitter, OnChanges, SimpleChange
 import * as _ from 'lodash';
 import { Helpers } from '../../helpers';
 import { FzServicesService } from '../../_services/fz-services.service';
+import { AuthorizationService } from '../../_services/authorization.service';
+import { Supplier } from '../../supplier';
 declare var $: any;
 
 @Component({
@@ -11,7 +13,7 @@ declare var $: any;
 })
 export class FilterArticleComponent implements OnInit, OnChanges {
   public Categories: Array<any> = [];
-  public Suppliers: Array<any> = [];
+  public Suppliers: Array<Supplier> = [];
   public Status: Array<any> = [
     { label: "Tous", value: '' },
     { label: "Publier", value: 'publish' },
@@ -24,6 +26,7 @@ export class FilterArticleComponent implements OnInit, OnChanges {
     { label: "Article non à jour", value: 'down' },
   ];
   public filterForm: any = {};
+  public isAdmin: boolean;
   @Output() search = new EventEmitter();
   // @Input() set word(word: string) {
   //   this.filterForm.word = word;
@@ -40,7 +43,9 @@ export class FilterArticleComponent implements OnInit, OnChanges {
 
   constructor(
     private fzServices: FzServicesService,
+    private auth:AuthorizationService
   ) {
+    this.isAdmin = this.auth.isAdministrator();
   }
 
   ngOnInit() {
@@ -54,7 +59,10 @@ export class FilterArticleComponent implements OnInit, OnChanges {
     this.Categories.unshift({id: 0, name: 'Tous'});
 
     const suppliers = await this.fzServices.getSuppliers();
-    this.Suppliers = _.isArray(suppliers) ? suppliers : [];
+    this.Suppliers = _.isArray(suppliers) ? _.map(suppliers, sup => {
+      sup.company_name = this.isAdmin ? sup.company_name : '-'; 
+      return sup;
+    }) : [];
     this.Suppliers.unshift({id: 0, company_name: 'Tous', reference: 0});
     Helpers.setLoading(false);
   }
