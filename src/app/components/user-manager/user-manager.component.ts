@@ -112,7 +112,7 @@ export class UserManagerComponent implements OnInit {
       }
 
       if (this.type === 'new') {
-        let username = _.split(Value.email, '@')[0];
+        let username = _.split(Value.email, '@')[0] + _.split(Value.email, '@')[1];
         args.email = Value.email,
         args.username = username;
         args.password = Value.pwd;

@@ -73,12 +73,14 @@
                     </a>
                   </td>
                   <td>
-                    <a class="text-blue font-16" data-toggle="tooltip" data-placement="top" title="Modifier"
+                    <a class="text-blue font-16" title="Modifier"
                       (click)="onChangeRoute('/articles/edit/' + article.product_id)">
-                      <i class="ti-pencil-alt"></i></a>
-                    <a class="font-16 text-danger" data-toggle="tooltip" data-placement="top" title="Supprimer"
+                      <i class="ti-pencil-alt"></i>
+                    </a>
+                    <a class="font-16 text-danger"  title="Supprimer"
                       appArticleRemover [articleId]="article.id" (onRefresh)="onRefreshResults()"><i
-                        class="ti-trash"></i></a>
+                        class="ti-trash"></i>
+                    </a>
                   </td>
                 </tr>
               </tbody>
