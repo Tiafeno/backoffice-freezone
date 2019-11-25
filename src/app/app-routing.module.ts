@@ -79,6 +79,7 @@ import { QuotationManageComponent } from './pages/quotation/quotation-manage/quo
 import { ArticleRemoverDirective } from './directives/article-remover.directive';
 import { AcceptedItemSuppliersComponent } from './components/accepted-item-suppliers/accepted-item-suppliers.component';
 import { PrestationsComponent } from './pages/prestations/prestations.component';
+import { NoTechnicianAccessGuard } from './guards/no-technician-access.guard';
 
 
 const routes: Routes = [
@@ -102,6 +103,7 @@ const routes: Routes = [
                             },
                             {
                                 path: 'quotation/:id',
+                                canActivate: [NoTechnicianAccessGuard],
                                 children: [
                                     { path: '', redirectTo: 'edit', pathMatch: 'full' },
                                     { path: 'edit', component: QuotationEditComponent },
@@ -116,17 +118,17 @@ const routes: Routes = [
             },
             {
                 path: 'carousel',
-                canActivate: [NoCommercialAccessGuard],
+                canActivate: [NoCommercialAccessGuard, NoTechnicianAccessGuard],
                 component: CarouselComponent
             },
             {
                 path: 'prestations',
-                canActivate: [NoCommercialAccessGuard],
+                canActivate: [NoCommercialAccessGuard, NoTechnicianAccessGuard],
                 component: PrestationsComponent
             },
             {
                 path: 'faq-client',
-                canActivate: [NoCommercialAccessGuard],
+                canActivate: [NoCommercialAccessGuard, NoTechnicianAccessGuard],
                 component: FaqClientComponent,
                 children: [
                     { path: '', redirectTo: 'view', pathMatch: 'full' },
@@ -165,6 +167,7 @@ const routes: Routes = [
             },
             {
                 path: 'client',
+                canActivate: [NoTechnicianAccessGuard],
                 children: [
                     { path: '', redirectTo: 'lists', pathMatch: 'full' },
                     { path: 'lists', component: ClientsComponent },
@@ -179,31 +182,27 @@ const routes: Routes = [
             },
             {
                 path: 'supplier',
+                canActivate: [NoTechnicianAccessGuard, NoCommercialAccessGuard],
                 children: [
                     { path: '', redirectTo: 'lists', pathMatch: 'full' },
                     {
                         path: 'lists',
-                        canActivate: [NoCommercialAccessGuard],
                         component: SupplierDatatableComponent
                     },
                     {
                         path: 'new',
-                        canActivate: [NoCommercialAccessGuard],
                         component: AddSupplierComponent
                     },
                     {
                         path: 'review',
-                        canActivate: [NoCommercialAccessGuard],
                         component: ReviewSupplierComponent
                     },
                     {
                         path: 'article/review',
-                        canActivate: [NoCommercialAccessGuard],
                         component: ReviewArticlesComponent
                     },
                     {
                         path: ':id',
-                        canActivate: [NoCommercialAccessGuard],
                         children: [
                             { path: '', redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: EditSupplierComponent }
@@ -227,12 +226,12 @@ const routes: Routes = [
             },
             {
                 path: 'settings',
-                canActivate: [NoCommercialAccessGuard],
+                canActivate: [NoCommercialAccessGuard, NoTechnicianAccessGuard],
                 component: SettingsComponent
             },
             {
                 path: 'product',
-                canActivate: [NoCommercialAccessGuard],
+                canActivate: [NoCommercialAccessGuard, NoTechnicianAccessGuard],
                 children: [
                     { path: '', redirectTo: 'lists', pathMatch: 'full' },
                     {
@@ -369,6 +368,7 @@ const routes: Routes = [
         LoginGuard,
         ScheduleGuard,
         NoCommercialAccessGuard,
+        NoTechnicianAccessGuard,
         FzSecurityService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true }
         // { provide: LocationStrategy, useClass: HashLocationStrategy}
