@@ -46,7 +46,7 @@ export class FzSecurityService {
       ]
     },
     {
-      role: 'editor',
+      role: 'editor', // Commercial
       access: [
         { code: 's1', access: true },
         { code: 's2', access: false },
@@ -62,12 +62,12 @@ export class FzSecurityService {
         { code: 's12', access: false },
         { code: 's13', access: false },
         { code: 's14', access: false },
-        { code: 's15', access: false },
+        { code: 's15', access: true },
         { code: 's16', access: false },
       ]
     },
     {
-      role: 'author',
+      role: 'author', // SAV
       access: [
         { code: 's1', access: true },
         { code: 's2', access: false },
@@ -83,7 +83,7 @@ export class FzSecurityService {
         { code: 's12', access: false },
         { code: 's13', access: false },
         { code: 's14', access: true },
-        { code: 's15', access: true },
+        { code: 's15', access: false },
         { code: 's16', access: true },
       ]
     }
