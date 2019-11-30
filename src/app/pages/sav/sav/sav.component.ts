@@ -10,6 +10,7 @@ import { FzSecurityService } from '../../../_services/fz-security.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { MSG } from '../../../defined';
+import { HtmlParser } from '@angular/compiler';
 declare var $: any;
 
 @Component({
@@ -20,6 +21,15 @@ declare var $: any;
 export class SavComponent implements OnInit {
   public Table: any;
   private Wordpress: any;
+  private messages: Array<{status: number, msg: string}> = [
+    {status: 1, msg: "Bonjour,\n Nous vous informons que votre matériel a été bien diagnostique, de ce fait le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
+    {status: 2, msg: "Bonjour,\n Nous vous informons que votre matériel n’a pas pu être diagnostique, de ce fait le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
+    {status: 3, msg: "Bonjour,\n Nous vous informons que votre matériel est déjà en réparation et actuellement en atelier sous nos soins avec les techniciens \n\n Merci\n\n SAV  Freezone " },
+    {status: 4, msg: "" },
+    {status: 5, msg: "Bonjour,\n Nous vous informons que la réparation de votre matériel est terminée, ainsi le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
+    {status: 6, msg: "Bonjour,\n Nous avons bien réceptionné votre matériel et la procédure avant diagnostique est de vous faire parvenir " +
+     "l’inventaire des objets qu’on a réceptionné suivant cette liste :\n\n Merci\n\n SAV  Freezone " },
+  ];
   constructor(
     private apiWP: ApiWordpressService,
     private zone: NgZone,
@@ -78,6 +88,11 @@ export class SavComponent implements OnInit {
           }
         },
         {
+          data: 'date_add', render: data => {
+            return moment(data, 'YYYY-MM-DD HH:mm:ss').format('LLL');
+          }
+        },
+        {
           data: 'approximate_time', render: (data, type, row) => {
             let dt = '';
             dt = !_.isEmpty(data) ? moment(data).format('LL') : "Non assigné";
@@ -119,12 +134,13 @@ export class SavComponent implements OnInit {
             '2': '2 - Diagnostic non réalisé',
             '3': '3 - A réparer',
             '4': '4 - Ne pas réparer',
-            '5': '5 - Terminer'
+            '5': '5 - Terminer',
+            '6': '6 - Inventaire matériel'
           };
           let statusValue = _.isObjectLike(__DATA__.status_sav) ? __DATA__.status_sav.value : '';
           statusValue = _.isEqual(statusValue, '') ? '2' : statusValue; // Diagnostic non réalisé par default
           let mailSubject = null; // Contient l'objet du mail
-          let mailStatus = null;
+          let mailStatus = 1;
           Swal.mixin({
             confirmButtonText: 'Suivant &rarr;',
             cancelButtonText: 'Annuler',
@@ -195,7 +211,7 @@ export class SavComponent implements OnInit {
               },
               confirmButtonText: 'Enregistrer & Envoyer',
               inputValidator: (value) => {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve) => {
                   if (_.isEmpty(value)) { resolve('Ce champ est obligatoire'); }
                   resolve();
                 });
@@ -243,8 +259,10 @@ export class SavComponent implements OnInit {
                     resolve(false);
                   });
                 }) // .end promise
-
-              }
+              },
+              
+              inputValue: _.find(this.messages, {status: mailStatus}).msg
+            
             }
           ]).then((result) => {
             if (result.value) {
