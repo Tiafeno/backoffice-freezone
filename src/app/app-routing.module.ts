@@ -80,6 +80,8 @@ import { ArticleRemoverDirective } from './directives/article-remover.directive'
 import { AcceptedItemSuppliersComponent } from './components/accepted-item-suppliers/accepted-item-suppliers.component';
 import { PrestationsComponent } from './pages/prestations/prestations.component';
 import { NoTechnicianAccessGuard } from './guards/no-technician-access.guard';
+import { GoodDealEditComponent } from './pages/good-deal/good-deal-edit/good-deal-edit.component';
+import { GoodDealListsComponent } from './pages/good-deal/good-deal-lists/good-deal-lists.component';
 
 
 const routes: Routes = [
@@ -343,6 +345,8 @@ const routes: Routes = [
         FaqClientsComponent,
         AcceptedItemSuppliersComponent,
         PrestationsComponent,
+        GoodDealEditComponent,
+        GoodDealListsComponent,
         MomentsPipe,
         BenefitPipe,
         ArticleRemoverDirective

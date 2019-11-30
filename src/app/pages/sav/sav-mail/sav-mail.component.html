@@ -15,6 +15,9 @@
         <div class="col-lg-9 col-md-8">
             <div class="ibox" id="mailbox-container">
                 <div class="flexbox-b p-4">
+                    <a [routerLink]="['/sav']" class="btn btn-sm btn-primary" routerLinkActive="active" >Retour</a>
+                </div>
+                <div class="flexbox-b p-4">
                     <h5 class="font-strong m-0 mr-3">MESSAGES</h5>
                 </div>
                 <table class="table table-hover table-inbox" id="table-inbox">
@@ -24,13 +27,15 @@
                             <td class="pl-4">{{mail.title.rendered}}</td>
                             <td class="pl-4">{{mail.sav}}</td>
                             <td>
-                                <a class="d-block" 
-                                (click)="openViewMail($event, mail)"
-                                 data-toggle="modal"
-                                 data-target="#mail-view-modal">{{mail.content.rendered}}</a>
+                                {{mail.content.rendered}}
                             </td>
                             <td>{{mail.sender.email}}</td>
                             <td class="text-right">{{mail.date}}</td>
+                            <td class="text-right">
+                                <button class="btn btn-sm btn-pink" data-toggle="modal"
+                                data-target="#mail-view-modal" (click)="openViewMail($event, mail)">Voir
+                            </button>
+                             </td>
                         </tr>
                         <tr *ngIf="Mails.length <= 0">
                             <td>Aucun message</td>

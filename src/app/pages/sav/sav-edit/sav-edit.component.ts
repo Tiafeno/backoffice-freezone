@@ -17,6 +17,7 @@ declare var $: any;
 export class SavEditComponent implements OnInit {
   public ID: number = 0;
   public Author: any = {};
+  public isAdmin: boolean = true;
   public reference: string = '';
   public Form: FormGroup;
   private Wordpress: any;
@@ -50,6 +51,7 @@ export class SavEditComponent implements OnInit {
     private cd: ChangeDetectorRef,
     private auth: AuthorizationService
   ) { 
+    this.isAdmin = this.auth.isAdministrator();
     this.Wordpress = this.apiWP.getWordpress();
     this.garenteeRange = _.range(1, 13, 1);
     this.Form = new FormGroup({
