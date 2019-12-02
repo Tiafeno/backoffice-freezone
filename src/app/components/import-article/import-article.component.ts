@@ -27,6 +27,7 @@ export class ImportArticleComponent implements OnInit {
         Mark: '',
         Marge: '',
         MargeDealer: '',
+        MargeParticular: '',
         Description: ''
     };
 
@@ -39,8 +40,9 @@ export class ImportArticleComponent implements OnInit {
         { key: 'LastUpdate', label: 'Date de revision' },
         { key: 'Categorie', label: 'Categories' },
         { key: 'Mark', label: 'Marque' },
-        { key: 'Marge', label: 'Marge en %' },
+        { key: 'Marge', label: 'Marge UF' },
         { key: 'MargeDealer', label: 'Marge de revendeur' },
+        { key: 'MargeParticular', label: 'Marge particulier' },
         { key: 'Description', label: 'Description' },
     ];
 
@@ -105,6 +107,7 @@ export class ImportArticleComponent implements OnInit {
                     Form.append('price_dealer', column[this.Columns.PriceDealer]);
                     Form.append('marge', column[this.Columns.Marge]);
                     Form.append('marge_dealer', column[this.Columns.MargeDealer]);
+                    Form.append('marge_particular', column[this.Columns.MargeParticular]);
                     Form.append('description', '');
                     Form.append('short_description', '');
                     Form.append('mark', column[this.Columns.Mark]);
