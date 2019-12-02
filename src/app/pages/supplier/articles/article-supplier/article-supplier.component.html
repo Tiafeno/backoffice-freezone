@@ -42,7 +42,7 @@
                       [attr.data-article]="article.id" [src]="article.product_thumbnail.src" alt="image" width="60">
                   </td>
                   <td>
-                    <a class="text-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
+                    <a class="text-blue" (click)="onEditArticle(article.id)">{{article.title.raw}}</a>
                   </td>
                   <td><span class="badge" [ngClass]="{'badge-blue': article.status === 'publish',
                             'badge-pink': article.status === 'draft',

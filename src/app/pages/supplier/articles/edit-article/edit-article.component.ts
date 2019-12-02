@@ -239,7 +239,7 @@ export class EditArticleComponent implements OnInit {
       const priceParticular: number = this.services.getBenefit(price, this._article.marge_particular);
 
       this.Form.patchValue({
-        title: this._article.title.rendered,
+        title: this._article.title.raw,
         price: this._article.price,
         priceDealer: Math.round(priceDealer),
         pricePro: Math.round(pricePro),
