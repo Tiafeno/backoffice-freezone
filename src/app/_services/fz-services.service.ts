@@ -64,8 +64,8 @@ export class FzServicesService {
   }
 
   public getBenefit(price: any, marge: any, discount?: number): number {
-    const _price = parseInt(price, 10);
-    const _marge = parseInt(marge, 10);
+    const _price = parseFloat(price);
+    const _marge = parseFloat(marge);
     const Y: number = 1 - (_marge / 100);
     const result: number = _price / Y;
     /**
