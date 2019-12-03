@@ -26,30 +26,35 @@
                   <th>Designation</th>
                   <th>Statut</th>
                   <th>Prix de revient</th>
-                  <th>Prix Part.</th>
-                  <th>%UF</th>
                   <th>Prix UF</th>
-                  <th>%R</th>
+                  <th>%UF</th>
+                  <th>Prix Part.</th>
+                  <th>%P</th>
                   <th>Prix Rev.</th>
+                  <th>%R</th>
                   <th>F.</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let article of Products">
+                  <!-- Image -->
                   <td>
                     <img class="update-thumbnail" [attr.data-product]="article.product_id"
                       [attr.data-article]="article.id" [src]="article.product_thumbnail.src" alt="image" width="60">
                   </td>
+                  <!-- Designation -->
                   <td>
                     <a class="text-blue" (click)="onEditArticle(article.id)">{{article.title.raw}}</a>
                   </td>
+                  <!-- Statut -->
                   <td><span class="badge" [ngClass]="{'badge-blue': article.status === 'publish',
                             'badge-pink': article.status === 'draft',
                             'badge-warning': article.status === 'pending'}" (click)="onChangeStatus(article)"
                       style="cursor: pointer">
                       {{article.status === 'publish' ? 'PUBLIER' : (article.status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                   </td>
+                  <!-- Prix de revient -->
                   <td *ngIf="isNumber(article.price)">
                     <span data-toggle="tooltip" data-placement="top"
                       title="{{article.price * 5 | currency:'FMG':'symbole':'4.0-2':'fr'}}">
@@ -57,21 +62,30 @@
                     </span>
                   </td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
+                  <!-- Prix UF -->
+                  <td>{{article.priceUF | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
+                  <!-- Marge UF -->
+                  <td>{{article.marge}}</td>
+                  <!-- Prix particulier -->
                   <td *ngIf="isNumber(article.price_particular)">
                     {{article.price_particular | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}
                   </td>
                   <td *ngIf="!isNumber(article.price_particular)"><span
                       class="badge badge-default">{{article.price_particular}}</span>
                   </td>
-                  <td>{{article.marge}}</td>
-                  <td>{{article.priceUF | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
-                  <td>{{article.marge_dealer}}</td>
+                  <!-- Marge particulier -->
+                  <td>{{article.marge_particular}}</td>
+                  <!-- Prix revendeur -->
                   <td>{{article.price_dealer | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
+                  <!-- Marge revendeur -->
+                  <td>{{article.marge_dealer}}</td>
+                  <!-- Reference du fournisseur -->
                   <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']"
                       routerLinkActive="active" class="badge badge-info">
                       {{article.supplier.reference}}
                     </a>
                   </td>
+                  <!-- Edition -->
                   <td>
                     <a class="text-blue font-16" title="Modifier"
                       (click)="onChangeRoute('/articles/edit/' + article.product_id)">

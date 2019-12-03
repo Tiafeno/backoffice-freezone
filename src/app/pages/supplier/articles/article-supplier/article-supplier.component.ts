@@ -264,9 +264,9 @@ export class ArticleSupplierComponent implements OnInit {
       this.Products = _.isEmpty(fzProducts) ? [] : fzProducts;
       this.Products = _.map(this.Products, product => {
          const price = parseInt(product.price, 10);
-         const _marge = parseInt(product.marge, 10);
-         const _margeDealer = parseInt(product.marge_dealer, 10);
-         const _margeParticular = parseInt(product.marge_particular, 10);
+         const _marge = parseFloat(product.marge);
+         const _margeDealer = parseFloat(product.marge_dealer);
+         const _margeParticular = parseFloat(product.marge_particular);
          product.marge_particular = this.adminAccess ? (_.isNaN(_margeParticular) ? 'Non définie' : _margeParticular + '%') : 'Restreint';
          product.marge_dealer = this.adminAccess ? (_.isNaN(_margeDealer) ? 'Non définie' : _margeDealer + '%') : "Restreint";
          product.marge = this.adminAccess ? (_.isNaN(_marge) ? 'Non définie' : _marge + '%') : "Restreint";
