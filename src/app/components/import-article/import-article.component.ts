@@ -108,7 +108,7 @@ export class ImportArticleComponent implements OnInit {
                     Form.append('marge', column[this.Columns.Marge]);
                     Form.append('marge_dealer', column[this.Columns.MargeDealer]);
                     Form.append('marge_particular', column[this.Columns.MargeParticular]);
-                    Form.append('description', '');
+                    Form.append('description', column[this.Columns.Description]);
                     Form.append('short_description', '');
                     Form.append('mark', column[this.Columns.Mark]);
                     Form.append('reference', column[this.Columns.SupplierRef]);
