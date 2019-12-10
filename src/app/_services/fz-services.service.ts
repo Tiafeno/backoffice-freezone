@@ -5,13 +5,18 @@ import { ApiWoocommerceService } from './api-woocommerce.service';
 import { Observable } from 'rxjs/Observable';
 import { environment } from '../../environments/environment';
 import { of } from 'rxjs/observable/of';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable()
 export class FzServicesService {
   private Woocommerce: any;
   private Wordpress: any;
   public postResponseCache = new Map();
+  public httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type':  'application/json'
+    })
+  };
 
   constructor(
     private apiWp: ApiWordpressService,

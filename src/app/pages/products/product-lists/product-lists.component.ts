@@ -1,12 +1,13 @@
-import {Component, OnInit} from '@angular/core';
-import {ApiWoocommerceService} from '../../../_services/api-woocommerce.service';
-import {ApiWordpressService} from '../../../_services/api-wordpress.service';
+import { Component, OnInit } from '@angular/core';
+import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
+import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as moment from 'moment';
-import {config} from '../../../../environments/environment';
+import { config } from '../../../../environments/environment';
 import * as _ from 'lodash';
-import {Helpers} from '../../../helpers';
+import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 declare var $: any;
 
@@ -23,7 +24,8 @@ export class ProductListsComponent implements OnInit {
   constructor(
     private apiWc: ApiWoocommerceService,
     private apiWp: ApiWordpressService,
-    private router: Router
+    private router: Router,
+    private Http: HttpClient
   ) {
     this.WCAPI = this.apiWc.getWoocommerce();
     this.WPAPI = this.apiWp.getWPAPI();
@@ -60,7 +62,7 @@ export class ProductListsComponent implements OnInit {
         },
         {
           data: 'name', render: (data, type, row) => {
-            return `<span class="edit-product font-strong">${data}</span>`;
+            return `<span class="edit-product font-strong" style="cursor: pointer">${data}</span>`;
           }
         },
         {
@@ -101,31 +103,35 @@ export class ProductListsComponent implements OnInit {
         }
       ],
       initComplete: (setting, json) => {
+        // Pour supprimer un produit
         $('#products-table tbody').on('click', '.remove-product', ev => {
           ev.preventDefault();
           Swal.fire({
             title: 'Confirmation',
-            text: 'Voulez vous vraiment supprimer ce produit?',
+            text: 'Supprimer un produit revient à supprimer tous les articles similaire aux fournisseurs. Voulez vous vraiment supprimer ce produit?',
             type: 'warning',
             showCancelButton: true
           }).then(result => {
             if (result.value) {
               Helpers.setLoading(true);
               const __product: any = getElementData(ev);
-              this.WCAPI.delete(`products/${__product.ID}?force=true`, (err, data, res) => {
-                Helpers.setLoading(false);
-                this.reload();
+              this.WCAPI.delete(`products/${__product.ID}?force=true`, async (err, data, res) => {
+                let remove = await this.Http.post<any>(`${config.apiUrl}/product/remove/${__product.ID}`, new FormData());
+                remove.subscribe(resp => {
+                  Helpers.setLoading(false);
+                  this.reload();
+                });
               });
             }
           });
         });
 
+        //  Ajouter une envennement dans le titre
         $('#products-table tbody').on('click', '.edit-product', e => {
           e.preventDefault();
           const __product: any = getElementData(e);
           this.router.navigate(['/product', __product.ID]);
         });
-
       },
       ajax: {
         url: `${config.apiUrl}/product/`,

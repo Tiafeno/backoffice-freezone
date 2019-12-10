@@ -8,6 +8,8 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Helpers } from '../../../helpers';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/zip';
+import { HttpClient } from '@angular/common/http';
+import { config } from '../../../../environments/environment';
 
 @Component({
     selector: 'app-product-edit',
@@ -40,14 +42,13 @@ export class ProductEditComponent implements OnInit {
     constructor(
         private fzServices: FzServicesService,
         private route: ActivatedRoute,
-        private apiWC: ApiWoocommerceService
+        private apiWC: ApiWoocommerceService,
+        private Http: HttpClient
     ) {
         this.WC = this.apiWC.getWoocommerce();
         this.Form = new FormGroup({
             name: new FormControl('', Validators.required),
             description: new FormControl(''),
-            marge: new FormControl('', Validators.required),
-            marge_dealer: new FormControl('', Validators.required),
             sku: new FormControl('', Validators.required),
             categorie: new FormControl('', Validators.required)
         })
@@ -94,27 +95,28 @@ export class ProductEditComponent implements OnInit {
         }
         let Value: any = this.Form.value;
         let Ctg: Array<any> = _.map(Value.categorie, ctg => { return { id: ctg }; });
-        let metaData: any = this.Product.meta_data;
-
-        metaData = _.reject(metaData, (meta) => meta.key === '_fz_marge' || meta.key === '_fz_marge_dealer');
-        metaData.push({ key: '_fz_marge', value: Value.marge }, { key: '_fz_marge_dealer', value: Value.marge_dealer });
-
         let data: any = {
             name: Value.name,
             description: Value.description,
             sku: Value.sku,
             categories: _.clone(Ctg),
-            meta_data: metaData
         };
         Helpers.setLoading(true);
-        this.WC.put(`products/${this.ID}`, data, (err, data, res) => {
-            Helpers.setLoading(false);
-            let response: any = JSON.parse(res);
-            if (!_.isUndefined(response.code)) {
-                Swal.fire('Désolé', response.message, 'error');
-                return false;
-            }
-            Swal.fire('Succès', "Produit mis à jour avec succès", 'success');
+        this.WC.put(`products/${this.ID}`, data, async (err, data, res) => {
+            let formdata = new FormData();
+            formdata.append('title', Value.name);
+            formdata.append('description', Value.description);
+            let update = await this.Http.post<any>(`${config.apiUrl}/product/update/${this.ID}`, formdata);
+            update.subscribe(resp => {
+                Helpers.setLoading(false);
+                let response: any = JSON.parse(res);
+                if (!_.isUndefined(response.code)) {
+                    Swal.fire('Désolé', response.message, 'error');
+                    return false;
+                }
+                Swal.fire('Succès', "Produit mis à jour avec succès", 'success');
+            });
+
         });
     }
 
