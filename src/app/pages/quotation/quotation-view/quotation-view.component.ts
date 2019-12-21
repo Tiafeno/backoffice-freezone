@@ -113,7 +113,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
         let aIds: Array<any> = _(this.Items).map((item: OrderItem) => {
             let metadata: Array<Metadata> = item.meta_data;
-            let suppliers: any = _.find(metadata, {key: 'suppliers'});
+            let suppliers: any = _.find(metadata, { key: 'suppliers' });
             if (_.isUndefined(suppliers)) return null;
             suppliers = JSON.parse(suppliers.value);
             if (_.isEmpty(suppliers)) return null;
@@ -122,7 +122,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return parseInt(sup.article_id, 10);
             }).filter(!_.isNaN).value();
         }).flatten().filter(value => value !== null).value();
-        
+
         console.log(aIds);
         const ARTICLES = _.isEmpty(aIds) ? [] : await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
         // Si la position ne sont pas: Envoyer, Rejeter, Accepter et Terminée
@@ -179,7 +179,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             const hasStockRequest = (): boolean => {
                 let stockR = _.find(meta_data, { key: 'stock_request' });
                 if (_.isUndefined(stockR)) return false;
-                return _.isEqual( parseInt(stockR.value, 10), 0) ? false : true;
+                return _.isEqual(parseInt(stockR.value, 10), 0) ? false : true;
             };
 
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
@@ -196,7 +196,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return item;
             }
 
-            
+
             item.discountTypeFn = (): number => {
                 return discountTypeFn();
             };

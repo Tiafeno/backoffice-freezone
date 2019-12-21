@@ -8,6 +8,7 @@ import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { FormGroup, FormControl } from '@angular/forms';
 
 declare var $: any;
 
@@ -20,6 +21,7 @@ export class ProductListsComponent implements OnInit {
   private WCAPI: any;
   private WPAPI: any;
   public Table: any;
+  public searchForm: FormGroup;
 
   constructor(
     private apiWc: ApiWoocommerceService,
@@ -29,15 +31,29 @@ export class ProductListsComponent implements OnInit {
   ) {
     this.WCAPI = this.apiWc.getWoocommerce();
     this.WPAPI = this.apiWp.getWPAPI();
+    this.searchForm = new FormGroup({
+      query: new FormControl('')
+    });
   }
 
   public reload() {
     this.Table.ajax.reload(null, false);
   }
 
+  public onSubmitSearch(event: any) {
+    
+    if (event.keyCode == 13) { // Touche entrer
+      event.preventDefault();
+      this.loadDatatbl();
+    }
+  }
+
   ngOnInit() {
     moment.locale('fr');
+    this.loadDatatbl();
+  }
 
+  public loadDatatbl() {
     const getElementData = (ev: any): any => {
       const el = $(ev.currentTarget).parents('tr');
       const data = this.Table.row(el).data();
@@ -45,6 +61,9 @@ export class ProductListsComponent implements OnInit {
     };
 
     const productsTable = $('#products-table');
+    if ($.fn.dataTable.isDataTable('#products-table')) {
+      this.Table.destroy();
+    }
     this.Table = productsTable.DataTable({
       pageLength: 10,
       page: 1,
@@ -55,11 +74,6 @@ export class ProductListsComponent implements OnInit {
       processing: true,
       serverSide: true,
       columns: [
-        {
-          data: 'ID', render: (data) => {
-            return `<span>${data}</span>`;
-          }
-        },
         {
           data: 'name', render: (data, type, row) => {
             return `<span class="edit-product font-strong" style="cursor: pointer">${data}</span>`;
@@ -136,8 +150,16 @@ export class ProductListsComponent implements OnInit {
       ajax: {
         url: `${config.apiUrl}/product/`,
         dataType: 'json',
-        data: {
-          order: false,
+        data: d => {
+          let query: any = {};
+          const searchBy = () => {
+            const formValue: any = this.searchForm.value;
+            return formValue.query;
+          };
+          query.length = d.length; 
+          query.start = d.start;
+          query.search = searchBy();
+          return query;
         },
         beforeSend: function (xhr) {
           const __fzCurrentUser: any = JSON.parse(localStorage.getItem('__fzCurrentUser'));
@@ -149,6 +171,7 @@ export class ProductListsComponent implements OnInit {
         type: 'POST',
       }
     });
+
   }
 
 
