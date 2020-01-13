@@ -20,17 +20,25 @@ export class JwtInterceptorService implements HttpInterceptor {
     return next.handle(request).do(event => { }, err => {
       if (err instanceof HttpErrorResponse) { // here you can even check for err.status == 404 | 401 etc
         if (err.status == 401 || err.status == 511 || err.status == 500) {
-          setTimeout(() => {
-            location.reload();
-            localStorage.removeItem('__fzCurrentUser');
-          }, 1500);
+            this.logOut();
         } else {
           console.log(err);
-          Swal.fire('Erreur', err.message, 'error');
+          if (err.error.code === 'jwt_auth_invalid_token') {
+            setTimeout(() => {
+              this.logOut();
+            }, 1500);
+          } else {
+            Swal.fire('Erreur', err.message, 'error');
+          }
         }
         Observable.throw(err); // send data to service which will inform the component of the error and in turn the user
       }
     });
+  }
+
+  public logOut() {
+    localStorage.removeItem('__fzCurrentUser');
+    location.reload();
   }
 
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 declare var $:any;
 
 @Component({
@@ -9,6 +9,7 @@ declare var $:any;
 export class FilterSearchArticleComponent implements OnInit {
   public item: string = '';
   @Output() findword = new EventEmitter();
+  @Input() placeh: string = "De quoi avez-vous besoin ?";
   constructor() { }
 
   ngOnInit() {

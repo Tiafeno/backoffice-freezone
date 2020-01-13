@@ -20,3 +20,16 @@ export class Supplier {
     rc?: any;
     cif?: any;
 }
+
+
+export class FzProductCSV {
+    id: number;
+    title: string;
+    price: number;
+    marge: number;
+    marge_dealer: number;
+    marge_particular: number;
+    price_particular?: any;
+    price_dealer?: any;
+    price_UF?: any;
+}

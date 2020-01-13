@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, ChangeDetectorRef, EventEmitter, Input, AfterViewInit } from '@angular/core';
+import { Component, OnInit, Output, ChangeDetectorRef, EventEmitter, Input, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { FzSecurityService } from '../../../_services/fz-security.service';
 import { Router } from '@angular/router';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
@@ -13,7 +13,8 @@ declare var $: any;
 @Component({
   selector: 'app-quotation-custom',
   templateUrl: './quotation-custom.component.html',
-  styleUrls: ['./quotation-custom.component.css']
+  styleUrls: ['./quotation-custom.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class QuotationCustomComponent implements OnInit, AfterViewInit {
 
@@ -84,7 +85,8 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
         {
           data: 'author', render: (data, type, row) => {
             if (!_.isObjectLike(data)) return 'Client introuvable';
-            return _.isEmpty(data.company_name) || _.isNull(data.company_name) ? `<span>${data.last_name} ${data.first_name}</span>` : data.company_name;
+            let name = _.isEmpty(data.company_name) || _.isNull(data.company_name) ? data.last_name + ' ' + data.first_name : data.company_name;
+            return `<span class="view-client">${name}</span>`
           }
         },
         {
@@ -127,6 +129,12 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
           ev.preventDefault();
           let __quotation = this.getRowElement(ev);
           this.router.navigate(['dashboard', 'quotation', __quotation.ID]);
+        });
+
+        $(`#quotation-${this.Balise}-table tbody`).on('click', '.view-client', ev => {
+          ev.preventDefault();
+          let __quotation = this.getRowElement(ev);
+          this.router.navigate(['client', __quotation.user_id, 'edit']);
         });
 
         $(`#quotation-${this.Balise}-table tbody`).on('click', '.status-switcher', e => {

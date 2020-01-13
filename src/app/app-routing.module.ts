@@ -82,6 +82,7 @@ import { PrestationsComponent } from './pages/prestations/prestations.component'
 import { NoTechnicianAccessGuard } from './guards/no-technician-access.guard';
 import { GoodDealEditComponent } from './pages/good-deal/good-deal-edit/good-deal-edit.component';
 import { GoodDealListsComponent } from './pages/good-deal/good-deal-lists/good-deal-lists.component';
+import { ToExcelComponent } from './components/to-excel/to-excel.component';
 
 
 const routes: Routes = [
@@ -347,6 +348,7 @@ const routes: Routes = [
         PrestationsComponent,
         GoodDealEditComponent,
         GoodDealListsComponent,
+        ToExcelComponent,
         MomentsPipe,
         BenefitPipe,
         ArticleRemoverDirective
