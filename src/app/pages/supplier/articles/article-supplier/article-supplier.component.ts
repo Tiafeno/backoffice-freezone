@@ -14,6 +14,8 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FzServicesService } from '../../../../_services/fz-services.service';
 import * as moment from 'moment';
+import { MSG } from '../../../../defined';
+import { ToExcelComponent } from '../../../../components/to-excel/to-excel.component';
 
 declare var $: any;
 
@@ -42,6 +44,7 @@ export class ArticleSupplierComponent implements OnInit {
    @ViewChild(FilterSearchArticleComponent) public Search: FilterSearchArticleComponent;
    @ViewChild(ImportArticleComponent) public Importation: ImportArticleComponent;
    @ViewChild(StatusArticleComponent) public Status: StatusArticleComponent;
+   @ViewChild(ToExcelComponent) public toExcel: ToExcelComponent;
 
    constructor(
       private apiWC: ApiWoocommerceService,
@@ -75,6 +78,23 @@ export class ArticleSupplierComponent implements OnInit {
          this.cd.detectChanges();
       });
 
+      $('#add-article').on('click', e => {
+         e.preventDefault();
+         if (!this.authorisation.isAdministrator()) {
+            Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
+            return false;
+         }
+         $('#add-article-supplier-modal').modal('show');
+      });
+
+      $('#import-article').on('click', e => {
+         e.preventDefault();
+         if (!this.authorisation.isAdministrator()) {
+            Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
+            return false;
+         }
+         $('#import-article-modal').modal('show');
+      });
    }
 
    public onSearchWord($event): void {
@@ -106,7 +126,7 @@ export class ArticleSupplierComponent implements OnInit {
          this.articleEdit = _.clone(article);
          $('#status-product-modal').modal('show');
       } else {
-         Swal.fire('Accès', "Accès non-aurotisé", 'error');
+         Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
       }
    }
 
@@ -246,30 +266,14 @@ export class ArticleSupplierComponent implements OnInit {
       this.Products = _.isEmpty(fzProducts) ? [] : fzProducts;
       this.Products = _.map(this.Products, product => {
          const price = parseInt(product.price, 10);
-         const _marge = parseInt(product.marge, 10);
-         const _margeDealer = parseInt(product.marge_dealer, 10);
-         const _margeParticular = parseInt(product.marge_particular, 10);
-         product.marge_particular = this.adminAccess ? (_.isNaN(_margeParticular) ? 'Non définie' : _margeParticular + '%') : 'Restreint';
-         product.marge_dealer = this.adminAccess ? (_.isNaN(_margeDealer) ? 'Non définie' : _margeDealer + '%') : "Restreint";
-         product.marge = this.adminAccess ? (_.isNaN(_marge) ? 'Non définie' : _marge + '%') : "Restreint";
+         const { marge, marge_dealer, marge_particular } = product;
+         product.marge_particular = this.adminAccess ? (_.isNaN(marge_particular) ? 'Non définie' : marge_particular + '%') : 'Restreint';
+         product.marge_dealer = this.adminAccess ? (_.isNaN(marge_dealer) ? 'Non définie' : marge_dealer + '%') : "Restreint";
+         product.marge = this.adminAccess ? (_.isNaN(marge) ? 'Non définie' : marge + '%') : "Restreint";
 
-         if (!_.isNaN(_margeParticular)) {
-            product.price_particular = this.adminAccess ? this.services.getBenefit(price, _margeParticular) : 'Restreint';
-         } else {
-            product.price_particular = 'Non définie';
-         }
-
-         if (!_.isNaN(_margeDealer)) {
-            product.price_dealer = this.adminAccess ? this.services.getBenefit(price, _margeDealer) : 'Restreint';
-         } else {
-            product.price_dealer = 'Non définie';
-         }
-
-         if (!_.isNaN(_marge)) {
-            product.priceUF = this.services.getBenefit(price, _marge);
-         } else {
-            product.priceUF = 'Non définie';
-         }
+         product.price_particular = this.services.getBenefit(price, marge_particular);
+         product.price_dealer = this.services.getBenefit(price, marge_dealer);
+         product.priceUF = this.services.getBenefit(price, marge);
          product.price = this.adminAccess ? price : 'Restreint';
          return product;
       });

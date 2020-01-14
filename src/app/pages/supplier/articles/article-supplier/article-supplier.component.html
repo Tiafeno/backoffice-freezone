@@ -5,10 +5,11 @@
       <app-filter-article [word]="findWord" (search)="onSubmit($event)"></app-filter-article>
       <div class="mb-3">
         <span>
-          <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#add-article-supplier-modal">Ajouter
+          <button class="btn btn-sm btn-primary" data-toggle="modal" id="add-article">Ajouter
             un article</button>
-          <button class="btn btn-sm btn-warning" data-toggle="modal" data-target="#import-article-modal">+ Importer des
+          <button class="btn btn-sm btn-warning" data-toggle="modal" id="import-article">+ Importer des
             articles (Non recommandé)</button>
+            <app-to-excel></app-to-excel>
         </span>
       </div>
       <div class="ibox">
@@ -25,31 +26,36 @@
                   <th>Image</th>
                   <th>Designation</th>
                   <th>Statut</th>
-                  <th>Prix de vente</th>
-                  <th>Prix Part.</th>
-                  <th>%UF</th>
+                  <th>Prix de revient</th>
                   <th>Prix UF</th>
-                  <th>%R</th>
+                  <th>%UF</th>
+                  <th>Prix Part.</th>
+                  <th>%P</th>
                   <th>Prix Rev.</th>
+                  <th>%R</th>
                   <th>F.</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let article of Products">
+                  <!-- Image -->
                   <td>
                     <img class="update-thumbnail" [attr.data-product]="article.product_id"
                       [attr.data-article]="article.id" [src]="article.product_thumbnail.src" alt="image" width="60">
                   </td>
+                  <!-- Designation -->
                   <td>
-                    <a class="text-blue" (click)="onEditArticle(article.id)">{{article.title.rendered}}</a>
+                    <a class="text-blue" (click)="onEditArticle(article.id)">{{article.title.raw}}</a>
                   </td>
+                  <!-- Statut -->
                   <td><span class="badge" [ngClass]="{'badge-blue': article.status === 'publish',
                             'badge-pink': article.status === 'draft',
                             'badge-warning': article.status === 'pending'}" (click)="onChangeStatus(article)"
                       style="cursor: pointer">
                       {{article.status === 'publish' ? 'PUBLIER' : (article.status === 'pending' ? 'EN ATTENTE' : 'DESACTIVER')}}</span>
                   </td>
+                  <!-- Prix de revient -->
                   <td *ngIf="isNumber(article.price)">
                     <span data-toggle="tooltip" data-placement="top"
                       title="{{article.price * 5 | currency:'FMG':'symbole':'4.0-2':'fr'}}">
@@ -57,28 +63,39 @@
                     </span>
                   </td>
                   <td *ngIf="!isNumber(article.price)"><span class="badge badge-default">{{article.price}}</span></td>
+                  <!-- Prix UF -->
+                  <td>{{article.priceUF | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
+                  <!-- Marge UF -->
+                  <td>{{article.marge}}</td>
+                  <!-- Prix particulier -->
                   <td *ngIf="isNumber(article.price_particular)">
                     {{article.price_particular | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}
                   </td>
                   <td *ngIf="!isNumber(article.price_particular)"><span
                       class="badge badge-default">{{article.price_particular}}</span>
                   </td>
-                  <td>{{article.marge}}</td>
-                  <td>{{article.priceUF | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
-                  <td>{{article.marge_dealer}}</td>
+                  <!-- Marge particulier -->
+                  <td>{{article.marge_particular}}</td>
+                  <!-- Prix revendeur -->
                   <td>{{article.price_dealer | benefit | currency:'MGA':'symbole':'4.0-2':'fr'}}</td>
+                  <!-- Marge revendeur -->
+                  <td>{{article.marge_dealer}}</td>
+                  <!-- Reference du fournisseur -->
                   <td><a target="_blank" [routerLink]="['/supplier', article.supplier.ID, 'edit']"
                       routerLinkActive="active" class="badge badge-info">
                       {{article.supplier.reference}}
                     </a>
                   </td>
+                  <!-- Edition -->
                   <td>
-                    <a class="text-blue font-16" data-toggle="tooltip" data-placement="top" title="Modifier"
+                    <a class="text-blue font-16" title="Modifier"
                       (click)="onChangeRoute('/articles/edit/' + article.product_id)">
-                      <i class="ti-pencil-alt"></i></a>
-                    <a class="font-16 text-danger" data-toggle="tooltip" data-placement="top" title="Supprimer"
+                      <i class="ti-pencil-alt"></i>
+                    </a>
+                    <a class="font-16 text-danger"  title="Supprimer"
                       appArticleRemover [articleId]="article.id" (onRefresh)="onRefreshResults()"><i
-                        class="ti-trash"></i></a>
+                        class="ti-trash"></i>
+                    </a>
                   </td>
                 </tr>
               </tbody>
@@ -93,19 +110,21 @@
         </div>
       </div>
 
+      <!-- Ajouter une article -->
       <div class="modal fade" id="add-article-supplier-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <app-add-article (refresh)="onRefreshResults()"></app-add-article>
         </div>
       </div>
 
+      <!-- Modifier une article -->
       <div class="modal fade" id="edit-article-supplier-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
-
           <app-edit-article [article]="Editor" (refresh)="onRefreshResults()"></app-edit-article>
         </div>
       </div>
 
+      <!-- Importer des articles via un fichier CSV -->
       <div class="modal fade" id="import-article-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <app-import-article (refresh)="onRefreshResults()"></app-import-article>
@@ -118,6 +137,7 @@
         </div>
       </div>
 
+      <!-- Ajouter ou remplacer les image à la une des produits -->
       <div class="modal fade" id="update-thumbnail-modal" data-backdrop="static">
         <div class="modal-dialog" role="document">
           <form class="modal-content" [formGroup]="thumbForm" (ngSubmit)="onSubmitThumbnail()">

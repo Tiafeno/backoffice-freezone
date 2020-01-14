@@ -15,15 +15,13 @@
             <div class="col-sm-6">
               <div class="form-group mb-4">
                 <label class="font-light">Nom <span style="color: red">*</span></label>
-                <input class="form-control" autocomplete="off" formControlName="last_name" type="text" id="last_name"
-                  name="last_name" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="last_name" type="text" id="last_name" placeholder="">
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group mb-4">
                 <label class="font-light">Prénom</label>
-                <input class="form-control" autocomplete="off" formControlName="first_name" type="text" id="first_name"
-                  name="first_name" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="first_name" type="text" id="first_name" placeholder="">
               </div>
             </div>
           </div>
@@ -32,8 +30,16 @@
             <div class="col-md-6">
               <div class="form-group mb-4">
                 <label class="font-light">Adresse E-mail <span style="color: red">*</span></label>
-                <input class="form-control" autocomplete="off" formControlName="email" type="text" id="email"
-                  name="email" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="email" type="text" id="email" placeholder="">
+              </div>
+            </div>
+          </div>
+<!--  -->
+          <div class="row" *ngIf="clientRole === 'fz-company'">
+            <div class="col-md-6">
+              <div class="form-group mb-4">
+                <label class="font-light">Nom d'entreprise <span style="color: red">*</span></label>
+                <input class="form-control" autocomplete="off" formControlName="company_name" type="text" id="company_name" placeholder="">
               </div>
             </div>
           </div>
@@ -42,8 +48,7 @@
             <div class="col-sm-6">
               <div class="form-group mb-4">
                 <label class="font-light">Adresse <span style="color: red">*</span></label>
-                <input class="form-control" autocomplete="off" formControlName="address" id="address" name="address"
-                  type="text" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="address" id="address" type="text" placeholder="">
                 <div *ngIf="f.address.errors && f.address.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>
@@ -53,8 +58,7 @@
             <div class="col-sm-6">
               <div class="form-group mb-4">
                 <label class="font-light">Numéro de téléphone</label>
-                <input class="form-control" autocomplete="off" formControlName="phone" id="phone" name="phone"
-                  type="text" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="phone" id="phone" type="text" placeholder="">
                 <div *ngIf="f.phone.errors && f.phone.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>

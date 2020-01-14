@@ -66,7 +66,7 @@
             <div class="col-sm-6">
               <div class="form-group mb-2">
                 <label>Prix de vente UF</label>
-                <input class="form-control" onkeypress="return false;" min="0" formControlName="pricePro" type="number"
+                <input class="form-control" onkeypress="return false;" min="0"  formControlName="pricePro" type="number"
                   id="price_pro" placeholder="">
                 <p class="help-block font-11"></p>
               </div>
@@ -74,7 +74,7 @@
             <div class="col-sm-6">
               <div class="form-group mb-2">
                 <label>Marge <span style="color: red">*</span></label>
-                <input class="form-control" formControlName="margePro" min="0" (ngModelChange)="onChangeMarge($event)"
+                <input class="form-control" formControlName="margePro" min="0"  step="0.5" (ngModelChange)="onChangeMarge($event)"
                   type="number" id="marge" placeholder="Ajouter une marge">
                 <div *ngIf="f.margePro.errors && f.margePro.dirty">
                   <label id="marge-error" class="help-block error">Ce champ est obligatoire.</label>
@@ -100,7 +100,7 @@
         <div class="col-md-6">
           <div class="form-group mb-2">
             <label>Marge R. <span style="color: red">*</span></label>
-            <input class="form-control" formControlName="margeDealer" min="0" type="number"
+            <input class="form-control" formControlName="margeDealer" min="0"  step="0.5" type="number"
               (ngModelChange)="onChangeMargeDealer($event)" id="marge_dealer" placeholder="Ajouter une marge">
             <div *ngIf="f.margeDealer.errors && f.margeDealer.dirty">
               <label id="marge-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
@@ -124,7 +124,7 @@
         <div class="col-md-6">
           <div class="form-group mb-2">
             <label>Marge P. <span style="color: red">*</span></label>
-            <input class="form-control" formControlName="margeParticular" min="0" type="number"
+            <input class="form-control" formControlName="margeParticular" min="0"  step="0.5" type="number"
               (ngModelChange)="onChangeMargeParticular($event)" id="marge_particular" placeholder="Ajouter une marge">
             <div *ngIf="f.margeParticular.errors && f.margeParticular.dirty">
               <label id="marge-dealer-error" class="help-block error">Ce champ est obligatoire.</label>

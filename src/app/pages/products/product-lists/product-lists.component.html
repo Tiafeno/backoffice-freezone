@@ -6,20 +6,22 @@
         <div class="flexbox">
         </div>
         <div class="flexbox">
-          <div class="input-group-icon input-group-icon-left mr-3">
+
+          <form class="input-group-icon input-group-icon-left mr-3" [formGroup]="searchForm" style="width: 5in">
             <span class="input-icon input-icon-right font-16"><i class="ti-search"></i></span>
             <input class="form-control form-control-rounded form-control-solid" id="key-search" type="text"
-              placeholder="Search ...">
-          </div>
+              formControlName="query" (keypress)="onSubmitSearch($event)" placeholder="Search ...">
+          </form>
+
           <a class="btn btn-rounded btn-primary btn-air" [routerLink]="['/product', 'new']"
             routerLinkActive="router-link-active">Ajouter un produit</a>
         </div>
+
       </div>
       <div class="table-responsive row">
         <table class="table table-bordered table-hover" id="products-table">
           <thead class="thead-default thead-lg">
             <tr>
-              <th>ID</th>
               <th>Titre</th>
               <th>Reference</th>
               <th>Catégorie</th>
@@ -30,6 +32,8 @@
           </thead>
         </table>
       </div>
+
     </div>
+
   </div>
 </div>

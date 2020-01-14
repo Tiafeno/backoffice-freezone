@@ -10,6 +10,7 @@ import Swal from 'sweetalert2';
 import { ApiWoocommerceService } from '../../_services/api-woocommerce.service';
 import { FzSecurityService } from '../../_services/fz-security.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { AuthorizationService } from '../../_services/authorization.service';
 
 @Component({
   selector: 'app-clients',
@@ -28,6 +29,7 @@ export class ClientsComponent implements OnInit {
 
   constructor(
     private Security: FzSecurityService,
+    private auth: AuthorizationService,
     private apiWp: ApiWordpressService,
     private apiWc: ApiWoocommerceService,
     private router: Router,
@@ -134,8 +136,8 @@ export class ClientsComponent implements OnInit {
           data: 'meta_data', render: (data, type, row) => {
             let meta_disable: any = _.find(data, { key: 'ja_disable_user' });
             let meta_pending: any = _.find(data, { key: 'fz_pending_user' });
-            meta_disable =  _.isUndefined(meta_disable) ? 0 : meta_disable;
-            meta_pending =  _.isUndefined(meta_pending) ? 0 : meta_pending;
+            meta_disable = _.isUndefined(meta_disable) ? 0 : meta_disable;
+            meta_pending = _.isUndefined(meta_pending) ? 0 : meta_pending;
             let disable_value = parseInt(meta_disable.value, 10);
             let pending_value = parseInt(meta_pending.value, 10);
 
@@ -210,8 +212,11 @@ export class ClientsComponent implements OnInit {
 
         $('#clients-table tbody').on('click', '.switch-status', e => {
           e.preventDefault();
+          if (!this.auth.isAdministrator()) {
+            Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+            return false;
+          }
           const __clt: any = getElementData(e);
-
           let meta_disable: any = _.find(__clt.meta_data, { key: 'ja_disable_user' });
           let meta_pending: any = _.find(__clt.meta_data, { key: 'fz_pending_user' });
           const editDisabled = _.isUndefined(meta_disable) ? 0 : parseInt(meta_disable.value, 10);

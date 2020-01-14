@@ -50,6 +50,7 @@ export class EditClientComponent implements OnInit {
       cin: new FormControl(''), // Meta data
       date_cin: new FormControl(''), // Meta data
       company_status: new FormControl(''), // Meta data
+      company_name: new FormControl(''), // Meta data
     });
 
     /**
@@ -119,7 +120,8 @@ export class EditClientComponent implements OnInit {
             nif: this.getMetaDataValue('nif'),
             rc: this.getMetaDataValue('rc'),
             cif: this.getMetaDataValue('cif'),
-            company_status: companyStatus
+            company_status: companyStatus,
+            company_name: this.getMetaDataValue('company_name'),
           });
         }
 
@@ -157,7 +159,7 @@ export class EditClientComponent implements OnInit {
         return false;
       }
 
-      const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'company_status'];
+      const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'company_status', 'company_name'];
       this.MetaData = _.map(this.Customer.meta_data, (meta) => {
         if (meta.key === 'address') meta.value = Value.address;
         if (meta.key === 'phone') meta.value = Value.phone;
@@ -166,6 +168,7 @@ export class EditClientComponent implements OnInit {
         if (meta.key === 'rc') meta.value = Value.rc;
         if (meta.key === 'cif') meta.value = Value.cif;
         if (meta.key === 'company_status') meta.value = Value.company_status;
+        if (meta.key === 'company_name') meta.value = Value.company_name;
 
         return meta;
       });
@@ -185,11 +188,15 @@ export class EditClientComponent implements OnInit {
         shipping: this.shipForm.value
       };
 
+      let shipping: any = data.shipping;
+      data.shipping.company = Value.company_name; 
+
       let billing: any = data.billing;
       data.billing.postcode = data.shipping.postcode = billing.postcode.toString();
       data.billing.phone = _.isEmpty(billing.phone) ? Value.phone : billing.phone;
       data.billing.first_name = _.isEmpty(billing.first_name) ? Value.first_name : billing.first_name;
       data.billing.last_name = _.isEmpty(billing.last_name) ? Value.last_name : billing.last_name;
+      data.billing.company = Value.company_name;
 
       Helpers.setLoading(true);
 

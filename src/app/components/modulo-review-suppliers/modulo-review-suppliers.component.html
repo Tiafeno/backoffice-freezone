@@ -11,7 +11,7 @@
             <div class="media-heading">{{supplier.reference}} 
               <span *ngIf="supplier.sendReview" class="badge badge-blue badge-pill">Envoyer</span>
             </div>
-            <small class="text-muted">{{supplier.email}}</small>
+            <small class="text-muted" *ngIf="isAdmin" >{{supplier.email}}</small>
           </div>
           <button class="btn btn-sm btn-outline-secondary btn-rounded" (click)="onMail(supplier.id)">Envoyer un mail</button>
         </div>

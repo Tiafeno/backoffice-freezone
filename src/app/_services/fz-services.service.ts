@@ -5,13 +5,18 @@ import { ApiWoocommerceService } from './api-woocommerce.service';
 import { Observable } from 'rxjs/Observable';
 import { environment } from '../../environments/environment';
 import { of } from 'rxjs/observable/of';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable()
 export class FzServicesService {
   private Woocommerce: any;
   private Wordpress: any;
   public postResponseCache = new Map();
+  public httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type':  'application/json'
+    })
+  };
 
   constructor(
     private apiWp: ApiWordpressService,
@@ -64,8 +69,8 @@ export class FzServicesService {
   }
 
   public getBenefit(price: any, marge: any, discount?: number): number {
-    const _price = parseInt(price, 10);
-    const _marge = parseInt(marge, 10);
+    const _price = parseFloat(price);
+    const _marge = parseFloat(marge);
     const Y: number = 1 - (_marge / 100);
     const result: number = _price / Y;
     /**

@@ -6,6 +6,9 @@ import { ReviewMailSupplierComponent } from '../../pages/supplier/review-mail-su
 import { ApiWordpressService } from '../../_services/api-wordpress.service';
 import { Helpers } from '../../helpers';
 import * as moment from 'moment';
+import { AuthorizationService } from '../../_services/authorization.service';
+import Swal from 'sweetalert2';
+import { MSG } from '../../defined';
 
 @Component({
   selector: 'app-modulo-review-suppliers',
@@ -15,15 +18,18 @@ import * as moment from 'moment';
 export class ModuloReviewSuppliersComponent implements OnInit {
   public suppliers: Array<any> = [];
   public selectedSupplier: any;
+  public isAdmin: boolean;
   private Wordpress: any;
 
   @ViewChild(ReviewMailSupplierComponent) Mail: ReviewMailSupplierComponent;
   constructor(
     private apiWP: ApiWordpressService,
     private Http: HttpClient,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private auth: AuthorizationService
   ) { 
     this.Wordpress = this.apiWP.getWordpress();
+    this.isAdmin = this.auth.isAdministrator();
   }
 
   ngOnInit() {
@@ -47,6 +53,10 @@ export class ModuloReviewSuppliersComponent implements OnInit {
   }
 
   onMail(supplierId: number) {
+    if (!this.isAdmin) {
+      Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
+      return false;
+    }
     Helpers.setLoading(true);
     this.Wordpress.users().id(supplierId).context('edit').then(resp => {
       Helpers.setLoading(false);

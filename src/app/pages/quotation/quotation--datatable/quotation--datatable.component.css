@@ -1,3 +1,14 @@
 .status-switcher {
     cursor: pointer;
 }
+
+.search-quotation {
+    padding: 20px;
+    background-color: #5b4282;
+    color: white !important;
+}
+
+.search-quotation p,
+.search-quotation a {
+    color: white !important;
+} 

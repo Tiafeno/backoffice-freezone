@@ -1,12 +1,14 @@
-import {Component, OnInit} from '@angular/core';
-import {ApiWoocommerceService} from '../../../_services/api-woocommerce.service';
-import {ApiWordpressService} from '../../../_services/api-wordpress.service';
+import { Component, OnInit } from '@angular/core';
+import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
+import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as moment from 'moment';
-import {config} from '../../../../environments/environment';
+import { config } from '../../../../environments/environment';
 import * as _ from 'lodash';
-import {Helpers} from '../../../helpers';
+import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { FormGroup, FormControl } from '@angular/forms';
 
 declare var $: any;
 
@@ -19,23 +21,39 @@ export class ProductListsComponent implements OnInit {
   private WCAPI: any;
   private WPAPI: any;
   public Table: any;
+  public searchForm: FormGroup;
 
   constructor(
     private apiWc: ApiWoocommerceService,
     private apiWp: ApiWordpressService,
-    private router: Router
+    private router: Router,
+    private Http: HttpClient
   ) {
     this.WCAPI = this.apiWc.getWoocommerce();
     this.WPAPI = this.apiWp.getWPAPI();
+    this.searchForm = new FormGroup({
+      query: new FormControl('')
+    });
   }
 
   public reload() {
     this.Table.ajax.reload(null, false);
   }
 
+  public onSubmitSearch(event: any) {
+    
+    if (event.keyCode == 13) { // Touche entrer
+      event.preventDefault();
+      this.loadDatatbl();
+    }
+  }
+
   ngOnInit() {
     moment.locale('fr');
+    this.loadDatatbl();
+  }
 
+  public loadDatatbl() {
     const getElementData = (ev: any): any => {
       const el = $(ev.currentTarget).parents('tr');
       const data = this.Table.row(el).data();
@@ -43,6 +61,9 @@ export class ProductListsComponent implements OnInit {
     };
 
     const productsTable = $('#products-table');
+    if ($.fn.dataTable.isDataTable('#products-table')) {
+      this.Table.destroy();
+    }
     this.Table = productsTable.DataTable({
       pageLength: 10,
       page: 1,
@@ -54,13 +75,8 @@ export class ProductListsComponent implements OnInit {
       serverSide: true,
       columns: [
         {
-          data: 'ID', render: (data) => {
-            return `<span>${data}</span>`;
-          }
-        },
-        {
           data: 'name', render: (data, type, row) => {
-            return `<span class="edit-product font-strong">${data}</span>`;
+            return `<span class="edit-product font-strong" style="cursor: pointer">${data}</span>`;
           }
         },
         {
@@ -101,37 +117,49 @@ export class ProductListsComponent implements OnInit {
         }
       ],
       initComplete: (setting, json) => {
+        // Pour supprimer un produit
         $('#products-table tbody').on('click', '.remove-product', ev => {
           ev.preventDefault();
           Swal.fire({
             title: 'Confirmation',
-            text: 'Voulez vous vraiment supprimer ce produit?',
+            text: 'Supprimer un produit revient à supprimer tous les articles similaire aux fournisseurs. Voulez vous vraiment supprimer ce produit?',
             type: 'warning',
             showCancelButton: true
           }).then(result => {
             if (result.value) {
               Helpers.setLoading(true);
               const __product: any = getElementData(ev);
-              this.WCAPI.delete(`products/${__product.ID}?force=true`, (err, data, res) => {
-                Helpers.setLoading(false);
-                this.reload();
+              this.WCAPI.delete(`products/${__product.ID}?force=true`, async (err, data, res) => {
+                let remove = await this.Http.post<any>(`${config.apiUrl}/product/remove/${__product.ID}`, new FormData());
+                remove.subscribe(resp => {
+                  Helpers.setLoading(false);
+                  this.reload();
+                });
               });
             }
           });
         });
 
+        //  Ajouter une envennement dans le titre
         $('#products-table tbody').on('click', '.edit-product', e => {
           e.preventDefault();
           const __product: any = getElementData(e);
           this.router.navigate(['/product', __product.ID]);
         });
-
       },
       ajax: {
         url: `${config.apiUrl}/product/`,
         dataType: 'json',
-        data: {
-          order: false,
+        data: d => {
+          let query: any = {};
+          const searchBy = () => {
+            const formValue: any = this.searchForm.value;
+            return formValue.query;
+          };
+          query.length = d.length; 
+          query.start = d.start;
+          query.search = searchBy();
+          return query;
         },
         beforeSend: function (xhr) {
           const __fzCurrentUser: any = JSON.parse(localStorage.getItem('__fzCurrentUser'));
@@ -143,6 +171,7 @@ export class ProductListsComponent implements OnInit {
         type: 'POST',
       }
     });
+
   }
 
 

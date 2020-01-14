@@ -6,6 +6,7 @@ import { Helpers } from '../../../helpers';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import Swal from 'sweetalert2';
+import { AuthorizationService } from '../../../_services/authorization.service';
 declare var $: any;
 
 @Component({
@@ -16,6 +17,7 @@ declare var $: any;
 export class SavEditComponent implements OnInit {
   public ID: number = 0;
   public Author: any = {};
+  public isAdmin: boolean = true;
   public reference: string = '';
   public Form: FormGroup;
   private Wordpress: any;
@@ -46,8 +48,10 @@ export class SavEditComponent implements OnInit {
   constructor(
     private apiWP: ApiWordpressService,
     private route: ActivatedRoute,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private auth: AuthorizationService
   ) { 
+    this.isAdmin = this.auth.isAdministrator();
     this.Wordpress = this.apiWP.getWordpress();
     this.garenteeRange = _.range(1, 13, 1);
     this.Form = new FormGroup({
@@ -99,6 +103,10 @@ export class SavEditComponent implements OnInit {
 
   onSubmit() {
     if (this.Form.invalid) return;
+    if (!this.auth.isAdministrator()) {
+      Swal.fire('access refusé', "Vous n'avez pas l'autorisation", 'warning');
+      return false;
+    }
     const Value: any = this.Form.value;
     Helpers.setLoading(true);
     this.Wordpress.savs().id(this.ID).update({
