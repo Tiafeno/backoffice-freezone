@@ -1,0 +1,131 @@
+<button class="btn btn-sm btn-blue" (click)="onAddQuote($event)" id="import-article">+ Ajouter une demande</button>
+
+<div class="modal fade" id="quote-select-client-dialog" aria-labelledby="question-dialog" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header p-4">
+        <h5 class="modal-title">Selectionner un client</h5>
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body p-4">
+
+        <div class="row" *ngIf="step === 1">
+          <div class="col-sm-12">
+            <div class="form-group mb-4">
+              <ng-select placeholder="Selectionner un client" name="users" bindLabel="email" bindValue="email"
+                [hideSelected]="true" (change)="onSelectClient($event)" [typeahead]="typeaheadUsers" [multiple]="false"
+                [items]="Users">
+                <ng-template ng-option-tmp let-item="item">
+                  {{item.company_name ? item.company_name + ' - ' : '' }}
+                  {{item.first_name}} {{item.last_name}} <i>({{item.email}})</i>
+                </ng-template>
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-sm-12">
+            <button class="btn btn-sm btn-primary" (click)="step = 0">Ajouter un client</button>
+          </div>
+        </div>
+
+        <div *ngIf="step === 0">
+          <form [formGroup]="formAddUser" (ngSubmit)="submitNewUser($event)">
+            <div class="form-group mb-4">
+              <label>Type de compte</label>
+              <div>
+                <label class="radio radio-inline radio-info">
+                  <input type="radio" formControlName="role" [value]="'fz-company'" checked="">
+                  <span class="input-span"></span>Entreprise</label>
+
+                <label class="radio radio-inline radio-info">
+                  <input type="radio" formControlName="role" [value]="'fz-particular'">
+                  <span class="input-span"></span>Particulier</label>
+              </div>
+            </div>
+            <div class="row" *ngIf="formAddUser.get('role').value == 'fz-company'">
+              <div class="col-sm-12 form-group mb-4">
+                <label>
+                  Nom de l'entreprise/societe</label>
+                <input class="form-control" type="text" formControlName="company_name" />
+              </div>
+              <div class="col-sm-6 form-group mb-4">
+                <label>Status</label>
+                <select formControlName="company_status" class="form-control">
+                  <option value="dealer">Revendeur</option>
+                  <option value="professional">Professionnel</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-6 form-group mb-4">
+                <label>Nom</label>
+                <input class="form-control" type="text" formControlName="last_name">
+              </div>
+              <div class="col-sm-6 form-group mb-4">
+                <label>Prenom</label>
+                <input class="form-control" type="text" formControlName="first_name" />
+              </div>
+
+            </div>
+
+            <div class="form-group mb-4">
+              <label>Email</label>
+              <input class="form-control" type="text" formControlName="email">
+            </div>
+
+            <div class="ibox-footer">
+              <button class="btn btn-info mr-2" type="submit">Ajouter</button>
+              <button class="btn btn-secondary" type="reset" (click)="step = 1">retour</button>
+            </div>
+          </form>
+
+        </div>
+
+        <div *ngIf="step === 2">
+          <form [formGroup]="formAddQuote" (ngSubmit)="submitNewQuote($event)">
+            <div formArrayName="line_items">
+              <ul>
+                <li *ngFor="let item of formAddQuote.controls.line_items.controls; let i = index">
+                  <div class="row" [formGroupName]="i">
+                    <div class="col-sm-8 form-group mb-4">
+
+                      <ng-select placeholder="Selectionner un produit" name="users" bindLabel="title.raw" bindValue="id" formControlName="product_id"
+                        [hideSelected]="true" (change)="resetProductList()"  [typeahead]="typeaheadProducts"
+                        [multiple]="false" [items]="Products">
+                        <ng-template ng-option-tmp let-item="item">
+                          {{item.title.raw}}
+                        </ng-template>
+                      </ng-select>
+
+                    </div>
+                    <div class="col-sm-2 form-group mb-4">
+                      <input class="form-control" placeholder="qty" type="number" min="0" formControlName="quantity">
+                    </div>
+                    <div class="col-sm-2 form-group mb-4">
+                      <a class="font-16 text-danger" (click)="onRemoveLine(i)">
+                        <i class="ti-trash"></i>
+                      </a>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+              <button type="button" (click)="onAddSpecialRequest()">
+                Add a Request
+              </button>
+            </div>
+
+
+            <div class="ibox-footer">
+              <button class="btn btn-info mr-2" type="submit">Ajouter</button>
+              <button class="btn btn-secondary" type="reset" (click)="step = 1">retour</button>
+            </div>
+          </form>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
