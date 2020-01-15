@@ -6,7 +6,7 @@ import { debounceTime, switchMap, catchError, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs/observable/of';
-import { environment } from '../../../../environments/environment';
+import { environment, config } from '../../../../environments/environment';
 import { FormGroup, FormControl, Validators, FormArray, FormBuilder } from '@angular/forms';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
@@ -26,6 +26,11 @@ class User {
   roles?: Array<string>;
 }
 
+class WPResponse {
+  success: boolean;
+  data: any
+}
+
 @Component({
   selector: 'app-quote-add',
   templateUrl: './quote-add.component.html',
@@ -36,7 +41,6 @@ export class QuoteAddComponent implements OnInit {
   private woocommerce: any;
   public typeaheadUsers = new EventEmitter<string>();
   public typeaheadProducts = new EventEmitter<string>();
-  public dialogTitle = "Selectionner un client";
   // Contient la listes des clients dans le champs recherche
   public Users: Array<User> = [];
   public Products: Array<any> = [];
@@ -67,17 +71,15 @@ export class QuoteAddComponent implements OnInit {
         Validators.email
       ])),
       company_name: new FormControl(null),
-      company_status: new FormControl(null)
+      company_status: new FormControl('')
     });
     // formulaire d'ajout de demande
     this.formAddQuote = formBuilder.group({
       customer_id: 0,
       payment_method: 'cod',
       line_items: formBuilder.array([
-        this.formBuilder.group({
-          product_id: 0,
-          quantity: 1
-        })
+        this.formBuilder.group({ product_id: null, quantity: 1 }),
+        this.formBuilder.group({ product_id: null, quantity: 1 })
       ])
     });
 
@@ -85,7 +87,7 @@ export class QuoteAddComponent implements OnInit {
       .pipe(debounceTime(400), switchMap(term => this.queryUsers(term)))
       .subscribe(items => {
         this.Users = items;
-        this.detector.markForCheck();
+        this.detector.detectChanges();
       }, (err) => {
         console.log('Error: ', err);
         this.Users = [];
@@ -96,7 +98,7 @@ export class QuoteAddComponent implements OnInit {
       .pipe(debounceTime(400), switchMap(term => this.queryProducts(term)))
       .subscribe(items => {
         this.Products = items;
-        this.detector.markForCheck();
+        this.detector.detectChanges();
       }, (err) => {
         console.log('Error: ', err);
         this.Users = [];
@@ -109,7 +111,7 @@ export class QuoteAddComponent implements OnInit {
 
   get lineItems() { return <FormArray>this.formAddQuote.get('line_items'); }
   public onAddSpecialRequest() {
-    this.lineItems.push(this.formBuilder.group({ product_id: 0, quantity: 0 }));
+    this.lineItems.push(this.formBuilder.group({ product_id: null, quantity: 0 }));
   }
 
   public onRemoveLine (index: number) {
@@ -146,6 +148,7 @@ export class QuoteAddComponent implements OnInit {
   public onSelectClient(user: any): any {
     if (_.isEmpty(user)) return false;
     this.clientSelected = _.clone(user);
+
     // Modifier le contenue du modal
     this.step = 2;
   }
@@ -162,7 +165,7 @@ export class QuoteAddComponent implements OnInit {
       const { first_name, last_name, email, company_name, company_status, role } = this.formAddUser.value;
       const clientPassword = this.generaterandPassword(8);
       this.wordpress.users().create({
-        username: "CLT" + clientPassword,
+        username: "CLT-" + clientPassword,
         name: `${first_name} ${last_name}`,
         first_name: first_name,
         last_name: last_name,
@@ -172,13 +175,24 @@ export class QuoteAddComponent implements OnInit {
         company_status: company_status,
         password: clientPassword
       }).then(newClient => {
-        // TODO: envoyer les informations utilisateur par email au client
+        // Envoyer les informations utilisateur par email au client
+        let dataForm = new FormData();
+        dataForm.append('pwd', clientPassword);
+        this.Http.post<any>(`${config.apiUrl}/mail/user/${newClient.id}`, dataForm).subscribe( (response: WPResponse) => {
+          Helpers.setLoading(false);
+          if (response.success) {
+            this.formAddUser.reset();
+          } else {
+            Swal.fire("", response.data, "warning");
+          }
+          this.clientSelected = _.clone(newClient);
+          this.step = 2;
 
-        Helpers.setLoading(false);
-        this.clientSelected = _.clone(newClient);
-        this.formAddUser.reset();
-        this.step = 2;
-        this.detector.detectChanges();
+          this.detector.detectChanges();
+        }, error => {
+            Helpers.setLoading(false);
+            Swal.fire("", error.message, "warning");
+        });
       }, err => {
         Helpers.setLoading(false);
         Swal.fire('', err.message, 'warning');
@@ -192,25 +206,24 @@ export class QuoteAddComponent implements OnInit {
     ev.preventDefault();
     const {line_items, payment_method} = this.formAddQuote.value;
     const customer_id = this.clientSelected.id;
+    const address: string = _.isNull(this.clientSelected.address) ? '' : this.clientSelected.address;
     const getClientRole = () => {
       let clientRoles = this.clientSelected.roles;
-      return _.isUndefined(clientRoles[0]) ? 'fz-company' : clientRoles[0];
+      return _.isUndefined(clientRoles[0]) ? 'fz-particular' : clientRoles[0];
     };
     const data = {
       payment_method: payment_method,
       payment_method_title: "Livraison",
       set_paid: true,
-
       customer_id: customer_id,
       user_id: customer_id,
       position: 0,
       date_send: moment().format('YYYY-MM-DD HH:mm:ss'),
       client_role: getClientRole(),
-
       billing: {
         first_name: this.clientSelected.first_name,
         last_name: this.clientSelected.last_name,
-        address_1: this.clientSelected.address,
+        address_1: address,
         address_2: "",
         city: "",
         state: "",
@@ -222,7 +235,7 @@ export class QuoteAddComponent implements OnInit {
       shipping: {
         first_name: this.clientSelected.first_name,
         last_name: this.clientSelected.last_name,
-        address_1: this.clientSelected.address,
+        address_1: address,
         address_2: "",
         city: "",
         postcode: "",
@@ -235,7 +248,10 @@ export class QuoteAddComponent implements OnInit {
       $('.modal').modal('hide');
       let response = JSON.parse(res);
       Helpers.setLoading(false);
-      location.reload();
+      Swal.fire("Success", "Quote successfully added", "info");
+      setTimeout(() => {
+        location.reload();
+      }, 1200);
     });
   }
 

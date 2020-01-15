@@ -1,18 +1,21 @@
-<button class="btn btn-sm btn-blue" (click)="onAddQuote($event)" id="import-article">+ Ajouter une demande</button>
+<button class="btn btn-sm btn-pink" (click)="onAddQuote($event)" id="import-article">+ Ajouter une demande</button>
 
-<div class="modal fade" id="quote-select-client-dialog" aria-labelledby="question-dialog" tabindex="-1" role="dialog">
+<div class="modal fade" id="quote-select-client-dialog" data-backdrop="static" aria-labelledby="question-dialog" tabindex="-1"
+  role="dialog">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-      <div class="modal-header p-4">
-        <h5 class="modal-title">Selectionner un client</h5>
+      <div class="modal-header pr-2 p-0">
+        <div></div>
         <button class="close" type="button" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">×</span>
         </button>
       </div>
       <div class="modal-body p-4">
-
         <div class="row" *ngIf="step === 1">
-          <div class="col-sm-12">
+          <div class="col-sm-8">
+            <h5 class="modal-title mb-4">Selectionner le client
+              <small class="d-block">Si le client est deja inscrit dans le site</small>
+            </h5>
             <div class="form-group mb-4">
               <ng-select placeholder="Selectionner un client" name="users" bindLabel="email" bindValue="email"
                 [hideSelected]="true" (change)="onSelectClient($event)" [typeahead]="typeaheadUsers" [multiple]="false"
@@ -24,15 +27,18 @@
               </ng-select>
             </div>
           </div>
-          <div class="col-sm-12">
-            <button class="btn btn-sm btn-primary" (click)="step = 0">Ajouter un client</button>
+          <div class="col-sm-4 d-flex">
+            <div class="m-auto">
+              <button class="btn btn-lg btn-success" (click)="step = 0">Ajouter un client</button>
+            </div>
+            
           </div>
         </div>
 
         <div *ngIf="step === 0">
+          <h5 class="modal-title mb-4">Cree un compte</h5>
           <form [formGroup]="formAddUser" (ngSubmit)="submitNewUser($event)">
             <div class="form-group mb-4">
-              <label>Type de compte</label>
               <div>
                 <label class="radio radio-inline radio-info">
                   <input type="radio" formControlName="role" [value]="'fz-company'" checked="">
@@ -52,6 +58,7 @@
               <div class="col-sm-6 form-group mb-4">
                 <label>Status</label>
                 <select formControlName="company_status" class="form-control">
+                  <option value="">Selectionner un status</option>
                   <option value="dealer">Revendeur</option>
                   <option value="professional">Professionnel</option>
                 </select>
@@ -76,20 +83,30 @@
             </div>
 
             <div class="ibox-footer">
-              <button class="btn btn-info mr-2" type="submit">Ajouter</button>
-              <button class="btn btn-secondary" type="reset" (click)="step = 1">retour</button>
+              <button class="btn btn-info mr-2" type="submit">Enregistrer</button>
+              <button class="btn btn-secondary" type="reset" (click)="step = 1">Annuler l'inscription</button>
             </div>
           </form>
 
         </div>
 
         <div *ngIf="step === 2">
+          <h5 class="modal-title mb-4">Ajouter une demande
+            <small class="d-block">pour {{clientSelected.email}}</small>
+          </h5>
           <form [formGroup]="formAddQuote" (ngSubmit)="submitNewQuote($event)">
             <div formArrayName="line_items">
-              <ul>
-                <li *ngFor="let item of formAddQuote.controls.line_items.controls; let i = index">
+              <ul class="p-0">
+                <li style="list-style: none;">
+                  <div class="row mb-2">
+                    <div class="col-sm-8">Designation</div>
+                    <div class="col-sm-2">Quantité</div>
+                    <div class="col-sm-2"></div>
+                  </div>
+                </li>
+                <li *ngFor="let item of formAddQuote.controls.line_items.controls; let i = index" style="list-style: none;">
                   <div class="row" [formGroupName]="i">
-                    <div class="col-sm-8 form-group mb-4">
+                    <div class="col-sm-8 form-group mb-2">
 
                       <ng-select placeholder="Selectionner un produit" name="users" bindLabel="title.raw" bindValue="id" formControlName="product_id"
                         [hideSelected]="true" (change)="resetProductList()"  [typeahead]="typeaheadProducts"
@@ -100,10 +117,10 @@
                       </ng-select>
 
                     </div>
-                    <div class="col-sm-2 form-group mb-4">
+                    <div class="col-sm-2 form-group mb-2">
                       <input class="form-control" placeholder="qty" type="number" min="0" formControlName="quantity">
                     </div>
-                    <div class="col-sm-2 form-group mb-4">
+                    <div class="col-sm-2 form-group mb-2">
                       <a class="font-16 text-danger" (click)="onRemoveLine(i)">
                         <i class="ti-trash"></i>
                       </a>
@@ -111,15 +128,15 @@
                   </div>
                 </li>
               </ul>
-              <button type="button" (click)="onAddSpecialRequest()">
-                Add a Request
+              <button type="button" class="btn btn-sm btn-success" (click)="onAddSpecialRequest()">
+                Ajouter
               </button>
             </div>
 
 
             <div class="ibox-footer">
-              <button class="btn btn-info mr-2" type="submit">Ajouter</button>
-              <button class="btn btn-secondary" type="reset" (click)="step = 1">retour</button>
+              <button class="btn btn-primary mr-2" type="submit">Cree une demande</button>
+              <button class="btn btn-secondary" type="reset" (click)="step = 1">Retour</button>
             </div>
           </form>
 

@@ -1,6 +1,6 @@
 <div class="">
   <div class="search-quotation">
-    <app-filter-search-article (findword)="onSearchWord($event)" [placeh]="'Vous cherchez un demande specifique?'">
+    <app-filter-search-article (findword)="onSearchWord($event)" [placeh]="'Vous cherchez une demande specifique?'">
     </app-filter-search-article>
 
     <div>
@@ -29,21 +29,27 @@
 
       </ul>
     </div>
-  </div>  
+  </div>
 
   <app-quote-add></app-quote-add>
 
   <app-status-quotation-switcher [quotation]="qtSelected"></app-status-quotation-switcher>
   <div class="ibox-head flex-row-reverse">
-    <div class="ibox-title">LES DEMANDES</div>
-    <ul class="nav nav-pills nav-pills-rounded nav-pills-air">
-      <li class="nav-item">
-        <a class="nav-link active" href="#tab-2-1" data-toggle="tab" aria-expanded="true">Professionnel</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#tab-2-2" data-toggle="tab" aria-expanded="false">Particulier</a>
-      </li>
-    </ul>
+    <div>
+      <div class="text-right">LES DEMANDES</div>
+      <ul class="nav nav-pills nav-pills-rounded nav-pills-air">
+        <li class="nav-item">
+          <a class="nav-link active" href="#tab-2-1" data-toggle="tab" aria-expanded="true">Professionnel</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#tab-2-2" data-toggle="tab" aria-expanded="false">Particulier</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      
+    </div>
+
   </div>
   <div class="">
     <div class="tab-content">
