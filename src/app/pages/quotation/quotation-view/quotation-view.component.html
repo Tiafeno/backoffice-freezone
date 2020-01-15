@@ -53,7 +53,7 @@
         </div>
       </div>
       <div class="ibox-block">
-        <table class="table mb-0">
+        <table class="table mb-4">
           <thead class="thead-default thead-lg">
             <tr>
               <th class="pl-4">Désignation</th>
@@ -77,8 +77,10 @@
             </tr>
           </tbody>
           <tfoot>
-            <tr>
-              <th colspan="4"></th>
+            <tr *ngIf="Billing && (Billing.total_tax != 0 && Billing.total_tax > minCostWithTransport)"
+              style="background-color: #fcff21;">
+              <th colspan="4" class="pl-4">Frais de transport</th>
+              <th>{{costTransport | currency:'MGA':'symbole':'4.2-2':'fr'}}</th>
             </tr>
           </tfoot>
         </table>

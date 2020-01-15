@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import { FzServicesService } from '../../../_services/fz-services.service';
 import { Metadata } from '../../../metadata';
 import { OrderItem } from '../../../order.item';
+import { DEFINE_FREEZONE } from '../../../defined';
 declare var $: any;
 
 @Component({
@@ -25,6 +26,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public billingAdress: any = {}; // adresse de facturation
     public shippingAdress: any = {}; // adresse de facturation
     public ownerClient: any = {};
+    public costTransport: number; // en ariry
+    public minCostWithTransport: number; // en ariry
 
     private Woocommerce: any;
     private Wordpress: any;
@@ -40,6 +43,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     ) {
         this.Woocommerce = this.apiWC.getWoocommerce();
         this.Wordpress = this.apiWP.getWPAPI();
+        this.costTransport = DEFINE_FREEZONE.COST_TRANSPORT;
+        this.minCostWithTransport = DEFINE_FREEZONE.MIN_TRANSPORT_WITH_COST;
     }
 
     ngOnInit() {
@@ -221,7 +226,11 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
         let allTotalHT: Array<number> = _.map(this.QtItems, item => item.priceFn() * item.quantity);
         this.Billing.totalHT = _.sum(allTotalHT);
-        let allTotalNet: Array<number> = _.map(this.QtItems, item => item.subTotalNetFn());
+        let allTotalNet: Array<number> = _.map(this.QtItems, item => {
+            let total: number = item.subTotalNetFn()
+            // Ajouter le frais de transport
+            return total > this.minCostWithTransport ? (this.costTransport + total) : total ;
+        });
         this.Billing.totalNet = _.sum(allTotalNet);
 
         let priceTax: number = (this.Billing.totalNet * this.Tax) / 100;
