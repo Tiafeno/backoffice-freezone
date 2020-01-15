@@ -7,109 +7,110 @@
   </button>
 </div>
 <div class="modal-body p-4">
-    <div class="">
-        <div class="ibox-body">
-            <div class="row mb-5 pb-3">
-                <div class="col-6"></div>
-                <div class="col-6 text-right">
-                    <h5 class="font-strong text-success mb-3" *ngIf="!ownerClient.company_name">
-                      {{ownerClient.first_name}} {{ownerClient.last_name}}
-                    </h5>
-                    <h5 class="font-strong text-success mb-3" *ngIf="ownerClient.company_name">
-                        {{ownerClient.company_name}}
-                    </h5>
-                    <div class="text-light">{{ownerClient.address}}, {{billingAdress.postcode}} {{billingAdress.city}}.</div>
+  <div class="">
+    <div class="ibox-body">
+      <div class="row mb-5 pb-3">
+        <div class="col-6"></div>
+        <div class="col-6 text-right">
+          <h5 class="font-strong text-success mb-3" *ngIf="!ownerClient.company_name">
+            {{ownerClient.first_name}} {{ownerClient.last_name}}
+          </h5>
+          <h5 class="font-strong text-success mb-3" *ngIf="ownerClient.company_name">
+            {{ownerClient.company_name}}
+          </h5>
+          <div class="text-light">{{ownerClient.address}}, {{billingAdress.postcode}} {{billingAdress.city}}.</div>
 
-                    <div class="row mb-2" *ngIf="ownerClient.stat">
-                      <div class="col-6 text-muted">STAT:</div>
-                      <div class="col-6">{{ownerClient.stat}}</div>
-                    </div>
+          <div class="row mb-2" *ngIf="ownerClient.stat">
+            <div class="col-6 text-muted">STAT:</div>
+            <div class="col-6">{{ownerClient.stat}}</div>
+          </div>
 
-                    <div class="row mb-2" *ngIf="ownerClient.nif">
-                      <div class="col-6 text-muted">NIF:</div>
-                      <div class="col-6">{{ownerClient.nif}}</div>
-                    </div>
+          <div class="row mb-2" *ngIf="ownerClient.nif">
+            <div class="col-6 text-muted">NIF:</div>
+            <div class="col-6">{{ownerClient.nif}}</div>
+          </div>
 
-                    <div class="row mb-2" *ngIf="ownerClient.rc">
-                      <div class="col-6 text-muted">RC:</div>
-                      <div class="col-6">{{ownerClient.rc}}</div>
-                    </div>
+          <div class="row mb-2" *ngIf="ownerClient.rc">
+            <div class="col-6 text-muted">RC:</div>
+            <div class="col-6">{{ownerClient.rc}}</div>
+          </div>
 
-                    <div class="row mb-2" *ngIf="ownerClient.cif">
-                      <div class="col-6 text-muted">CIF:</div>
-                      <div class="col-6">{{ownerClient.cif}}</div>
-                    </div>
+          <div class="row mb-2" *ngIf="ownerClient.cif">
+            <div class="col-6 text-muted">CIF:</div>
+            <div class="col-6">{{ownerClient.cif}}</div>
+          </div>
 
-                    <div class="row mb-2" *ngIf="ownerClient.cin">
-                      <div class="col-6 text-muted">CIN:</div>
-                      <div class="col-6">{{ownerClient.cin}}</div>
-                    </div>
+          <div class="row mb-2" *ngIf="ownerClient.cin">
+            <div class="col-6 text-muted">CIN:</div>
+            <div class="col-6">{{ownerClient.cin}}</div>
+          </div>
 
-                    <div class="row mb-2" *ngIf="ownerClient.date_cin">
-                      <div class="col-6 text-muted">Date de délivrance:</div>
-                      <div class="col-6">{{ownerClient.date_cin}}</div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="ibox-block">
-                <table class="table mb-0">
-                    <thead class="thead-default thead-lg">
-                        <tr>
-                            <th class="pl-4">Désignation</th>
-                            <th>Qté</th>
-                            <th>P.U HT</th>
-                            <th>Rem</th>
-                            <th class="text-right pr-4">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let item of QtItems">
-                            <td class="pl-4">
-                                <div><strong>{{item.name}}</strong></div>
-                            </td>
-                            <td class="text-center">{{item.quantity}}</td>
-                            <td>{{item.priceFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                            <td>{{item.discountTypeFn() === 0 ? '-' : item.discountFn() + '%'}}</td>
-                            <td class="text-right pr-4">{{item.subTotalNetFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="4"></th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <div *ngIf="Billing">
-              <table class="table table-bordered table-head-purple table-border-purple mb-5">
-                <thead>
-                  <tr>
-                    <th>Total HT Brut</th>
-                    <th>Total Net</th>
-                    <th>TVA 20%</th>
-                    <th>Montant Taxe</th>
-                    <th>Acompte</th>
-                    <th>NET A PAYER</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr>
-                    <td>{{Billing.totalHT | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                    <td>{{Billing.totalNet | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                    <td>{{Tax}}%</td>
-                    <td>{{Billing.price_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                    <td></td>
-                    <td>{{Billing.total_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="row mb-2" *ngIf="ownerClient.date_cin">
+            <div class="col-6 text-muted">Date de délivrance:</div>
+            <div class="col-6">{{ownerClient.date_cin}}</div>
+          </div>
 
         </div>
+      </div>
+      <div class="ibox-block">
+        <table class="table mb-0">
+          <thead class="thead-default thead-lg">
+            <tr>
+              <th class="pl-4">Désignation</th>
+              <th>Qté</th>
+              <th>P.U HT</th>
+              <th>Rem</th>
+              <th class="text-right pr-4">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of QtItems">
+              <td class="pl-4">
+                <div><strong>{{item.name}}</strong></div>
+              </td>
+              <td class="text-center">{{item.quantity === 0 ? '-' : item.quantity}}</td>
+              <td>{{item.priceFn() === 0 ? '-' : item.priceFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+              <td>{{item.discountTypeFn() === 0 ? '-' : item.discountFn() + '%'}}</td>
+              <td class="text-right pr-4">
+                {{item.subTotalNetFn() === 0 ? "Non disponible" : item.subTotalNetFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="4"></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div *ngIf="Billing && Billing.total_tax != 0">
+        <table class="table table-bordered table-head-purple table-border-purple mb-5">
+          <thead>
+            <tr>
+              <th>Total HT Brut</th>
+              <th>Total Net</th>
+              <th>TVA 20%</th>
+              <th>Montant Taxe</th>
+              <th>Acompte</th>
+              <th>NET A PAYER</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{Billing.totalHT | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+              <td>{{Billing.totalNet | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+              <td>{{Tax}}%</td>
+              <td>{{Billing.price_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+              <td></td>
+              <td>{{Billing.total_tax | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
+  </div>
 </div>
 <div class="modal-footer justify-content-between bg-primary-50">
   <div>

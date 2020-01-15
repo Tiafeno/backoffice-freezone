@@ -65,7 +65,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 Swal.fire('Désolé', "L'entreprise est en attente de confirmation", "warning");
                 return false;
             }
-
             // Ne pas envoyer le devis si le compte particulier est en attente
             if (this.ownerClient.pending == 1 || this.ownerClient.disable == 1) {
                 Swal.fire('Désolé', "Le client est en attente de confirmation ou désactiver", "warning");
@@ -77,7 +76,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return false;
             }
         }
-
         this.QtItems = _.map(this.QtItems, item => {
             // Mettre le prix unitaire pour 0 par default
             // (Le prix sera regenerer automatiquement par woocommerce)
@@ -110,20 +108,16 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         this.error = false;
         this.cd.detectChanges();
         Helpers.setLoading(true);
-
         let aIds: Array<any> = _(this.Items).map((item: OrderItem) => {
             let metadata: Array<Metadata> = item.meta_data;
             let suppliers: any = _.find(metadata, { key: 'suppliers' });
             if (_.isUndefined(suppliers)) return null;
             suppliers = JSON.parse(suppliers.value);
             if (_.isEmpty(suppliers)) return null;
-
             return _(suppliers).map(sup => {
                 return parseInt(sup.article_id, 10);
             }).filter(!_.isNaN).value();
         }).flatten().filter(value => value !== null).value();
-
-        console.log(aIds);
         const ARTICLES = _.isEmpty(aIds) ? [] : await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
         // Si la position ne sont pas: Envoyer, Rejeter, Accepter et Terminée
         if (!_.includes([1, 2, 3, 4], parseInt(this.order.position, 10))) {
@@ -153,10 +147,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return false;
             }
         }
-
         const CLIENT = await this.getUsers(this.order.customer_id); // Array of user or empty
         this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
-
         this.QtItems = _.map(this.Items, item => {
             // Récuperer tous les meta utiliser pour le produit
             const meta_data: Array<Metadata> = _.cloneDeep(item.meta_data);
@@ -164,7 +156,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             if (_.isUndefined(dataSuppliers)) { return item; }
             const __supplierVals__ = JSON.parse(dataSuppliers.value);
             const allTakeForItem: Array<number> = _.map(__supplierVals__, sp => parseInt(sp.get));
-
             /**
              * 0: Aucun
              * 1: Remise
@@ -175,13 +166,11 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 if (_.isUndefined(type)) return 0;
                 return _.isNaN(parseInt(type.value)) ? 0 : parseInt(type.value);
             };
-
             const hasStockRequest = (): boolean => {
                 let stockR = _.find(meta_data, { key: 'stock_request' });
                 if (_.isUndefined(stockR)) return false;
                 return _.isEqual(parseInt(stockR.value, 10), 0) ? false : true;
             };
-
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
             const takes = _.sum(allTakeForItem);
             if (takes === 0 && !hasStockRequest()) {
@@ -195,22 +184,17 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 this.errorOccured('Désolé', `Quantité ajouter incorrect. Veuillez vérifier l'article: ${item.name}`, 'error');
                 return item;
             }
-
-
+            const discountPercentFn = (): number => {
+                return (item.price * item.discountFn()) / 100;
+            };
             item.discountTypeFn = (): number => {
                 return discountTypeFn();
             };
-
             item.discountFn = (): number => {
                 let discount: any = _.find(meta_data, { key: 'discount' });
                 if (_.isUndefined(discount) || _.isNaN(parseInt(discount.value)) || parseInt(discount.value) === 0) return 0;
                 return parseInt(discount.value);
             };
-
-            const discountPercentFn = (): number => {
-                return (item.price * item.discountFn()) / 100;
-            };
-
             item.priceFn = () => {
                 switch (discountTypeFn()) {
                     case 2: // Rajout
@@ -220,7 +204,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                         return item.price;
                 }
             };
-
             item.subTotalNetFn = (): number => {
                 switch (discountTypeFn()) {
                     case 2:
@@ -233,7 +216,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
                 }
             }
-
             return item;
         });
 
