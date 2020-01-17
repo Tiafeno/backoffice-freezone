@@ -202,15 +202,24 @@ export class QuoteAddComponent implements OnInit {
     }
   }
 
-  public submitNewQuote(ev: any) {
+  public submitNewQuote(ev: any): any {
     ev.preventDefault();
-    const {line_items, payment_method} = this.formAddQuote.value;
+    let {line_items, payment_method} = this.formAddQuote.value;
     const customer_id = this.clientSelected.id;
     const address: string = _.isNull(this.clientSelected.address) ? '' : this.clientSelected.address;
     const getClientRole = () => {
       let clientRoles = this.clientSelected.roles;
       return _.isUndefined(clientRoles[0]) ? 'fz-particular' : clientRoles[0];
     };
+    // Filtrer les resultats
+    line_items = _(line_items).filter(item => {
+      return _.isNumber(item.product_id) && item.product_id != 0;
+    }).value();
+    console.log(line_items);
+    if (_.isEmpty(line_items)) {
+      Swal.fire("Erreur", "Vous n'avez ajoute aucune article. Veuillez ajouter au minimum une article", "error");
+      return false;
+    }
     const data = {
       payment_method: payment_method,
       payment_method_title: "Livraison",
@@ -250,7 +259,7 @@ export class QuoteAddComponent implements OnInit {
       Helpers.setLoading(false);
       Swal.fire("Success", "Quote successfully added", "info");
       setTimeout(() => {
-        location.reload();
+        //location.reload();
       }, 1200);
     });
   }
