@@ -259,7 +259,7 @@ export class QuoteAddComponent implements OnInit {
       Helpers.setLoading(false);
       Swal.fire("Success", "Quote successfully added", "info");
       setTimeout(() => {
-        //location.reload();
+        location.reload();
       }, 1200);
     });
   }

@@ -77,7 +77,7 @@
             </tr>
           </tbody>
           <tfoot>
-            <tr *ngIf="Billing && (Billing.total_tax != 0 && Billing.total_tax > minCostWithTransport)"
+            <tr *ngIf="Billing && (Billing.total_tax != 0 && Billing.total_tax < minCostWithTransport)"
               style="background-color: #fcff21;">
               <th colspan="4" class="pl-4">Frais de transport</th>
               <th>{{costTransport | currency:'MGA':'symbole':'4.2-2':'fr'}}</th>

@@ -229,7 +229,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         let allTotalNet: Array<number> = _.map(this.QtItems, item => {
             let total: number = item.subTotalNetFn()
             // Ajouter le frais de transport
-            return total > this.minCostWithTransport ? (this.costTransport + total) : total ;
+            return total < this.minCostWithTransport ? (this.costTransport + total) : total ;
         });
         this.Billing.totalNet = _.sum(allTotalNet);
 
