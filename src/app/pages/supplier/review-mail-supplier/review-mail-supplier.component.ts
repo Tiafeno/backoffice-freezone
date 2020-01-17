@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import { ModuloMailTemplateComponent } from '../../../components/modulo-mail-template/modulo-mail-template.component';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as RSVP from 'rsvp';
+import { FzProduct } from '../../../supplier';
 declare var $: any;
 
 @Component({
@@ -20,7 +21,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    public Fournisseur: any = {};
    public FormEditor: Array<any> = [];
    public email = 'contact@freezone.click';
-   public pendingArticle: Array<any> = [];
+   public pendingArticle: Array<FzProduct> = [];
    @Input() supplier: any = {};
    public updateForm: FormGroup;
    public Form: FormGroup;
@@ -55,12 +56,10 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          mail_logistics_cc: new FormControl(false),
          mail_commercial_cc: new FormControl(false),
       });
-
       this.updateForm = new FormGroup({
          articles: new FormArray([
          ])
       });
-
       this.Wordpress = this.apiWP.getWordpress();
    }
 
@@ -69,6 +68,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    }
 
    ngOnInit() {
+      moment.locale('fr');
       $("#send-mail-modal").on('hide.bs.modal', e => {
          this.Form.patchValue({ message: '' });
          this.Form.reset();
@@ -79,7 +79,6 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          });
          this.cd.detectChanges();
       });
-
    }
 
    ngOnChanges(changes: SimpleChanges) {
@@ -87,7 +86,6 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          this.Fournisseur = changes.supplier.currentValue;
          // TODO: Ajouter un objet et un message par default pour le mail
       }
-
       console.log(changes);
    }
 
@@ -169,15 +167,27 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       this.Http.post<any>(`${config.apiUrl}/fz_product/review_articles`, Form).subscribe(resp => {
          Helpers.setLoading(false);
          const response: any = _.clone(resp);
-         const data: any = response.data;
+         const data: Array<FzProduct> = response.data;
          this.pendingArticle = _.clone(data);
          // Ajouter les quantité et les prix
          for (let item of data) {
+            let dateReview = moment(item.date_review).format('LLL');
+            let condition: string = '';
+            switch (item.condition) {
+               case 0: condition = 'Disponible'; break;
+               case 1: condition = 'Rupture de stock'; break;
+               case 2: condition = 'Obsolete'; break;
+               case 3: condition = 'Commande'; break;
+               default: condition = 'Disponible';  break;
+            }
+            
             this.formArticleArray.push(new FormGroup({
                title: new FormControl(item.title.rendered),
                price: new FormControl(parseInt(item.price, 10)),
                qty: new FormControl(parseInt(item.total_sales, 10)),
-               article_id: new FormControl(item.id, Validators.required)
+               article_id: new FormControl(item.id, Validators.required),
+               date_review: new FormControl(dateReview),
+               condition: new FormControl(condition)
             }));
          }
          const reviewArticles: Array<number> = _.map(data, (item) => { return item.id; });

@@ -121,7 +121,7 @@
     <div class="modal-body">
       <div class="">
         <div class="ibox-body">
-          <div class="px-4 py-3" *ngIf="Fournisseur">
+          <div *ngIf="Fournisseur">
             <div class="row">
               <div class="col-12">
                 <div class="table-responsive">
@@ -130,15 +130,23 @@
                       <thead style="background-color: lavender;">
                         <tr>
                           <th>Designation</th>
+                          <th>Dernier mise à jour</th>
+                          <th>Statut</th>
                           <th>Quantité disponible</th>
                           <th>Prix revient (AR)</th>
                         </tr>
                       </thead>
                       <tbody formArrayName="articles">
-                        <tr *ngFor="let article of pendingArticle; let i = index" [formGroupName]="i">
-                          <td width="250"><span class="font-10">{{article.title.rendered}}</span></td>
-                          <td><input min="0" class="form-control" formControlName="qty" type="number" /></td>
-                          <td>
+                        <tr *ngFor="let article of updateForm.controls.articles.controls; let i = index" [formGroupName]="i">
+                          <td width="250"><span class="font-10">{{article.value.title}}</span></td>
+                          <td width="80"><span class="font-10">{{article.value.date_review}}</span></td>
+                          <td width="80">
+                            <span class="font-10">
+                              {{article.value.condition}}
+                            </span>
+                          </td>
+                          <td width="60"><input min="0" class="form-control" formControlName="qty" type="number" /></td>
+                          <td width="100">
                             <input min="0" class="form-control" formControlName="price" type="number" />
                             <input formControlName="article_id" type="hidden" [value]="article.id" />
                           </td>

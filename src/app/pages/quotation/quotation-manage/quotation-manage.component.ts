@@ -161,6 +161,19 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         return `<span>${data}</span>`
                                     }
                                 },
+                                { // statut produit, Disponible - 0, Rupture -1, Obsolete - 2, et Commande - 3
+                                    data: 'condition', render: (data, type, row) => {
+                                        let status: string = '';
+                                        switch (parseInt(data)) {
+                                            case 0: status = 'Disponible'; break;
+                                            case 1: status = 'Rupture de stock'; break;
+                                            case 2: status = 'Obsolete'; break;
+                                            case 3: status = 'Commande'; break;
+                                            default: status = 'Disponible';  break;
+                                        }
+                                        return `<span class="badge ${data == 2 ? 'badge-pink' : 'badge-default'}">${status}</span>`
+                                    }
+                                },
                                 {
                                     data: 'reference', render: (data, type, row) => {
                                         return `<span class="badge badge-default view-supplier" style="cursor: pointer" data-supplier="${row.id}">${data}</span>`

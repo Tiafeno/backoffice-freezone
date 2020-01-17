@@ -24,12 +24,26 @@ export class Supplier {
 
 export class FzProductCSV {
     id: number;
-    title: string;
-    price: number;
+    title: any;
+    price: any;
     marge: number;
     marge_dealer: number;
     marge_particular: number;
     price_particular?: any;
     price_dealer?: any;
     price_UF?: any;
+    
+}
+
+export class FzProduct extends FzProductCSV {
+    status: string;
+    date_add: string;
+    date_review: string;
+    total_sales: any; // Quantité disponible
+    user_id: number;
+    condition: number; // Disponible - 0, Rupture -1, Obsolete - 2, et Commande - 3
+    product_id: number;
+    product_cat: Array<any>;
+    garentee?: any;
+    meta: Array<any>;
 }
