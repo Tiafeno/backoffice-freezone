@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { UserManagerComponent } from '../../components/user-manager/user-manager.component';
+import { UserManagerComponent } from './user-manager/user-manager.component';
+import { WpoptionsComponent } from './wpoptions/wpoptions.component';
 
 @Component({
   selector: 'app-settings',
@@ -8,6 +9,7 @@ import { UserManagerComponent } from '../../components/user-manager/user-manager
 })
 export class SettingsComponent implements OnInit {
   @ViewChild(UserManagerComponent) public manager: UserManagerComponent;
+  @ViewChild(WpoptionsComponent) public wpoptions: WpoptionsComponent;
   constructor() { }
 
   ngOnInit() {

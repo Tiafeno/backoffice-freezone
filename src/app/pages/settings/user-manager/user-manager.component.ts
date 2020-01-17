@@ -1,9 +1,9 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ApiWordpressService } from '../../_services/api-wordpress.service';
-import { Helpers } from '../../helpers';
 import * as _ from 'lodash';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import { Helpers } from '../../../helpers';
 declare var $: any;
 
 @Component({
