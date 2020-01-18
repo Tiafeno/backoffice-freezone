@@ -9,6 +9,7 @@ import { FzServicesService } from '../../../_services/fz-services.service';
 import { Metadata } from '../../../metadata';
 import { OrderItem } from '../../../order.item';
 import { DEFINE_FREEZONE } from '../../../defined';
+import { FzProduct } from '../../../supplier';
 declare var $: any;
 
 @Component({
@@ -123,7 +124,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return parseInt(sup.article_id, 10);
             }).filter(!_.isNaN).value();
         }).flatten().filter(value => value !== null).value();
-        const ARTICLES = _.isEmpty(aIds) ? [] : await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
+        const ARTICLES: FzProduct = _.isEmpty(aIds) ? [] : await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
         // Si la position ne sont pas: Envoyer, Rejeter, Accepter et Terminée
         if (!_.includes([1, 2, 3, 4], parseInt(this.order.position, 10))) {
             // Vérifier si la date de revision est périmé
@@ -171,11 +172,23 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 if (_.isUndefined(type)) return 0;
                 return _.isNaN(parseInt(type.value)) ? 0 : parseInt(type.value);
             };
+            // Vérifier s'il a une quantité demander
             const hasStockRequest = (): boolean => {
                 let stockR = _.find(meta_data, { key: 'stock_request' });
                 if (_.isUndefined(stockR)) return false;
                 return _.isEqual(parseInt(stockR.value, 10), 0) ? false : true;
             };
+            // Récuperer la valeur 
+            const getStockRequest = (): number => {
+                let stockR = _.find(meta_data, { key: 'stock_request' });
+                if (_.isUndefined(stockR)) return 0;
+                return parseInt(stockR.value, 10);
+            };
+            const getArticlesCondition = (ids: Array<number>): any => { // Array<number> : articles condition value
+                const itemArticles: any = _(ARTICLES).filter(art => { return _.indexOf(ids, art.id) > -1}).values();
+                if (_.isEmpty(itemArticles)) return [];
+                return _(itemArticles).map<Array<number>>(art => parseInt(art.condition)).values();
+            }
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
             const takes = _.sum(allTakeForItem);
             if (takes === 0 && !hasStockRequest()) {
@@ -208,6 +221,16 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                     default:
                         return item.price;
                 }
+            };
+            item.isQtyOverride = () => { return hasStockRequest(); };
+            item.isOrder = () => {
+
+            };
+            item.isRupture = () => {
+
+            };
+            item.isObsolete = () => {
+
             };
             item.subTotalNetFn = (): number => {
                 switch (discountTypeFn()) {
@@ -253,6 +276,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         }
     }
 
+    /**
+     * Récuperer les articles de type 'fz_product'
+     * @param ids Array<number>
+     */
     getArticles(ids: string): Promise<any> {
         return new Promise(resolve => {
             this.Wordpress.fz_product().include(ids).then(fzProducts => {
@@ -261,6 +288,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         })
     }
 
+    /**
+     * Récuperer tous les utilisteurs
+     * @param ids Array<number>
+     */
     getUsers(ids: string): Promise<any> {
         return new Promise(resolve => {
             this.Wordpress.users().include(ids).context('edit').then(users => {

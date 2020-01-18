@@ -311,9 +311,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         // Tous les champs d'ajout de quantity ajouté
         const inputIncrement: any = $(`input.input-increment`);
         // Récuperer tous les valeurs d'entrée pour la quantity ajouter
-        _.map(inputIncrement, iI => {
-            const inputVal = parseInt($(iI).val(), 10);
-            const inputData: any = $(iI).data();
+        _.map(inputIncrement, inputI => {
+            const inputVal = parseInt($(inputI).val(), 10);
+            const inputData: any = $(inputI).data();
             if (!_.isEqual(inputVal, 0)) {
                 this.qtyIncrement.push({
                     get: inputVal,
@@ -324,11 +324,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             }
         });
         // Mettre à jours les fournisseurs ajouter pour l'article
-        // Récuperer la valeur de consition pour le changement de quantité
-
+        // Récuperer la valeur de condition pour le changement de quantité
         let allCollectQuantity: Array<number> = _.map(this.qtyIncrement, meta => { return parseInt(meta.get, 10); });
         let collectQts = _.sum(allCollectQuantity);
-
         if (collectQts < this.item.quantity) {
             const { value: dialogResult } = await Swal.fire({
                 title: 'Confirmation',
@@ -341,19 +339,22 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 focusConfirm: false,
             });
             stockInsuffisantCondition = dialogResult ? true : false;
+            // Chqnger lq vqleur de la quantité demandé
             if (dialogResult) this.editForm.patchValue({ stock_request: collectQts });
             this.cd.detectChanges();
         }
-
         const quantityItemTakes = _.map(this.qtyIncrement, mt => parseInt(mt.get, 10));
         // Vérifier si la remise est définie 
         lineItems = _.map(lineItems, item => {
             // Récuperer seulement l'item en cours de modification
             if (item.product_id !== this.item.product_id) return item;
-
             let meta_data: Array<Metadata> = _.cloneDeep(item.meta_data);
-            let stkRequest = stockInsuffisantCondition ? item.quantity : frmEditValue.stock_request;
-
+            /**
+             * La valeur par default de 'stock_request' est 0, donc pour le variable 'stkRequest':
+             * si la valeur vaut 0, ce qu'il a pas de demande de changement de quantité.
+             * si la valeur vaut plus de 0, ce qu'il y a une demande de changement (La valeur vaut la qté demande par le client)
+             */
+            let stkRequest = stockInsuffisantCondition ? _.clone(item.quantity) : frmEditValue.stock_request;
             // Redefinir la quantité du produit
             item.quantity = stockInsuffisantCondition ? _.sum(quantityItemTakes) : item.quantity;
             meta_data = _.map(meta_data, meta => {
@@ -364,7 +365,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                             meta.value = 1;
                             return meta;
                         }
-
                         // Verifier le status par la quantité ajouter
                         // vérifier si la quantité ajouter est valide ou pas
                         // Si la quantité ajouter est inferieur à la quantité demander le status est ègale à 0 si le contraire 1
@@ -385,16 +385,14 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                             let dateLimit: any = moment(prd.date_review);
                             return dateLimit > todayAt6; // à jour
                         });
-
                         meta.value = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;
                         break;
-
                     default:
                         break;
                 }
                 return meta;
             });
-
+            // Ajouter la valeur de la quantité ajouter
             meta_data = _.reject(meta_data, { key: 'stock_request' });
             meta_data.push({ key: 'stock_request', value: stkRequest });
             // Meta data informations
@@ -406,7 +404,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             item.meta_data = _.clone(meta_data);
             return item;
         });
-
         lineItems = _.map(lineItems, item => {
             if (item.id !== this.itemId) return item;
             const formValue = this.editForm.value;
@@ -418,38 +415,29 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             item.meta_data = meta_data;
             return item;
         });
-
         //  price, total & subtotal
         const clientRole: string = _.isArray(this.client.roles) ? this.client.roles[0] : this.client.roles;
         lineItems = _.map(lineItems, item => {
             // Seulemet l'item actuellement en cours de modification
             if (item.id !== this.itemId) return item;
-
             let suppliers: any = _.find(item.meta_data, { key: 'suppliers' });
             if (_.isUndefined(suppliers)) return item;
             let suppliersValue: Array<any> = _.isObjectLike(suppliers) ? JSON.parse(suppliers.value) : [];
             if (_.isEmpty(suppliersValue)) return item;
-
             let pdtPrices: Array<number> = _.map(suppliersValue, sup => {
                 let fzProduct: any = _.find(this.allProducts, { id: sup.article_id });
                 if (_.isUndefined(fzProduct)) return 0;
                 const price: number = parseInt(fzProduct.price, 10);
                 const marge = clientRole === 'fz-company' ? (this.client.company_status === 'dealer' ? fzProduct.marge_dealer : fzProduct.marge) : fzProduct.marge_particular;
                 let hisPrice: number = this.services.getBenefit(price, parseInt(marge, 10));
-
                 return hisPrice;
             });
-
             let price: number = _.max(pdtPrices);
             item.price = price.toString();
             item.total = Math.round(price * item.quantity).toString();
             item.subtotal = Math.round(price * item.quantity).toString();
-
             return item;
         });
-
-
-
         Helpers.setLoading(true);
         const data: any = {
             line_items: lineItems,
@@ -457,7 +445,6 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 return _.isEqual(item.quantity, 0);
             }).push(this.itemsZero).flatten().value()
         };
-
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
             this.qtyIncrement = [];
             Helpers.setLoading(false);

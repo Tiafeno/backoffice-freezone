@@ -12,7 +12,6 @@
   <div class="">
     <div>
       <form [formGroup]="editForm" id="form-editor" class="form-horizontal">
-
         <div class="form-group mb-4 row">
           <label class="col-sm-4 col-form-label">
             <input class="form-control" formControlName="discount" min="0" type="number" placeholder="Valeur en %">
@@ -28,7 +27,6 @@
               <input type="radio" formControlName="discount_type" value="2">
               <span class="input-span"></span>Rajout</label> -->
           </div>
-
         </div>
       </form>
     </div>
@@ -47,7 +45,6 @@
       </thead>
     </table>
   </div>
-
 </div>
 
 <div class="ibox-footer justify-content-between bg-primary-50">
@@ -55,9 +52,7 @@
     <button class="btn btn-primary radius-0 mr-3" (click)="onSaveQuotationPdt()">Enregistrer</button>
     <a class="btn btn-secondary radius-0" [routerLink]="['/dashboard', 'quotation', orderId, 'edit']">Retour</a>
   </div>
-
 </div>
-
 
 <div class="modal fade" id="edit-article-supplier-modal">
   <div class="modal-dialog" role="document">

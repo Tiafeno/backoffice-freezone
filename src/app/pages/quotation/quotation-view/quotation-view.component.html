@@ -60,7 +60,7 @@
               <th>Qté</th>
               <th>P.U HT</th>
               <th>Rem</th>
-              <th class="text-right pr-4">Total</th>
+              <th class="text-right pr-4">Montant HT</th>
             </tr>
           </thead>
           <tbody>
@@ -68,7 +68,7 @@
               <td class="pl-4">
                 <div><strong>{{item.name}}</strong></div>
               </td>
-              <td class="text-center">{{item.quantity === 0 ? '-' : item.quantity}}</td>
+              <td class="text-center">{{item.quantity === 0 ? '-' : item.quantity}} {{item.isQtyOverride() ? '*' : ''}}</td>
               <td>{{item.priceFn() === 0 ? '-' : item.priceFn() | currency:'MGA':'symbole':'4.2-2':'fr'}}</td>
               <td>{{item.discountTypeFn() === 0 ? '-' : item.discountFn() + '%'}}</td>
               <td class="text-right pr-4">

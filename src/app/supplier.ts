@@ -21,7 +21,6 @@ export class Supplier {
     cif?: any;
 }
 
-
 export class FzProductCSV {
     id: number;
     title: any;
@@ -32,7 +31,6 @@ export class FzProductCSV {
     price_particular?: any;
     price_dealer?: any;
     price_UF?: any;
-    
 }
 
 export class FzProduct extends FzProductCSV {
