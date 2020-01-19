@@ -85,6 +85,7 @@ import { GoodDealListsComponent } from './pages/good-deal/good-deal-lists/good-d
 import { ToExcelComponent } from './components/to-excel/to-excel.component';
 import { QuoteAddComponent } from './pages/quotation/quote-add/quote-add.component';
 import { WpoptionsComponent } from './pages/settings/wpoptions/wpoptions.component';
+import { ClientQuoteComponent } from './pages/clients/client-quote/client-quote.component';
 
 const routes: Routes = [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -326,6 +327,7 @@ const routes: Routes = [
         ReviewMailSupplierComponent,
         ImportArticleComponent,
         ClientsComponent,
+        ClientQuoteComponent,
         EditClientComponent,
         SavComponent,
         StatusArticleComponent,

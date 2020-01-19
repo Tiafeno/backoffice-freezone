@@ -8,7 +8,7 @@ export class OrderItem {
     product_id: number;
     quantity: number;
     total: any;
-    subtoal: any;
+    subtotal?: any;
     sku: any;
     variation_id: number;
 }

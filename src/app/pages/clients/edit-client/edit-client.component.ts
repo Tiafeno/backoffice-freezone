@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import Swal from 'sweetalert2';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { ResponsibleComponent } from '../../../components/responsible/responsible.component';
+import { ClientQuoteComponent } from '../client-quote/client-quote.component';
 
 @Component({
   selector: 'app-edit-client',
@@ -31,6 +32,7 @@ export class EditClientComponent implements OnInit {
   ];
 
   @ViewChild(ResponsibleComponent) private Responsible: ResponsibleComponent;
+  @ViewChild(ClientQuoteComponent) private clientQuotes: ClientQuoteComponent;
   constructor(
     private apiWc: ApiWoocommerceService,
     private route: ActivatedRoute,
@@ -87,7 +89,6 @@ export class EditClientComponent implements OnInit {
       this.Form.disable();
       this.shipForm.disable();
     }
-
     this.Woocommerce = this.apiWc.getWoocommerce();
   }
 
@@ -124,20 +125,16 @@ export class EditClientComponent implements OnInit {
             company_name: this.getMetaDataValue('company_name'),
           });
         }
-
         if (this.role === 'fz-particular') {
           this.Form.patchValue({
             cin: this.getMetaDataValue('cin'),
             date_cin: this.getMetaDataValue('date_cin'),
           });
         }
-
         const role = this.getMetaDataValue('role_office');
         this.roleOffice = _.isNull(role) ? 0 : parseInt(role, 10);
-
         this.billForm.patchValue(this.Customer.billing);
         this.shipForm.patchValue(this.Customer.shipping);
-
         this.responsible = this.getMetaDataValue('responsible');
         this.cd.detectChanges();
         Helpers.setLoading(false);
@@ -153,12 +150,10 @@ export class EditClientComponent implements OnInit {
   onSubmit() {
     if (this.Form.valid && this.billForm.valid && this.shipForm.valid) {
       const Value: any = this.Form.value;
-
       if (Value.company_status === 'pending') {
         Swal.fire('Avertissement', "Vous n'avez pas encore definie le client en utilisateur final ou en revendeur", 'warning');
         return false;
       }
-
       const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'company_status', 'company_name'];
       this.MetaData = _.map(this.Customer.meta_data, (meta) => {
         if (meta.key === 'address') meta.value = Value.address;
@@ -169,7 +164,6 @@ export class EditClientComponent implements OnInit {
         if (meta.key === 'cif') meta.value = Value.cif;
         if (meta.key === 'company_status') meta.value = Value.company_status;
         if (meta.key === 'company_name') meta.value = Value.company_name;
-
         return meta;
       });
       // Crée si la meta data n'existe pas
@@ -179,7 +173,6 @@ export class EditClientComponent implements OnInit {
           this.MetaData.push({ key: $value, value: Value[$value] });
         }
       });
-
       let data: any = {
         first_name: Value.first_name,
         last_name: Value.last_name,
@@ -187,28 +180,22 @@ export class EditClientComponent implements OnInit {
         billing: this.billForm.value,
         shipping: this.shipForm.value
       };
-
       let shipping: any = data.shipping;
-      data.shipping.company = Value.company_name; 
-
+      shipping.company = Value.company_name; 
       let billing: any = data.billing;
-      data.billing.postcode = data.shipping.postcode = billing.postcode.toString();
+      data.billing.postcode = shipping.postcode = billing.postcode.toString();
       data.billing.phone = _.isEmpty(billing.phone) ? Value.phone : billing.phone;
       data.billing.first_name = _.isEmpty(billing.first_name) ? Value.first_name : billing.first_name;
       data.billing.last_name = _.isEmpty(billing.last_name) ? Value.last_name : billing.last_name;
       data.billing.company = Value.company_name;
-
       Helpers.setLoading(true);
-
       // Mettre à jour le client
       this.Woocommerce.put(`customers/${this.customerID}`, data, (err, data, res) => {
         const response: any = JSON.parse(res);
-
         if (!_.isUndefined(response.code)) {
           Swal.fire('Désolé', response.message, 'error');
           return false;
         }
-
         const responsible: any = this.getMetaDataValue("responsible");
         if (_.isNull(responsible) || _.isEmpty(responsible)) {
           Swal.fire('Succès', "Information mise à jour aves succès. Veuillez ajouter une commercial pour ce client.", 'info')
