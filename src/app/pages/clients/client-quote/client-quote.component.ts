@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
-import { OrderItem } from '../../../order.item';
+import { OrderItem, wpOrder } from '../../../order.item';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-client-quote',
@@ -9,7 +10,7 @@ import { OrderItem } from '../../../order.item';
 })
 export class ClientQuoteComponent implements OnInit, OnChanges {
   private woocommerce: any;
-  public orders: Array<OrderItem> = [];
+  public orders: Array<wpOrder> = [];
   public loading: boolean = false;
   @Input() clientId: number = 0;
   constructor(
@@ -28,10 +29,12 @@ export class ClientQuoteComponent implements OnInit, OnChanges {
       this.loading = true;
       this.woocommerce.get(`orders?customer=${currentValue}`, (err, dat, res) => {
         this.loading = false;
-        let orders = JSON.parse(res);
+        let orders: Array<OrderItem> = JSON.parse(res);
+        this.orders = _(orders).map(order => new wpOrder(order)).value();
+        this.cd.detectChanges();
       });
     }
 
   }
-
 }
+

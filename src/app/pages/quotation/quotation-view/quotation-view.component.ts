@@ -120,9 +120,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             if (_.isUndefined(suppliers)) return null;
             suppliers = JSON.parse(suppliers.value);
             if (_.isEmpty(suppliers)) return null;
-            return _(suppliers).map(sup => {
-                return parseInt(sup.article_id, 10);
-            }).filter(!_.isNaN).value();
+            return _(suppliers).map(sup => { return parseInt(sup.article_id, 10); }).filter(!_.isNaN).value();
         }).flatten().filter(value => value !== null).value();
         const ARTICLES: FzProduct = _.isEmpty(aIds) ? [] : await this.getArticles(_.join(aIds, ',')); // Array of fz_product type
         // Si la position ne sont pas: Envoyer, Rejeter, Accepter et Terminée
@@ -142,6 +140,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 this.error = dateReview < todayAt6;
             });
 
+            for (let item in this.Items) {
+                // TODO: Ajouter une verification avant devoir le devis
+            }
+
             if (this.error) {
                 $('.modal').modal('hide');
                 Helpers.setLoading(false);
@@ -149,7 +151,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 setTimeout(() => {
                     Swal.fire('Désolé', "Article en attente détecté. Veuillez mettre à jours l'article", 'error');
                 }, 600);
-
                 return false;
             }
         }
@@ -165,7 +166,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             /**
              * 0: Aucun
              * 1: Remise
-             * 2: Rajout
              */
             const discountTypeFn = (): number => {
                 let type = _.find(meta_data, { key: 'discount_type' });
@@ -185,9 +185,9 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return parseInt(stockR.value, 10);
             };
             const getArticlesCondition = (ids: Array<number>): any => { // Array<number> : articles condition value
-                const itemArticles: any = _(ARTICLES).filter(art => { return _.indexOf(ids, art.id) > -1}).values();
+                const itemArticles: any = _(ARTICLES).filter(art => { return _.indexOf(ids, art.id) > -1}).value();
                 if (_.isEmpty(itemArticles)) return [];
-                return _(itemArticles).map<Array<number>>(art => parseInt(art.condition)).values();
+                return _(itemArticles).map<Array<number>>(art => parseInt(art.condition)).value();
             }
             // Faire la somme pour tous les nombres d'article ajouter pour chaques fournisseurs
             const takes = _.sum(allTakeForItem);
@@ -217,7 +217,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 switch (discountTypeFn()) {
                     case 2: // Rajout
                         return item.price + discountPercentFn();
-                    case 1: // Remise & Aucun
+                    //case 1: // Remise & Aucun
                     default:
                         return item.price;
                 }
@@ -271,7 +271,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             this.Items = _(this.Quotation.line_items).push(this.Quotation.line_items_zero).flatten().value();
             this.billingAdress = _.clone(this.Quotation.billing);
             this.shippingAdress = _.clone(this.Quotation.shipping);
-
             return true;
         }
     }

@@ -1,3 +1,22 @@
-<p>
-  client-quote works!
-</p>
+<div class="ibox-body">
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Etat</th>
+        <th>Date de création</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of orders">
+        <td>{{order.id}}</td>
+        <td [innerHTML]="order.posValue"></td>
+        <td>{{order.dateCreate}}</td>
+        <td>
+          <a class="btn bt-sm btn-primary" [routerLink]="['/dashboard', 'quotation', order.id, 'edit']" routerLinkActive="router-link-active" >Voir</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
