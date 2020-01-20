@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import * as moment from 'moment';
 import { config } from '../../../environments/environment';
 import * as _ from 'lodash';
 import { FzServicesService } from '../../_services/fz-services.service';
@@ -35,7 +36,6 @@ export class AcceptedItemSuppliersComponent implements OnInit {
           article.item_quantity = _.sum(itemQuantity);
           return article;
         }).union().value();
-
         return supplier;
       })
       this.suppliers = _.map(items, item => item.data);
@@ -62,7 +62,6 @@ export class AcceptedItemSuppliersComponent implements OnInit {
       "sDom": 'rtip',
       data: this.articles,
       columns: [
-        { data: 'ID' },
         {
           data: 'name', render: (data, type, row) => {
             return data;
@@ -78,8 +77,14 @@ export class AcceptedItemSuppliersComponent implements OnInit {
             let price = this.services.currencyFormat(data);
             return `<span class="font-bold">${price}</span>`;
           }
+        },
+        {
+          date: 'date_review', render: (data) => {
+            let dateReview = moment(data);
+            if (!dateReview.isValid()) return data;
+            return dateReview.format('LLL');
+          }
         }
-
       ],
       initComplete: () => {
         

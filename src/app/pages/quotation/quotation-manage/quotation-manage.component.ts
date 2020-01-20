@@ -88,22 +88,19 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 const discount: any = _.find(meta, { key: 'discount' });
                 const discountType: any = _.find(meta, { key: 'discount_type' });
                 const stockRequest: any = _.find(meta, { key: 'stock_request' });
-
                 this.editForm.patchValue({
                     discount: _.isUndefined(discount) ? 0 : parseInt(discount.value),
                     stock_request: _.isUndefined(stockRequest) ? 0 : parseInt(stockRequest.value, 10),
                     discount_type: _.isUndefined(discountType) ? 0 : parseInt(discountType.value, 10)
                 });
-
+                // Desactiver ou activer le champ ajouter remise
                 this.isRegulatoryAuditDisabled();
-
-                // Récupérer l'utilisateur (client) qui a fait la demande
+                // Récupérer l'utilisateur (client) qui a fait cette demande
                 await this.Wordpress
                     .users()
                     .id(this.order.user_id)
                     .context('edit')
                     .then(user => { this.client = _.clone(user); });
-
                 // Afficher les informations sur la table
                 this.onRenderTable();
                 this.cd.detectChanges();
@@ -169,7 +166,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                             case 1: status = 'Rupture de stock'; break;
                                             case 2: status = 'Obsolete'; break;
                                             case 3: status = 'Commande'; break;
-                                            default: status = 'Disponible';  break;
+                                            default: status = 'Disponible'; break;
                                         }
                                         return `<span class="badge ${data == 2 ? 'badge-pink' : 'badge-default'}">${status}</span>`
                                     }
@@ -339,7 +336,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 focusConfirm: false,
             });
             stockInsuffisantCondition = dialogResult ? true : false;
-            // Chqnger lq vqleur de la quantité demandé
+            // Changer la valeur de la quantité demandé
             if (dialogResult) this.editForm.patchValue({ stock_request: collectQts });
             this.cd.detectChanges();
         }
@@ -393,14 +390,18 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 return meta;
             });
             // Ajouter la valeur de la quantité ajouter
-            meta_data = _.reject(meta_data, { key: 'stock_request' });
-            meta_data.push({ key: 'stock_request', value: stkRequest });
+            meta_data = _(meta_data)
+                .reject({ 'key': 'stock_request' })
+                .push({ key: 'stock_request', value: stkRequest })
+                .value();
             // Meta data informations
             const supValues: Array<any> = _.map(this.qtyIncrement, m => {
                 return _.pick(m, ['get', 'supplier', 'product_id', 'article_id']);
             });
-            meta_data = _.reject(meta_data, { key: 'suppliers' });
-            meta_data.push({ key: 'suppliers', value: JSON.stringify(supValues) });
+            meta_data = _(meta_data)
+                .reject({ 'key': 'suppliers' })
+                .push({ key: 'suppliers', value: JSON.stringify(supValues) })
+                .value();
             item.meta_data = _.clone(meta_data);
             return item;
         });
@@ -408,9 +409,8 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
             if (item.id !== this.itemId) return item;
             const formValue = this.editForm.value;
             let meta_data: Array<Metadata> = _.cloneDeep(item.meta_data);
-            meta_data = _.reject(meta_data, { key: 'discount' });
+            meta_data = _.reject(meta_data, meta => { return _.indexOf(['discount_type', 'discount'], meta.key) > 0 });
             meta_data.push({ key: 'discount', value: parseInt(formValue.discount, 10) });
-            meta_data = _.reject(meta_data, { key: 'discount_type' });
             meta_data.push({ key: 'discount_type', value: parseInt(formValue.discount_type, 10) });
             item.meta_data = meta_data;
             return item;
@@ -445,6 +445,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 return _.isEqual(item.quantity, 0);
             }).push(this.itemsZero).flatten().value()
         };
+
         this.Woocommerce.put(`orders/${this.orderId}`, data, (err, d, res) => {
             this.qtyIncrement = [];
             Helpers.setLoading(false);

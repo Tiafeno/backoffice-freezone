@@ -38,6 +38,7 @@ export class FzProduct extends FzProductCSV {
     date_add: string;
     date_review: string;
     total_sales: any; // Quantité disponible
+    _quantity: number;
     user_id: number;
     condition: number; // Disponible - 0, Rupture -1, Obsolete - 2, et Commande - 3
     product_id: number;

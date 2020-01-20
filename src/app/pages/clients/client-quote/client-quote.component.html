@@ -17,6 +17,12 @@
           <a class="btn bt-sm btn-primary" [routerLink]="['/dashboard', 'quotation', order.id, 'edit']" routerLinkActive="router-link-active" >Voir</a>
         </td>
       </tr>
+      <tr *ngIf="loading">
+        <td>Chargement...</td>
+      </tr>
+      <tr *ngIf="loading && orders.length <= 0">
+        <td>Chargement...</td>
+      </tr>
     </tbody>
   </table>
 </div>
