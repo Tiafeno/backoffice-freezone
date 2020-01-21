@@ -133,6 +133,7 @@ export class AddArticleComponent implements OnInit {
       Form.append('name', Value.title);
       Form.append('price', Value.price);
       Form.append('total_sales', Value.stock);
+      Form.append('_quantity', Value.stock);
       Form.append('user_id', Value.user_id);
       Form.append('product_cat', Value.product_cat);
       Form.append('mark', Value.mark);

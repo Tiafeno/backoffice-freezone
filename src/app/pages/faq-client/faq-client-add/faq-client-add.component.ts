@@ -24,8 +24,8 @@ export class FaqClientAddComponent implements OnInit {
     language_url: '/assets/js/langs/fr_FR.js',
     menubar: false,
     content_css: [
-      '//fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
-      '//www.tinymce.com/css/codepen.min.css'
+      'https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
+      'https://www.tinymce.com/css/codepen.min.css'
     ],
     content_style: ".mce-content-body p { margin: 5px 0; }",
     inline: false,

@@ -207,6 +207,7 @@ export class EditArticleComponent implements OnInit {
       marge_particular: Values.margeParticular,
       garentee: Values.garentee,
       total_sales: parseInt(Values.stock, 10),
+      _quantity: parseInt(Values.stock, 10), // Quantite pour le sauvegarde (Gestion de stock)
       date_review: moment().format('YYYY-MM-DD HH:mm:ss')
     }).then(() => {
       $('#edit-article-supplier-modal').modal('hide');

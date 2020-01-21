@@ -6,7 +6,6 @@ import { Helpers } from '../../../helpers';
 import Swal, { SweetAlertType } from 'sweetalert2';
 import * as moment from 'moment';
 import { FzServicesService } from '../../../_services/fz-services.service';
-import { Metadata } from '../../../metadata';
 import { OrderItem, wpItemOrder, wpOrder } from '../../../order.item';
 import { DEFINE_FREEZONE } from '../../../defined';
 import { FzProduct } from '../../../supplier';
@@ -20,8 +19,9 @@ declare var $: any;
 export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit {
     public ID: number = 0;
     public Quotation: wpOrder;
+    public Articles: Array<FzProduct> = [];
     private Items: Array<wpItemOrder> = [];
-    public QtItems: Array<any> = [];
+    public QtItems: Array<wpItemOrder> = [];
     public querySupplierProducts: Array<any> = [];
     public Billing: any = {};
     public billingAdress: any = {}; // adresse de facturation
@@ -35,7 +35,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     private error: boolean = false;
     private Tax: number = 20; // Tax de 20%
     @Input() public order: any;
-
     constructor(
         private apiWC: ApiWoocommerceService,
         private apiWP: ApiWordpressService,
@@ -54,16 +53,17 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
     ngAfterViewInit() {
         $("#quotation-view-modal")
-            .on('show.bs.modal', e => {
-                this.onShowModal();
-            })
+            .on('show.bs.modal', e => { this.onShowModal(); })
             .on('hide.bs.modal', e => {
-                this.QtItems = [];
                 this.Billing = {};
             });
     }
 
-    public onSendMail(): void | boolean {
+    public onResetItems() {
+        this.QtItems = [];
+    }
+
+    public onSendMail() {
         // Si la position ne sont pas: Envoyer, Rejeter, Accepter & Terminée
         if (!_.includes([1, 2, 3, 4], parseInt(this.order.position, 10))) {
             // Ne pas envoyer le devis si le client est toujours en attente
@@ -82,13 +82,13 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 return false;
             }
         }
-        this.QtItems = _.map(this.QtItems, item => {
+        const dataItemForm = _.map(this.QtItems, (item:any) => {
             // Mettre le prix unitaire pour 0 par default
             // (Le prix sera regenerer automatiquement par woocommerce)
             item.price = '0';
             return item;
         });
-        let data: any = { currency: 'MGA', line_items: this.QtItems };
+        let data: any = { currency: 'MGA', line_items: dataItemForm };
         Helpers.setLoading(true);
         $('.modal').modal('hide');
         this.Woocommerce.put(`orders/${this.ID}`, data, (err, data, res) => {
@@ -118,16 +118,16 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             return _(dataSuppliers).map(sup => parseInt(sup.article_id, 10)).value();
         }).flatten().filter(v => v !== null).value();
         // Recuperer tous les articles ajouter pour ces items par une requete.
-        let ARTICLES: Array<FzProduct> = []; // Array of fz_product type
         if (!_.isEmpty(aIds)) {
             await this.getArticles(_.join(aIds, ',')).then(articles => { 
-                ARTICLES = _.cloneDeep(articles); 
+                this.Articles = _.cloneDeep(articles);
+                this.cd.detectChanges();
             });
         }
         // Si la position ne sont pas: Envoyer, Rejeter, Accepter et Terminée
         if (!_.includes([1, 2, 3, 4], parseInt(this.order.position, 10))) {
             // Vérifier si la date de revision est périmé
-            _.map(ARTICLES, (a) => {
+            _.map(this.Articles, (a) => {
                 const dateReview: any = moment(a.date_review);
                 const dateNow: any = moment();
                 const todayAt6 = moment({
@@ -149,7 +149,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                     break; 
                 }
                 let currentItemArticlesIds: Array<number> = item.articleIdsFn;
-                let currentItemArticles: Array<FzProduct> = _.filter(ARTICLES, a => _.includes(currentItemArticlesIds, a.id));
+                let currentItemArticles: Array<FzProduct> = _.filter(this.Articles, a => _.includes(currentItemArticlesIds, a.id));
                 const sumQuantity: number = _.sum(_.map(currentItemArticles, j => parseInt(j.total_sales, 10)));
                 const sumTake: number = _.sum(_.map(currentSupplierVals, val => parseInt(val.get, 10)));
                 if (sumQuantity < sumTake) this.error = true;

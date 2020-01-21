@@ -1,5 +1,5 @@
 <!-- Affiche le devis en complet -->
-<div class="modal fade" id="quotation-view-modal">
+<div class="modal fade" id="quotation-view-modal" data-backdrop="static">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header px-4 py-3 bg-primary-400">
@@ -130,4 +130,10 @@
   </div>
 </div>
 
-<app-quotation-mail [itemsOrder]="QtItems" [orderId]="ID"></app-quotation-mail>
+<app-quotation-mail 
+  [itemsOrder]="QtItems" 
+  [orderId]="ID" 
+  [order]="Quotation"
+  [articles]="Articles" 
+  (resetItems)="onResetItems()">
+</app-quotation-mail>

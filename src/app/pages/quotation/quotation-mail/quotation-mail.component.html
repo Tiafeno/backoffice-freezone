@@ -1,5 +1,5 @@
 <!-- Afficher une boite de dialogue pour le mail -->
-<div class="modal fade" id="quotation-mail-modal">
+<div class="modal fade" id="quotation-mail-modal" data-backdrop="static">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <form [formGroup]="Form">
@@ -8,7 +8,6 @@
             <h5 class="modal-title text-white">ENVOYER PAR E-MAIL
             </h5>
             <small class="text-white">à {{Order.billing.email}}</small>
-            
           </div>
           <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span>
