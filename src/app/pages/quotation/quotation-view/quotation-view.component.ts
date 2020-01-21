@@ -88,10 +88,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             item.price = '0';
             return item;
         });
-        let data: any = {
-            currency: 'MGA',
-            line_items: this.QtItems
-        };
+        let data: any = { currency: 'MGA', line_items: this.QtItems };
         Helpers.setLoading(true);
         $('.modal').modal('hide');
         this.Woocommerce.put(`orders/${this.ID}`, data, (err, data, res) => {
@@ -180,7 +177,6 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 this.errorOccured('Désolé', `Quantité ajouter incorrect. Veuillez vérifier l'article: ${item.name}`, 'error');
                 return item;
             }
-            
             return item;
         });
 
@@ -195,7 +191,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         let allTotalHT: Array<number> = _.map(this.QtItems, o => o.priceFn * o.quantity);
         let allTotalNet: Array<number> = _.map(this.QtItems, item => {
             let total: number = item.subTotalNetFn;
-            // Ajouter le frais de transport, si le total vaut moins de 100.000Ar
+            // Ajouter le frais de transport, si le total vaut moins de XAr*
             return (total < this.minCostWithTransport && total !== 0) ? (this.costTransport + total) : total ;
         });
         this.Billing.totalNet = _.sum(allTotalNet);
@@ -209,11 +205,13 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
 
     ngOnChanges(changes: SimpleChanges): void | boolean {
         if (!_.isUndefined(changes.order.currentValue) && !_.isEmpty(changes.order.currentValue)) {
+            // Ajouter l'identifiant de la commande
             this.ID = changes.order.currentValue.id;
             this.Quotation = _.cloneDeep(changes.order.currentValue);
             const lineItems: Array<OrderItem> = this.Quotation.line_items;
             const lineItemsZero: Array<wpItemOrder> = _<Array<OrderItem>>(this.Quotation.line_items_zero).map(item => new wpItemOrder(item) ).value();
-            this.Items = _<Array<OrderItem>>(lineItems).map(QlItem => new wpItemOrder(QlItem)).push(lineItemsZero).flatten().value();
+            const lineItemsDefault = _<Array<OrderItem>>(lineItems).map(QlItem => new wpItemOrder(QlItem)).value();
+            this.Items = _.union(lineItemsDefault, lineItemsZero);
             this.billingAdress = _.clone(this.Quotation.billing);
             this.shippingAdress = _.clone(this.Quotation.shipping);
             return true;

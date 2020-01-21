@@ -46,7 +46,7 @@ export class QuotationMailComponent implements OnInit, OnChanges {
     private security: FzSecurityService
   ) {
     const message: string = `Chers clients, <br><br>
-    Nous vous remercions pour votre demande de devis et en retour nous prions de trouver la pro forma correspondant à vos besoins. 
+    Nous vous remercions pour votre demande de devis et en retour nous prions de trouver la proforma correspondant à vos besoins. 
     Dans l’attente de la confirmation de ce devis. <br> <br> Cordialement <br> L’équipe commerciale de Freezone`;
     this.Form = new FormGroup({
       subject: new FormControl('', Validators.required),
