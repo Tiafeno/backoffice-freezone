@@ -97,6 +97,7 @@ export class QuotationMailComponent implements OnInit, OnChanges {
         // Mettre a jour les quantites des articles
         let updates: Array<any> = [];
         for (let item of <Array<wpItemOrder>>this.itemsOrder) {
+          if (item.quantity === 0) continue; // Line zero
           const sumTake: number = _.sum(_.map(item.metaSupplierDataFn, val => parseInt(val.get, 10)));
           let currentItemArticlesIds: Array<number> = item.articleIdsFn;
           let currentItemArticles: Array<FzProduct> = _.filter(this.articles, a => _.includes(currentItemArticlesIds, a.id));

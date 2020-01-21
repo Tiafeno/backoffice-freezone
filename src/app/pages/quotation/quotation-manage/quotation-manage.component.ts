@@ -367,7 +367,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                         // Si la quantité ajouter est inferieur à la quantité demander le status est ègale à 0 si le contraire 1
                         meta.value = (collectQts < this.item.quantity && !stockInsuffisantCondition) ? 0 : 1;
                         if (!meta.value) return meta;
-                        // Verifier si l'article est en review
+                        // Verifier si l'article est en review.
                         const aIds: Array<any> = _.map(this.qtyIncrement, meta => meta.article_id); // Récuperer les identifiant des articles à ajouter
                         const collectFZProducts: Array<any> = _.filter(this.allProducts, fz => { return _.indexOf(aIds, fz.id) >= 0; });
                         const dateNow: any = moment();
@@ -407,7 +407,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
         });
         lineItems = _.map(lineItems, item => {
             if (item.id !== this.itemId) return item;
-            const formValue = this.editForm.value;
+            const formValue: any = this.editForm.value;
             let meta_data: Array<Metadata> = _.cloneDeep(item.meta_data);
             meta_data = _.reject(meta_data, meta => { return _.indexOf(['discount_type', 'discount'], meta.key) > 0 });
             meta_data.push({ key: 'discount', value: parseInt(formValue.discount, 10) });
@@ -432,6 +432,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 let hisPrice: number = this.services.getBenefit(price, parseInt(marge, 10));
                 return hisPrice;
             });
+            // Ajouter le prix le plus grand
             let price: number = _.max(pdtPrices);
             item.price = price.toString();
             item.total = Math.round(price * item.quantity).toString();

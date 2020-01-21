@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { Metadata } from "./metadata";
+import { FzProduct } from './supplier';
 
 export class OrderItem {
     id: number;
@@ -81,7 +82,7 @@ export class wpItemOrder {
     sku: any;
     variation_id: number;
     // Cette variable contiens les articles (fz_product) qui sont selectionnerpour cette item
-    private _articles: Array<any> = [];
+    private _articles: Array<FzProduct> = [];
     constructor(item: OrderItem) {
         (Object.keys(item)).forEach((element, index) => {
             this[element] = _.clone(item[element]);
@@ -90,10 +91,9 @@ export class wpItemOrder {
     set articles(value) {
         this._articles = value;
     }
-    get articles(): Array<any> {
+    get articles(): Array<FzProduct> {
         return this._articles;
     }
-
     /**
     * 0: Aucun
     * 1: Remise
@@ -117,11 +117,20 @@ export class wpItemOrder {
         }
     };
     get subTotalNetFn(): number {
+        const lines: Array<any> = this.takeMetaSuppliersLines;
+        let qty: number = 0;
+        for (let line of lines) {
+            switch (line.condition.key) {
+                case 0: qty += parseInt(line.get); break;
+                default: break;
+            }
+        }
+        qty = (0 === qty) ? this.quantity : qty;
         switch (this.discountTypeFn) {
-            case 2: return this.quantity * (this.price - this.discountPercentFn);
-            case 1: return (this.price - this.discountPercentFn) * this.quantity;
+            case 2: return qty * (this.price - this.discountPercentFn);
+            case 1: return (this.price - this.discountPercentFn) * qty;
             case 0:
-            default: return this.quantity * this.price;
+            default: return qty * this.price;
         }
     }
     // Vérifier s'il a une quantité demander
@@ -130,16 +139,48 @@ export class wpItemOrder {
         if (_.isUndefined(stockR)) return false;
         return _.isEqual(parseInt(stockR.value, 10), 0) ? false : true;
     };
-
     get articleIdsFn(): Array<number> {
         const dataParser = this.metaSupplierDataFn;
         return _(dataParser).map(line => parseInt(line.article_id, 10)).value();
     }
-
     get metaSupplierDataFn(): Array<any> {
         const suppliers = _.find(this.meta_data, { key: 'suppliers' });
         if (_.isUndefined(suppliers)) return [];
         const dataParser: Array<any> = JSON.parse(suppliers.value);
         return dataParser;
+    }
+    // Depends: articles (property)
+    get takeMetaSuppliersLines(): Array<any> {
+        const conditions: Array<{ key: number, value: string }> = [
+            { key: 0, value: 'Disponible' },
+            { key: 1, value: 'Rupture' },
+            { key: 2, value: 'Obsolete' },
+            { key: 3, value: 'Commande' }
+        ];
+        //let currentItemArticlesIds: Array<number> = this.articleIdsFn;
+        //let currentItemArticles: Array<FzProduct> = _.filter(this.articles, a => _.includes(currentItemArticlesIds, a.id));
+        let metaSuppliers: Array<any> = this.metaSupplierDataFn;
+        return  _(metaSuppliers).map(line => {
+            let hisArticle: FzProduct = _.find(this.articles, {id: parseInt(line.article_id)});
+            line.condition = _.find(conditions, { key: _.isUndefined(hisArticle) ? 0 : hisArticle.condition});
+            return line;
+        }).value();
+    }
+
+    // Depends: articles (property)
+    get qtyUI(): string {
+        const lines: Array<any> = this.takeMetaSuppliersLines;
+        let ui: string = '';
+        let qty: number = 0;
+        for (let line of lines) {
+            switch (line.condition.key) {
+                case 0: qty += parseInt(line.get); break;
+                case 1: ui += '*'; break;
+                case 3: ui += "**"; break;
+                default:  break;
+            }
+        }
+        qty = (0 === qty) ? this.quantity : qty;
+        return `${qty}<span style="color:red">${ui}</span>`;
     }
 }

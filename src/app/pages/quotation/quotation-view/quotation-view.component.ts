@@ -24,8 +24,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public QtItems: Array<wpItemOrder> = [];
     public querySupplierProducts: Array<any> = [];
     public Billing: any = {};
-    public billingAdress: any = {}; // adresse de facturation
-    public shippingAdress: any = {}; // adresse de facturation
+    public billingAddress: any = {}; // adresse de facturation
+    public shippingAddress: any = {}; // adresse de facturation
     public ownerClient: any = {};
     public costTransport: number; // en ariry
     public minCostWithTransport: number; // en ariry
@@ -161,6 +161,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         const CLIENT = await this.getUsers(this.order.customer_id); // Array of user or empty
         this.ownerClient = _.isArray(CLIENT) ? _.clone(CLIENT[0]) : {};
         this.QtItems = _.map(this.Items, item => {
+            // Ajouter les articles dans l'objet item
+            item.articles = this.Articles;
             // Récuperer tous les meta utiliser pour le produit
             const __supplierVals__ = item.metaSupplierDataFn;
             const allTakeForItem: Array<number> = _.map(__supplierVals__, sp => parseInt(sp.get));
@@ -212,8 +214,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             const lineItemsZero: Array<wpItemOrder> = _<Array<OrderItem>>(this.Quotation.line_items_zero).map(item => new wpItemOrder(item) ).value();
             const lineItemsDefault = _<Array<OrderItem>>(lineItems).map(QlItem => new wpItemOrder(QlItem)).value();
             this.Items = _.union(lineItemsDefault, lineItemsZero);
-            this.billingAdress = _.clone(this.Quotation.billing);
-            this.shippingAdress = _.clone(this.Quotation.shipping);
+            this.billingAddress = _.clone(this.Quotation.billing);
+            this.shippingAddress = _.clone(this.Quotation.shipping);
             return true;
         } 
     }
