@@ -37,7 +37,6 @@
           </div>
         </div>
       </div>
-
       <div class="row">
         <div class="row">
           <div class="col-md-6">
@@ -87,7 +86,7 @@
               <div class="form-group mb-4">
                 <label>Prix de vente UF</label>
                 <input class="form-control" onkeypress="return false;" min="0" formControlName="pricePro" type="number"
-                  id="price_uf" placeholder="">
+                  placeholder="">
               </div>
             </div>
             <div class="col-sm-6">
@@ -134,7 +133,7 @@
           <div class="form-group mb-2">
             <label>Prix de vente Particulier</label>
             <input class="form-control" onkeypress="return false;" min="0" formControlName="priceParticular"
-              type="number" id="price_particular" placeholder="">
+              type="number" placeholder="">
             <div *ngIf="f.priceParticular.errors && f.priceParticular.dirty">
               <label id="price-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
@@ -144,7 +143,7 @@
           <div class="form-group mb-2">
             <label>Marge P.</label>
             <input class="form-control" formControlName="margeParticular" min="0" type="number"
-              (ngModelChange)="onChangeMargeParticular($event)" id="marge_particular" placeholder="Ajouter une marge">
+              (ngModelChange)="onChangeMargeParticular($event)"  placeholder="Ajouter une marge">
             <div *ngIf="f.margeParticular.errors && f.margeParticular.dirty">
               <label id="marge-dealer-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>

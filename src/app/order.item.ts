@@ -112,8 +112,8 @@ export class wpItemOrder {
     get isQtyOverride(): boolean { return this.hasStockRequestFn; };
     get priceFn(): any {
         switch (this.discountTypeFn) {
-            case 2: return this.price + this.discountPercentFn;
-            default: return this.price;
+            //case 2: return this.price + this.discountPercentFn; // Rajout
+            default: return this.price; // Remise & Aucun
         }
     };
     get subTotalNetFn(): number {
@@ -127,7 +127,7 @@ export class wpItemOrder {
         }
         qty = (0 === qty) ? this.quantity : qty;
         switch (this.discountTypeFn) {
-            case 2: return qty * (this.price - this.discountPercentFn);
+            //case 2: return qty * (this.price - this.discountPercentFn);
             case 1: return (this.price - this.discountPercentFn) * qty;
             case 0:
             default: return qty * this.price;

@@ -168,7 +168,6 @@ export class EditArticleComponent implements OnInit {
     if (postCache) { return of(postCache); }
     const response = this.http.get<any>(URL);
     response.subscribe(suppliers => this.postResponseCache.set(URL, suppliers));
-
     return response;
   }
 
