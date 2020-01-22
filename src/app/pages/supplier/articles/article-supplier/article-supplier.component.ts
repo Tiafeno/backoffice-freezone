@@ -85,7 +85,6 @@ export class ArticleSupplierComponent implements OnInit {
          }
          $('#add-article-supplier-modal').modal('show');
       });
-
       $('#import-article').on('click', e => {
          e.preventDefault();
          if (!this.authorisation.isAdministrator()) {
