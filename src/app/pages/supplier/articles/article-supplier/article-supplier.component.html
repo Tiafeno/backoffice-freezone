@@ -105,10 +105,21 @@
         </div>
       </div>
 
-      <div class="inner-left preview" id="demo">
-        <div class="paginationjs">
+      <div class="row">
+        <div class="col-md-10">
+          <div class="inner-left preview" id="demo">
+            <div class="paginationjs">
+            </div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="d-flex">
+            <span class="m-auto px-2">Filtre: </span>
+            <input type="number" (change)="goToPage($event)" min="0" placeholder="Nombre de page" name="goto" class="form-control" />
+          </div>
         </div>
       </div>
+      
 
       <!-- Ajouter une article -->
       <div class="modal fade" id="add-article-supplier-modal" data-backdrop="static">

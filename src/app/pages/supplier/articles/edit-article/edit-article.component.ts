@@ -134,11 +134,9 @@ export class EditArticleComponent implements OnInit {
     const formValue: any = this.Form.value;
     const currentPrice: number = parseInt(newValue, 10);
     if (formValue.price) {
-
       const pricePro: number = this.services.getBenefit(currentPrice, formValue.marge);
       const priceR: number = this.services.getBenefit(currentPrice, formValue.margeDealer);
       const priceParticular: number = this.services.getBenefit(currentPrice, formValue.margeParticular);
-
       this.Form.patchValue({
         pricePro: pricePro,
         priceDealer: priceR,
@@ -168,7 +166,6 @@ export class EditArticleComponent implements OnInit {
     if (postCache) { return of(postCache); }
     const response = this.http.get<any>(URL);
     response.subscribe(suppliers => this.postResponseCache.set(URL, suppliers));
-
     return response;
   }
 
