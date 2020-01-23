@@ -49,8 +49,10 @@ export class QuotationDatatableComponent implements OnInit {
     const find = ev.word;
     Helpers.setLoading(true);
     this.woocommerce.get(`orders?search=${find}&context=edit`, (err, data, res) => {
+      Helpers.setLoading(false);
       //console.log(data.toJSON());
       const response: Array<wpOrder> = JSON.parse(res);
+      if (_.isEmpty(response)) return false;
       const pageSize: number = 5;
       // Retirer tous les commandes sans client
       const queryResponse = _.reject(response, (rs: wpOrder) => rs.customer_id === 0);
@@ -75,8 +77,6 @@ export class QuotationDatatableComponent implements OnInit {
         afterRender: (data, pagination) => { }
       });
       this.cd.detectChanges();
-      Helpers.setLoading(false);
-
     });
   }
 
