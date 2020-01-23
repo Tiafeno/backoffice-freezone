@@ -29,7 +29,7 @@ export class QuotationDatatableComponent implements OnInit {
   constructor(
     private cd: ChangeDetectorRef,
     private apiWC: ApiWoocommerceService
-  ) { 
+  ) {
     this.woocommerce = this.apiWC.getWoocommerce();
   }
 
@@ -44,7 +44,7 @@ export class QuotationDatatableComponent implements OnInit {
   }
 
   // Cette fonction se declanche pour effectuer les recherches
-  public onSearchWord(ev:{word?: string}) {
+  public onSearchWord(ev: { word?: string }) {
     const find = ev.word;
     Helpers.setLoading(true);
     this.woocommerce.get(`orders?search=${find}&context=edit`, (err, data, res) => {
@@ -52,26 +52,29 @@ export class QuotationDatatableComponent implements OnInit {
       const response = JSON.parse(res);
       const pageSize: number = 5;
       const queryResponse = response;
+      let pages: Array<Array<wpOrder>> = _.chunk(queryResponse, pageSize);
+      this.queryResults = pages[0];
       this.pagination.pagination({
         dataSource: _.range(queryResponse.length),
         totalNumber: queryResponse.length,
         pageNumber: 1,
         pageSize: pageSize,
-        showPrevious: true,
-        showNext: true,
+        showPrevious: false,
+        showNext: false,
         ulClassName: 'pagination justify-content-center',
         className: 'page-item',
         activeClassName: 'active',
         afterPageOnClick: (data, pagination) => {
           let currentPage: number = parseInt(pagination, 10);
           let pages: Array<Array<wpOrder>> = _.chunk(queryResponse, pageSize);
-          this.queryResults = pages[currentPage];
+          this.queryResults = pages[currentPage - 1];
+          this.cd.detectChanges();
         },
         afterRender: (data, pagination) => { }
-     });
-
-      Helpers.setLoading(false);
+      });
       this.cd.detectChanges();
+      Helpers.setLoading(false);
+
     });
   }
 
