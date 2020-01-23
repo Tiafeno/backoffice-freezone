@@ -6,6 +6,7 @@ import * as moment from 'moment';
 import { FilterSearchArticleComponent } from '../../../components/filter-search-article/filter-search-article.component';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { Helpers } from '../../../helpers';
+import { wpOrder } from '../../../order.item';
 declare var $: any;
 
 @Component({
@@ -17,8 +18,9 @@ declare var $: any;
 export class QuotationDatatableComponent implements OnInit {
   private woocommerce: any;
   public qtSelected: any = null;
-  public queryResults:Array<any> = [];
+  public queryResults: Array<wpOrder> = [];
   public refreshQuotatuon: any = '';
+  public pagination: any;
 
   @ViewChild(StatusQuotationSwitcherComponent) QuotationSwitcher: StatusQuotationSwitcherComponent;
   @ViewChild(QuotationCustomComponent) QuotationCustom: QuotationCustomComponent;
@@ -48,14 +50,33 @@ export class QuotationDatatableComponent implements OnInit {
     this.woocommerce.get(`orders?search=${find}&context=edit`, (err, data, res) => {
       //console.log(data.toJSON());
       const response = JSON.parse(res);
-      this.queryResults = _.clone(response);
+      const pageSize: number = 5;
+      const queryResponse = response;
+      this.pagination.pagination({
+        dataSource: _.range(queryResponse.length),
+        totalNumber: queryResponse.length,
+        pageNumber: 1,
+        pageSize: pageSize,
+        showPrevious: true,
+        showNext: true,
+        ulClassName: 'pagination justify-content-center',
+        className: 'page-item',
+        activeClassName: 'active',
+        afterPageOnClick: (data, pagination) => {
+          let currentPage: number = parseInt(pagination, 10);
+          let pages: Array<Array<wpOrder>> = _.chunk(queryResponse, pageSize);
+          this.queryResults = pages[currentPage];
+        },
+        afterRender: (data, pagination) => { }
+     });
+
       Helpers.setLoading(false);
       this.cd.detectChanges();
     });
   }
 
   ngOnInit() {
-
+    this.pagination = $('#pagination');
   }
 
 }

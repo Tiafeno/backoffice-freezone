@@ -117,6 +117,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
             Swal.fire('Succès', "Tous les articles sont à jours. Veuillez actualiser les resultats", 'success');
             $('.modal').modal('hide');
          }).catch(function (reason) {
+            Helpers.setLoading(false);
             // if any of the promises fails.
             Swal.fire('Désolé', "Une erreru s'est produit pendant la mise à jour", 'warning');
          });

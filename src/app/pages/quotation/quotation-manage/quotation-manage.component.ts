@@ -209,10 +209,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                 }, // price product
                                 {
                                     data: 'id', render: data => {
-                                        let userId: any = data;
-                                        let pdt: any = _.find(this.allProducts, { user_id: userId });
-                                        let article: any = JSON.stringify(pdt);
-                                        return `<span class='badge badge-success view-article' style='cursor: pointer' data-article='${article}'>VOIR</span>`;
+                                        return `<span class='badge badge-success view-article' style='cursor: pointer' >VOIR</span>`;
                                     }
                                 }, // voir ou modifier le produit
                                 {
@@ -257,8 +254,10 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                 });
                                 $('#quotation-supplier-table tbody').on('click', '.view-article', ev => {
                                     ev.preventDefault();
-                                    let data: any = $(ev.currentTarget).data();
-                                    this.articleEditor = _.clone(data.article);
+                                    const el = $(ev.currentTarget).parents('tr');
+                                    const supplier = this.qtSupplierTable.row(el).data();
+                                     let article: any = _.find(this.allProducts, { user_id: supplier.id });
+                                    this.articleEditor = _.clone(article);
                                     this.cd.detectChanges();
                                 });
                                 // Ajouter tous les modifications dans les champs dans une variable 'qtyIncrement'
