@@ -86,6 +86,7 @@ import { ToExcelComponent } from './components/to-excel/to-excel.component';
 import { QuoteAddComponent } from './pages/quotation/quote-add/quote-add.component';
 import { WpoptionsComponent } from './pages/settings/wpoptions/wpoptions.component';
 import { ClientQuoteComponent } from './pages/clients/client-quote/client-quote.component';
+import { StatusOrderPipe } from './pipes/status-order.pipe';
 
 const routes: Routes = [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -356,6 +357,7 @@ const routes: Routes = [
         WpoptionsComponent,
         MomentsPipe,
         BenefitPipe,
+        StatusOrderPipe,
         ArticleRemoverDirective
     ],
     imports: [

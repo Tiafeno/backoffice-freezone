@@ -7,6 +7,7 @@ import { FilterSearchArticleComponent } from '../../../components/filter-search-
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { Helpers } from '../../../helpers';
 import { wpOrder } from '../../../order.item';
+import { s } from '@angular/core/src/render3';
 declare var $: any;
 
 @Component({
@@ -49,9 +50,10 @@ export class QuotationDatatableComponent implements OnInit {
     Helpers.setLoading(true);
     this.woocommerce.get(`orders?search=${find}&context=edit`, (err, data, res) => {
       //console.log(data.toJSON());
-      const response = JSON.parse(res);
+      const response: Array<wpOrder> = JSON.parse(res);
       const pageSize: number = 5;
-      const queryResponse = response;
+      // Retirer tous les commandes sans client
+      const queryResponse = _.reject(response, (rs: wpOrder) => rs.customer_id === 0);
       let pages: Array<Array<wpOrder>> = _.chunk(queryResponse, pageSize);
       this.queryResults = pages[0];
       this.pagination.pagination({

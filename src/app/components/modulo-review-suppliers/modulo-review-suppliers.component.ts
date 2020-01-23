@@ -43,6 +43,7 @@ export class ModuloReviewSuppliersComponent implements OnInit {
         const reviewDate = supplier.send_mail_review_date;
         let reviewMoment = moment(reviewDate);
         const dateNow: any = moment();
+        // Aujourd'hui a 06h du matin
         const todayAt6 = moment({
           year: dateNow.year(),
           month: dateNow.month(),
@@ -50,7 +51,7 @@ export class ModuloReviewSuppliersComponent implements OnInit {
           hour: 6,
           minute: 0
       });
-        supplier.sendReview = reviewMoment.isValid() ? reviewMoment < todayAt6 : false;
+        supplier.sendReview = reviewMoment.isValid() ? reviewMoment > todayAt6 : false;
         return supplier;
       })
       this.suppliers = _.clone(suppliers);
