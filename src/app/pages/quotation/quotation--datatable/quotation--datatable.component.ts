@@ -7,7 +7,6 @@ import { FilterSearchArticleComponent } from '../../../components/filter-search-
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { Helpers } from '../../../helpers';
 import { wpOrder } from '../../../order.item';
-import { s } from '@angular/core/src/render3';
 declare var $: any;
 
 @Component({
