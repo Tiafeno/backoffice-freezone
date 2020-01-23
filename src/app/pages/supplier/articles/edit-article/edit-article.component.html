@@ -38,47 +38,45 @@
         </div>
       </div>
       <div class="row">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group mb-4">
-              <label>Prix de revient</label>
-              <input class="form-control" formControlName="price" min="0" (ngModelChange)="onChangePrice($event)"
-                type="number" id="price" placeholder="Ajouter un prix en AR">
-              <div *ngIf="f.price.errors && f.price.dirty">
-                <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
-              </div>
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Prix de revient</label>
+            <input class="form-control" formControlName="price" min="0" (ngModelChange)="onChangePrice($event)"
+              type="number" id="price" placeholder="Ajouter un prix en AR">
+            <div *ngIf="f.price.errors && f.price.dirty">
+              <label id="price-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group mb-4">
-              <label>Quantité disponible(s)</label>
-              <input class="form-control" formControlName="stock" min="0" type="number" id="stock" name="stock"
-                placeholder="Ajouter la quantité disponible">
-              <div *ngIf="f.stock.errors && f.stock.dirty">
-                <label id="qty-error" class="help-block error">Ce champ est obligatoire.</label>
-              </div>
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Quantité disponible(s)</label>
+            <input class="form-control" formControlName="stock" min="0" type="number" id="stock" name="stock"
+              placeholder="Ajouter la quantité disponible">
+            <div *ngIf="f.stock.errors && f.stock.dirty">
+              <label id="qty-error" class="help-block error">Ce champ est obligatoire.</label>
             </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-group mb-4">
-              <label>Garantie fournisseur (unité en mois)</label>
-              <input class="form-control" formControlName="garentee" min="0" max="12" type="number" id="garentee"
-                placeholder="e.g: 2 pour 2 mois">
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-group mb-4">
-              <label>Statut du produit</label>
-              <select formControlName="condition" class="form-control">
-                <option [value]="condition.key" *ngFor="let condition of conditions"> {{condition.value}}</option>
-              </select>
-            </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Garantie fournisseur (unité en mois)</label>
+            <input class="form-control" formControlName="garentee" min="0" max="12" type="number" id="garentee"
+              placeholder="e.g: 2 pour 2 mois">
           </div>
         </div>
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>Statut du produit</label>
+            <select formControlName="condition" class="form-control">
+              <option [value]="condition.key" *ngFor="let condition of conditions"> {{condition.value}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
         <div class="col-12">
           <div class="text-muted mb-2 mt-3">Utilisateur final</div>
           <div class="row">
