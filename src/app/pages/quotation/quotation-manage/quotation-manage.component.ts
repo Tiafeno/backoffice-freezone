@@ -168,7 +168,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                             case 3: status = 'Commande'; break;
                                             default: status = 'Disponible'; break;
                                         }
-                                        return `<span class="badge ${data == 2 ? 'badge-pink' : 'badge-default'}">${status}</span>`
+                                        return `<span class="badge ${data == 2 || data == 1 ? 'badge-pink' : 'badge-default'}">${status}</span>`
                                     }
                                 },
                                 {

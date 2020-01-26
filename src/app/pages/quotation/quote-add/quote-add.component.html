@@ -108,11 +108,11 @@
                   <div class="row" [formGroupName]="i">
                     <div class="col-sm-8 form-group mb-2">
 
-                      <ng-select placeholder="Selectionner un produit" name="users" bindLabel="title.raw" bindValue="id" formControlName="product_id"
+                      <ng-select placeholder="Selectionner un produit" name="users" bindLabel="title.rendered" bindValue="id" formControlName="product_id"
                         [hideSelected]="true" (change)="resetProductList()"  [typeahead]="typeaheadProducts"
                         [multiple]="false" [items]="Products">
                         <ng-template ng-option-tmp let-item="item">
-                          {{item.title.raw}}
+                          {{item.title.rendered}}
                         </ng-template>
                       </ng-select>
 

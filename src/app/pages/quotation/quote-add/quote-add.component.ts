@@ -126,7 +126,7 @@ export class QuoteAddComponent implements OnInit {
   }
 
   private queryProducts(term: string): Observable<any[]> {
-    return this.Http.get<any>(`https://${environment.SITE_URL}/wp-json/wp/v2/product?search=${term}&context=edit`).pipe(
+    return this.Http.get<any>(`https://${environment.SITE_URL}/wp-json/wp/v2/product?search=${term}&context=view`).pipe(
       catchError(() => of([])),
       map(rsp => rsp.filter(usr => usr.parent !== 0)),
     );
