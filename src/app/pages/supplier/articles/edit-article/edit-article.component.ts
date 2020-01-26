@@ -40,11 +40,15 @@ export class EditArticleComponent implements OnInit {
   public dateReview: string;
   public dateReviewFromNow: string;
   public canEdit = true;
-
+  public conditions: Array<{ key: number, value: string }> = [
+    { key: 0, value: 'Disponible' },
+    { key: 1, value: 'Rupture' },
+    { key: 2, value: 'Obsolete' },
+    { key: 3, value: 'Commande' }
+  ];
   private _article: any;
 
-  @Input()
-  set article(article: any) {
+  @Input() set article(article: any) {
     this._article = _.clone(article);
     if (_.isObject(article)) {
       this.ID = article.id;
@@ -53,12 +57,9 @@ export class EditArticleComponent implements OnInit {
     this.cd.detectChanges();
   }
 
-  get article(): any {
-    return this._article;
-  }
+  get article(): any { return this._article; }
 
   @Output() refresh = new EventEmitter<any>();
-
   constructor(
     private http: HttpClient,
     private security: FzSecurityService,
@@ -69,6 +70,7 @@ export class EditArticleComponent implements OnInit {
     this.canEdit = this.security.hasAccess('s6', false);
     this.Form = new FormGroup({
       title: new FormControl('', Validators.required),
+      condition: new FormControl(0, Validators.required), // status de l'article
       price: new FormControl({ value: 0, disabled: !this.canEdit }, Validators.required),
       priceDealer: new FormControl({ value: 0, disabled: false }, Validators.required),
       pricePro: new FormControl({ value: '', disabled: false }),
@@ -76,7 +78,7 @@ export class EditArticleComponent implements OnInit {
       marge: new FormControl({ value: 0 }, Validators.required),
       margeDealer: new FormControl({ value: 0 }, Validators.required),
       margeParticular: new FormControl({ value: 0 }, Validators.required),
-      garentee: new FormControl({value: null, disabled: !this.canEdit}),
+      garentee: new FormControl({ value: null, disabled: !this.canEdit }),
       product: new FormControl({ value: null, disabled: true }, Validators.required),
       user_id: new FormControl(null, Validators.required),
       stock: new FormControl({ value: null, disabled: !this.canEdit }, Validators.required),
@@ -102,7 +104,7 @@ export class EditArticleComponent implements OnInit {
     if (formValue.price) {
       const _pricePro: number = this.services.getBenefit(currentPrice, newValue);
       this.Form.patchValue({ pricePro: _pricePro });
-      this.cd.detectChanges();
+      this.cd.markForCheck();
     }
   }
 
@@ -112,7 +114,7 @@ export class EditArticleComponent implements OnInit {
     if (formValue.price) {
       const priceR: number = this.services.getBenefit(currentPrice, newValue);
       this.Form.patchValue({ priceDealer: priceR });
-      this.cd.detectChanges();
+      this.cd.markForCheck();
     }
   }
 
@@ -122,7 +124,7 @@ export class EditArticleComponent implements OnInit {
     if (formValue.price) {
       const _priceParticular: number = this.services.getBenefit(currentPrice, newValue);
       this.Form.patchValue({ priceParticular: _priceParticular });
-      this.cd.detectChanges();
+      this.cd.markForCheck();
     }
   }
 
@@ -134,17 +136,15 @@ export class EditArticleComponent implements OnInit {
     const formValue: any = this.Form.value;
     const currentPrice: number = parseInt(newValue, 10);
     if (formValue.price) {
-
       const pricePro: number = this.services.getBenefit(currentPrice, formValue.marge);
       const priceR: number = this.services.getBenefit(currentPrice, formValue.margeDealer);
       const priceParticular: number = this.services.getBenefit(currentPrice, formValue.margeParticular);
-
       this.Form.patchValue({
         pricePro: pricePro,
         priceDealer: priceR,
         priceParticular: priceParticular
       });
-      this.cd.detectChanges();
+      this.cd.markForCheck();
     }
   }
 
@@ -168,14 +168,11 @@ export class EditArticleComponent implements OnInit {
     if (postCache) { return of(postCache); }
     const response = this.http.get<any>(URL);
     response.subscribe(suppliers => this.postResponseCache.set(URL, suppliers));
-
     return response;
   }
 
-  get f() {
-    return this.Form.controls;
-  }
-
+  get f() { return this.Form.controls; }
+  // Cette fontion permet d'afficher une notification dqns la boite de dialogue
   add_notice(msg: string, classes?: string) {
     this.notice = {};
     this.notice.msg = msg;
@@ -201,12 +198,14 @@ export class EditArticleComponent implements OnInit {
     Helpers.setLoading(true);
     this.WP.fz_product().id(this.ID).update({
       title: Values.title,
+      condition: Values.condition,
       price: Values.price,
       marge: Values.marge, // Professional marge
       marge_dealer: Values.margeDealer,
       marge_particular: Values.margeParticular,
       garentee: Values.garentee,
       total_sales: parseInt(Values.stock, 10),
+      _quantity: parseInt(Values.stock, 10), // Quantite pour le sauvegarde (Gestion de stock)
       date_review: moment().format('YYYY-MM-DD HH:mm:ss')
     }).then(() => {
       $('#edit-article-supplier-modal').modal('hide');
@@ -232,7 +231,7 @@ export class EditArticleComponent implements OnInit {
       const currentSupplierEdit = _.find(this.Suppliers, { id: this._article.user_id });
       this.supplierReference = currentSupplierEdit.reference;
       this.cd.detectChanges();
-
+      // Caculer tous les prixs, avant d'ajouter les resultats dans le fourmulaire
       const price: number = parseInt(this._article.price, 10);
       const pricePro: number = this.services.getBenefit(price, this._article.marge);
       const priceDealer: number = this.services.getBenefit(price, this._article.marge_dealer);
@@ -240,6 +239,7 @@ export class EditArticleComponent implements OnInit {
 
       this.Form.patchValue({
         title: this._article.title.raw,
+        condition: this._article.condition,
         price: this._article.price,
         priceDealer: Math.round(priceDealer),
         pricePro: Math.round(pricePro),

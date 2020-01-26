@@ -1,22 +1,16 @@
-<div class="ibox">
-  <div class="ibox-body">
-    <form [formGroup]="Form" (ngSubmit)="onSave()">
-      <div class="row">
-        <div class="col-md-12">
-          <div class="form-group mb-4">
-            <label class="font-light">Commercial responsable</label>
-            <ng-select name="commercial" placeholder="Ajouter un commercial" formControlName="commercial" [loading]='loading'
-              bindLabel="email" bindValue="id" [hideSelected]="false" [multiple]="false" [items]="Commercials">
-              <ng-template ng-option-tmp let-item="item">
-                {{item.email}}
-              </ng-template>
-            </ng-select>
-          </div>
+  <form [formGroup]="Form" (ngSubmit)="onSave()" class="px-4 py-4">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group mb-4">
+          <label class="font-light">Commercial responsable</label>
+          <ng-select name="commercial" placeholder="Ajouter un commercial" formControlName="commercial" [loading]='loading'
+            bindLabel="email" bindValue="id" [hideSelected]="false" [multiple]="false" [items]="Commercials">
+            <ng-template ng-option-tmp let-item="item">
+              {{item.email}}
+            </ng-template>
+          </ng-select>
         </div>
-        <div class="col-md-6">
-          <button type="submit" class="btn btn-primary">Enregistrer</button>
-        </div>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
       </div>
-    </form>
-  </div>
-</div>
+    </div>
+  </form>

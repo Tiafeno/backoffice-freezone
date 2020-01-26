@@ -6,8 +6,7 @@
 </style>
 <div class="page-content fade-in-up">
   <div class="row">
-    <div class="col-lg-8">
-
+    <div class="col-lg-6">
       <div class="ibox ibox-fullheight">
         <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
           <p class="lead mb-0 pb-0 font-bold">Modification</p>
@@ -25,7 +24,6 @@
               </div>
             </div>
           </div>
-
           <div class="row">
             <div class="col-md-6">
               <div class="form-group mb-4">
@@ -34,7 +32,6 @@
               </div>
             </div>
           </div>
-<!--  -->
           <div class="row" *ngIf="clientRole === 'fz-company'">
             <div class="col-md-6">
               <div class="form-group mb-4">
@@ -43,7 +40,6 @@
               </div>
             </div>
           </div>
-
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group mb-4">
@@ -54,7 +50,6 @@
                 </div>
               </div>
             </div>
-
             <div class="col-sm-6">
               <div class="form-group mb-4">
                 <label class="font-light">Numéro de téléphone</label>
@@ -65,9 +60,8 @@
               </div>
             </div>
           </div>
-
           <div class="row" *ngIf="clientRole === 'fz-company'">
-            <div class="col-md-12">
+            <div class="col-md-6">
               <div class="form-group mb-4">
                 <label class="font-light">Utilisateur final/Revendeur  ? <span style="color: red">*</span></label>
                 <ng-select name="company_status" placeholder="Veuillez selectionner" formControlName="company_status"
@@ -83,7 +77,6 @@
               </div>
             </div>
           </div>
-
           <div *ngIf="clientRole === 'fz-company'">
             <div class="row">
               <div class="col-sm-6">
@@ -93,7 +86,6 @@
                     placeholder="">
                 </div>
               </div>
-
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">NIF <span style="color: red">*</span></label>
@@ -102,7 +94,6 @@
                 </div>
               </div>
             </div>
-
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group mb-4">
@@ -111,7 +102,6 @@
                     placeholder="">
                 </div>
               </div>
-
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">CIF <span style="color: red">*</span></label>
@@ -121,7 +111,6 @@
               </div>
             </div>
           </div>
-
           <div *ngIf="clientRole === 'fz-particular'">
             <div class="row">
               <div class="col-sm-6">
@@ -131,7 +120,6 @@
                     placeholder="">
                 </div>
               </div>
-
               <div class="col-sm-6">
                 <div class="form-group mb-4">
                   <label class="font-light">Date de délivrance <span style="color: red">*</span></label>
@@ -140,9 +128,7 @@
                 </div>
               </div>
             </div>
-
           </div>
-
           <!--- Billing & Shipping form here... -->
           <div class="row mt-4 mb-2">
             <div class="col-sm-6" [formGroup]="billForm" style="border: none !important">
@@ -228,21 +214,20 @@
               
             </div>
           </div>
-
           <div class="text-center mb-4 mt-4">
             <div class="row">
               <button class="btn btn-primary  col-4" type="submit">METTRE A JOUR</button>
               <a class="btn btn-secondary ml-3 col-4" [routerLink]="['/client', 'lists']"
                 routerLinkActive="active">RETOUR</a>
             </div>
-
           </div>
         </form>
+        <!-- Afficher le formulaire pour affecter un commercial pour ce client -->
+        <app-responsible [clientId]="customerID" [responsible]="responsible"></app-responsible>
       </div>
-
     </div>
-    <div class="col-lg-4">
-      <app-responsible [clientId]="customerID" [responsible]="responsible"></app-responsible>
+    <div class="col-lg-6">
+      <app-client-quote [clientId]="customerID"></app-client-quote>
     </div>
   </div>
 </div>

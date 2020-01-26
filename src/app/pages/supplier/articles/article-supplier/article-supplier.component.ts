@@ -32,9 +32,9 @@ export class ArticleSupplierComponent implements OnInit {
    private adminAccess: boolean = true;
    public Products: any;
    public findWord: string = '';
-   public Paging: any = false;
+   public Paging: { _totalPages: number, _total: number } = { _totalPages: 0, _total: 0};
    public currentPage: number = 1;
-   public perPage: number = 20;
+   public perPage: number = 10;
    public Editor: any;
    public articleEdit: any;
    public thumbForm: FormGroup;
@@ -77,7 +77,6 @@ export class ArticleSupplierComponent implements OnInit {
          this.thumbForm.reset();
          this.cd.detectChanges();
       });
-
       $('#add-article').on('click', e => {
          e.preventDefault();
          if (!this.authorisation.isAdministrator()) {
@@ -86,7 +85,6 @@ export class ArticleSupplierComponent implements OnInit {
          }
          $('#add-article-supplier-modal').modal('show');
       });
-
       $('#import-article').on('click', e => {
          e.preventDefault();
          if (!this.authorisation.isAdministrator()) {
@@ -137,19 +135,14 @@ export class ArticleSupplierComponent implements OnInit {
    onSubmit($event): void | boolean {
       if (_.isUndefined($event) || _.isEmpty($event)) return false;
       this.Query = this.WP.fz_product().context('edit').perPage(this.perPage).page(this.currentPage);
-
       Helpers.setLoading(true);
-      console.log('$event:', $event);
       const eventForm: any = $event.form;
-
       if (!_.isUndefined(eventForm.word)) {
          this.Query.search(eventForm.word);
       }
-
       if (!_.isUndefined(eventForm.categorie)) {
          this.Query.param('product_cat', eventForm.categorie);
       }
-
       const status: string = !_.isUndefined(eventForm.status) ? eventForm.status : 'any';
       this.Query.param('status', _.isEmpty(status) ? 'any' : status);
       let metaQuery = [];
@@ -158,9 +151,7 @@ export class ArticleSupplierComponent implements OnInit {
             key: 'user_id',
             value: eventForm.supplier
          });
-         console.log('Filter by supplier run');
       }
-
       if (!_.isUndefined(eventForm.expiration) && !_.isEmpty(eventForm.expiration)) {
          let _date = moment().format('YYYY-MM-DD HH:mm:ss');
          let compare = eventForm.expiration === 'up' ? '>' : '<=';
@@ -220,6 +211,12 @@ export class ArticleSupplierComponent implements OnInit {
       }
    }
 
+   public goToPage(ev: MouseEvent) {
+      ev.preventDefault;
+      const element: any = ev.target;
+      this.onChangePage(parseInt(element.value));
+   }
+
    /**
     * Actualisez la liste apres l'ajout d'un nouveau article
     */
@@ -253,12 +250,9 @@ export class ArticleSupplierComponent implements OnInit {
 
    public isNumber(val) { return typeof val === 'number'; }
    private loadData(fzProducts: any, header?: any): void {
-      this.Paging = false;
-
       if (!_.isEmpty(fzProducts)) {
          const result: any = !_.isUndefined(header) ? header : null;
          if (!_.isNull(result)) {
-            this.Paging = {};
             this.Paging._totalPages = parseInt(result['x-wp-totalpages'], 10);
             this.Paging._total = parseInt(result['x-wp-total'], 10);
          }

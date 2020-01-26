@@ -114,7 +114,7 @@ export class ImportArticleComponent implements OnInit {
                     Form.append('reference', column[this.Columns.SupplierRef]);
                     Form.append('quantity', '1');
                     Form.append('categories', column[this.Columns.Categorie]);
-                    this.Http.post<any>(`${config.apiUrl}/import/csv/articles`, Form, ).subscribe(resp => {
+                    this.Http.post<any>(`${config.apiUrl}/import/csv`, Form, ).subscribe(resp => {
                       console.log(resp);
                       parser.resume();
                     });

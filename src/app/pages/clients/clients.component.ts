@@ -121,10 +121,11 @@ export class ClientsComponent implements OnInit {
           data: 'meta_data', render: (data, type, row) => {
             // Nom de l'entreprise ou la société
             let companyName: any = _.find(data, { key: 'company_name' });
-            let role: string = row.role;
-            let name = role === 'fz-company' ? companyName.value : `${row.last_name} ${row.first_name}`;
+            let firstLastName: string = `${row.last_name} ${row.first_name}`;
+            if (_.isUndefined(companyName)) return firstLastName;
+            let name = (row.role === 'fz-company') ? companyName.value : firstLastName;
 
-            return `<span class="edit-product font-strong">${name}</span>`;
+            return `<span class="font-strong">${name}</span>`;
           }
         },
         {

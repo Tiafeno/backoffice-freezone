@@ -19,10 +19,9 @@ export class JwtInterceptorService implements HttpInterceptor {
     }
     return next.handle(request).do(event => { }, err => {
       if (err instanceof HttpErrorResponse) { // here you can even check for err.status == 404 | 401 etc
-        if (err.status == 401 || err.status == 511 || err.status == 500) {
+        if (err.status == 401 || err.status == 511) {
             this.logOut();
         } else {
-          console.log(err);
           if (err.error.code === 'jwt_auth_invalid_token') {
             setTimeout(() => {
               this.logOut();

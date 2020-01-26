@@ -60,7 +60,7 @@ import { TypeClientSwitcherComponent } from "./components/type-client-switcher/t
 import { FaqPageComponent } from './pages/faq/faq-page/faq-page.component';
 import { ResponsibleComponent } from './components/responsible/responsible.component';
 import { SettingsComponent } from './pages/settings/settings.component';
-import { UserManagerComponent } from './components/user-manager/user-manager.component';
+import { UserManagerComponent } from './pages/settings/user-manager/user-manager.component';
 import { SavEditComponent } from './pages/sav/sav-edit/sav-edit.component';
 import { SavMailComponent } from './pages/sav/sav-mail/sav-mail.component';
 import { ModuloReviewSuppliersComponent } from './components/modulo-review-suppliers/modulo-review-suppliers.component';
@@ -83,7 +83,10 @@ import { NoTechnicianAccessGuard } from './guards/no-technician-access.guard';
 import { GoodDealEditComponent } from './pages/good-deal/good-deal-edit/good-deal-edit.component';
 import { GoodDealListsComponent } from './pages/good-deal/good-deal-lists/good-deal-lists.component';
 import { ToExcelComponent } from './components/to-excel/to-excel.component';
-
+import { QuoteAddComponent } from './pages/quotation/quote-add/quote-add.component';
+import { WpoptionsComponent } from './pages/settings/wpoptions/wpoptions.component';
+import { ClientQuoteComponent } from './pages/clients/client-quote/client-quote.component';
+import { StatusOrderPipe } from './pipes/status-order.pipe';
 
 const routes: Routes = [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -325,6 +328,7 @@ const routes: Routes = [
         ReviewMailSupplierComponent,
         ImportArticleComponent,
         ClientsComponent,
+        ClientQuoteComponent,
         EditClientComponent,
         SavComponent,
         StatusArticleComponent,
@@ -348,9 +352,12 @@ const routes: Routes = [
         PrestationsComponent,
         GoodDealEditComponent,
         GoodDealListsComponent,
+        QuoteAddComponent,
         ToExcelComponent,
+        WpoptionsComponent,
         MomentsPipe,
         BenefitPipe,
+        StatusOrderPipe,
         ArticleRemoverDirective
     ],
     imports: [

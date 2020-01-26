@@ -83,6 +83,20 @@ export class QuotationEditComponent implements OnInit {
             let line_items_zero: Array<OrderItem> = this.ORDER.line_items_zero;
             const ITEMS: Array<OrderItem> = _([]).push(_.xorWith(line_items_zero, line_items, _.isEqual)).flatten().value();
 
+            const itemSupplierArticleIdsFn = (productId: number): Array<number> => {
+               const item: OrderItem = _.find(ITEMS, { product_id: productId });
+               const metadata: Array<Metadata> = _.clone(item.meta_data);
+               const hasSupplier: any = _.find(metadata, { key: 'suppliers' });
+               if (_.isUndefined(hasSupplier)) return [];
+               let suppliers: any = JSON.parse(hasSupplier.value);
+               return _.map(suppliers, supplier => parseInt(supplier.article_id));
+            };
+
+            const itemSupplierArticleTakes = (item: OrderItem): Array<number> => {
+               let hasSuppliers: any = _.find(item.meta_data, { key: 'suppliers' });
+               if (_.isUndefined(hasSuppliers)) return [];
+               return _.map(hasSuppliers, line => { return parseInt(line.get, 10); });
+            };
 
             // Récuperer les informations du client
             await this.WPAPI
@@ -94,17 +108,24 @@ export class QuotationEditComponent implements OnInit {
                   Swal.fire('Erreur', "Compte du client introuvable. Le compte a été supprimer", 'error');
                });
 
-            const itemArticleIdsFn = (productId: number): Array<number> => {
-               const item: OrderItem = _.find(ITEMS, { product_id: productId });
-               const metadata: Array<Metadata> = _.clone(item.meta_data);
-               const hasSupplier: any = _.find(metadata, { key: 'suppliers' });
-               if (_.isUndefined(hasSupplier)) return [];
-               let suppliers: any = JSON.parse(hasSupplier.value);
-               return _.map(suppliers, supplier => parseInt(supplier.article_id));
-            };
+            let itemArticlesIds: Array<number> = _(ITEMS).map(item => {
+               return itemSupplierArticleIdsFn(item.product_id);
+            }).flatten().value();
 
-            const getReflectItemArticleIds = (item: OrderItem): Array<any> => {
-               let hasSuppliers: any = _.find(item.meta_data, {key: 'suppliers'});
+            /**
+             * recuperer tous les articles des produits qui se trouvent dans la commande
+             */
+            await this.WPAPI
+               .fz_product()
+               .context('edit')
+               .param('include', itemArticlesIds)
+               .then(response => {
+                  this.articles = _.clone(response);
+               });
+
+            // Recuperer les identifiants des articlesen forme de tableau ajouter pour une item selectionner
+            const getReflectItemArticles = (item: OrderItem): Array<Article> => {
+               let hasSuppliers: any = _.find(item.meta_data, { key: 'suppliers' });
                if (_.isUndefined(hasSuppliers)) return [];
                const suppliers: any = JSON.parse(hasSuppliers.value);
                let collectArticleIds: Array<number> = _.map(suppliers, meta => { return parseInt(meta.article_id, 10); });
@@ -112,16 +133,16 @@ export class QuotationEditComponent implements OnInit {
             };
 
             const getReflectItemQuantity = (item: OrderItem): number => {
-               const articles: Array<Article> = getReflectItemArticleIds(item);
+               const articles: Array<Article> = getReflectItemArticles(item);
                const stocks: Array<number> = _.map(articles, article => parseInt(article.total_sales));
                return _.sum(stocks);
             };
 
             const hasReflectItemStockRequest = (item: OrderItem): boolean => {
-               let has: any = _.find(item.meta_data, {key: 'stock_request'});
+               let has: any = _.find(item.meta_data, { key: 'stock_request' });
                if (_.isUndefined(has)) return false;
-
-               return 0 === parseInt(has.value) || _.isNaN(parseInt(has.value)) ? false : true;
+               const value: number = parseInt(has.value)
+               return _.isNaN(value) || 0 === value ? false : true;
             };
 
             const getNoticeFn = (status: number): string => {
@@ -129,18 +150,6 @@ export class QuotationEditComponent implements OnInit {
                const style: string = status === 0 ? 'warning' : (status === 1 ? "success" : "danger");
                return `<span class="badge badge-${style}">${msg}</span>`;
             };
-
-            let allItemsArticleIds: Array<number> = _(ITEMS).map(item => {
-               return itemArticleIdsFn(item.product_id);
-            }).flatten().value();
-
-            await this.WPAPI
-               .fz_product()
-               .context('edit')
-               .param('include', allItemsArticleIds)
-               .then(response => {
-                  this.articles = _.clone(response);
-               });
 
             // Crée la liste des produits dans la commande
             this.Table = $('#quotation-edit-table').DataTable({
@@ -163,17 +172,15 @@ export class QuotationEditComponent implements OnInit {
                      data: 'product_id',
                      render: (pId, type, item) => {
                         if (_.isEqual(item.quantity, 0)) return 0;
-                        const articleIds: Array<number> = itemArticleIdsFn(parseInt(pId));
+                        const articleIds: Array<number> = itemSupplierArticleIdsFn(parseInt(pId));
                         if (_.isEmpty(articleIds)) return 'Non définie';
                         const articles: Array<Article> = _(this.articles).filter(article => _.indexOf(articleIds, article.id) >= 0).value();
                         const stocks: Array<number> = _.map(articles, article => parseInt(article.total_sales));
-
                         return _.sum(stocks);
                      }
                   }, // quantité disponible pour le fournisseur
                   {
                      data: 'meta_data', render: (data: Array<Metadata>, type, item) => {
-
                         // Ajouter une posibilité de modification les demandes rejetée
                         if (_.isEqual(parseInt(this.ORDER.position), 2)) {
                            return getNoticeFn(1);
@@ -185,9 +192,10 @@ export class QuotationEditComponent implements OnInit {
                         let result = (getReflectItemQuantity(item) < item.quantity && !hasReflectItemStockRequest(item)) ? 0 : 1;
                         if (!result) return getNoticeFn(result);
 
-                        // Verifier si l'article est en review
-                        const aIds: Array<any> = getReflectItemArticleIds(item);
-                        const collectFZProducts: Array<any> = _.filter(this.articles, fz => { return _.indexOf(aIds, fz.id) >= 0; });
+                        // Verifier si l'article est en review. Si aucun article n'est ajouter pour cette 'item', il renvoie une tableau vide
+                        const _articles: Array<any> = getReflectItemArticles(item); // Return array
+                        const artItemIds: Array<number> = _(_articles).map(art => art.id).value();
+                        const collectFZProducts: Array<any> = _.filter(this.articles, fz => { return _.indexOf(artItemIds, fz.id) >= 0; });
                         const dateNow: any = moment();
                         const todayAt6 = moment({
                            year: dateNow.year(),
@@ -196,9 +204,23 @@ export class QuotationEditComponent implements OnInit {
                            hour: 6,
                            minute: 0
                         });
+
+                        // Verifier si la quantite des articles du fournisseur, satisfait le demande ajouter par les commercials
+                        // cette verification est necessaire apres la mise a jours effectuer par les fournisseurs a leurs articles.
+                        // Il est claire qu'on ajoute seulement lorsqu'un article est a jours mais celui-ci consiste a savoir et verifier 
+                        // au cas ou, il y a une delait de reponse effectuer par les fournisseurs
+                        const artItemsQty = _(collectFZProducts).map(fzproduct => fzproduct.total_sales).value();
+                        const itemTakes: Array<number> = itemSupplierArticleTakes(item);
+                        if (_.sum(itemTakes) > _.sum(artItemsQty)) {
+                           return getNoticeFn(0);
+                        }
+
                         const cltResutls: Array<boolean> = _.map(collectFZProducts, prd => {
                            let dateLimit: any = moment(prd.date_review);
-                           return dateLimit > todayAt6; // à jour
+                           // Verifier si l'aricle est obsolete ou en ruptur de stock
+                           let condition: number = parseInt(prd.condition);
+                           // 1: Rupture, 2: Obsolete
+                           return dateLimit > todayAt6 && _.indexOf([1, 2], condition) < 0; // à jour
                         });
 
                         result = _.indexOf(cltResutls, false) >= 0 ? 0 : 1;

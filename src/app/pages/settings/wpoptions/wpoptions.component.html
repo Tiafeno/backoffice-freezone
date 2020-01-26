@@ -1,0 +1,50 @@
+<div class="ibox">
+  <div class="ibox-head">
+    <div class="ibox-title">UTILISATEURS</div>
+    <div class="ibox-tools"></div>
+  </div>
+  <div class="ibox-body">
+    <form action="" [formGroup]="formOptions" (ngSubmit)="saveOptions($event)">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>NIF</label>
+            <input class="form-control" formControlName="nif" type="text" placeholder="">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>STAT</label>
+            <input class="form-control" formControlName="stat" type="text" placeholder="">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>RC</label>
+            <input class="form-control" formControlName="rc" type="text" placeholder="">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group mb-4">
+            <label>CIF</label>
+            <input class="form-control" formControlName="cif" type="text" placeholder="">
+          </div>
+        </div>
+      </div>
+      <div class="form-group mb-4">
+        <label>BMOI</label>
+        <input class="form-control" formControlName="bmoi" type="text" placeholder="">
+      </div>
+      <div class="ibox-footer">
+        <div>
+          <div class="btn-group mb-3">
+            
+            <button class="btn btn-pink mr-3" [disabled]='loading' type="submit">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

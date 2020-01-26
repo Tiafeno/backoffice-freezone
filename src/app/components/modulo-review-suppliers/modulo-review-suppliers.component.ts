@@ -39,14 +39,21 @@ export class ModuloReviewSuppliersComponent implements OnInit {
     formRequest.append('start', '0');
     this.Http.post<any>(`${config.apiUrl}/supplier/review`, formRequest).subscribe(resp => {
       let suppliers: any = resp.data;
-      
       suppliers = _.map(suppliers, (supplier) => {
-        let reviewDate = supplier.send_mail_review_date;
+        const reviewDate = supplier.send_mail_review_date;
         let reviewMoment = moment(reviewDate);
-        supplier.sendReview = _.isEmpty(reviewDate) || _.isNull(reviewDate) ? false : (reviewMoment.isValid() ? reviewMoment.subtract(-1, 'days') > moment() : false);
+        const dateNow: any = moment();
+        // Aujourd'hui a 06h du matin
+        const todayAt6 = moment({
+          year: dateNow.year(),
+          month: dateNow.month(),
+          days: dateNow.date(),
+          hour: 6,
+          minute: 0
+      });
+        supplier.sendReview = reviewMoment.isValid() ? reviewMoment > todayAt6 : false;
         return supplier;
       })
-      
       this.suppliers = _.clone(suppliers);
       this.cd.detectChanges();
     });

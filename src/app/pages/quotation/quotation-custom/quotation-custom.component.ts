@@ -8,6 +8,7 @@ import { config } from '../../../../environments/environment';
 import { Helpers } from '../../../helpers';
 import Swal from 'sweetalert2';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import { StatusOrderPipe } from '../../../pipes/status-order.pipe';
 declare var $: any;
 
 @Component({
@@ -91,16 +92,8 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
         },
         {
           data: 'position', render: (data, type, row) => {
-            const Status: Array<any> = [
-              { value: 0, label: 'En ettente', style: 'warning' },
-              { value: 1, label: 'Envoyer', style: 'blue' },
-              { value: 2, label: 'Rejeté',  style: 'danger' },
-              { value: 3, label: 'Accepté', style: 'success' },
-              { value: 4, label: 'Terminé', style: 'success' },
-            ];
-            let position: any = _.find(Status, { value: data });
-            if (_.isUndefined(position)) return 'Non definie';
-            return `<span class="badge badge-${position.style} status-switcher">${position.label}</span>`;
+            let filterStOrder = new StatusOrderPipe();
+            return filterStOrder.transform(data);
           }
         },
         {
