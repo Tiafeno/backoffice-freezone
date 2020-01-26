@@ -122,7 +122,6 @@ export class SavComponent implements OnInit {
         }
       ],
       initComplete: (setting, json) => {
-
         $('#sav-table tbody').on('click', '.change-status', async ev => {
           ev.preventDefault();
           if (!this.security.hasAccess('s15', true)) {
@@ -156,7 +155,6 @@ export class SavComponent implements OnInit {
                   if (_.isEmpty(value)) {
                     resolve('Ce champ est obligatoire');
                   }
-
                   resolve();
                 });
               },
@@ -190,14 +188,12 @@ export class SavComponent implements OnInit {
                     status_sav: value
                   }).then(resp => {
                       resolve(true);
-
                     }).catch(err => {
                       Swal.showValidationMessage(err);
                       resolve(false);
                     });
                   this.cd.detectChanges();
                 })
-
               }
             },
             // Message pour l'email
@@ -227,7 +223,6 @@ export class SavComponent implements OnInit {
                   const dataOnlineUser = this.auth.getCurrentUser().data;
                   const subject = mailSubject;
                   const message = msg;
-
                   const args: any = {
                     status: 'draft',
                     title: subject,
@@ -251,18 +246,14 @@ export class SavComponent implements OnInit {
                       Swal.showValidationMessage("Une erreur s'est produit pendant l'envoie");
                       resolve(false);
                     });
-
                     this.cd.detectChanges();
-
                   }).catch(err => {
                     Swal.showValidationMessage(err);
                     resolve(false);
                   });
                 }) // .end promise
               },
-              
               inputValue: _.find(this.messages, {status: mailStatus}).msg
-            
             }
           ]).then((result) => {
             if (result.value) {
@@ -273,12 +264,9 @@ export class SavComponent implements OnInit {
               }).then(successResp => {
                 this.reload();
               });
-
             }
           })
-
         });
-
         $('#sav-table tbody').on('click', '.change-approximate-time', async ev => {
           ev.preventDefault();
           if (!this.security.hasAccess('s16', true)) {
@@ -322,13 +310,11 @@ export class SavComponent implements OnInit {
               });
             }
           })
-
           if (dateApproximate) {
             Swal.fire(`Nouvelle date: ${dateApproximate}`);
             this.reload();
           }
         });
-
         // Supprimer une service
         $('#sav-table tbody').on('click', '.remove-sav', ev => {
           ev.preventDefault();

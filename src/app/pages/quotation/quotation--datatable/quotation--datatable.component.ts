@@ -56,6 +56,7 @@ export class QuotationDatatableComponent implements OnInit {
       // Retirer tous les commandes sans client
       const queryResponse = _.reject(response, (rs: wpOrder) => rs.customer_id === 0);
       let pages: Array<Array<wpOrder>> = _.chunk(queryResponse, pageSize);
+      if (_.isEmpty(pages)) return false;
       this.queryResults = pages[0];
       this.pagination.pagination({
         dataSource: _.range(queryResponse.length),
