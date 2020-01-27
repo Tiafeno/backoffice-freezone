@@ -159,16 +159,18 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     }
                                 },
                                 { // statut produit, Disponible - 0, Rupture -1, Obsolete - 2, et Commande - 3
-                                    data: 'condition', render: (data, type, row) => {
+                                    data: 'id', render: (data, type, row) => {
+                                        let userId: any = data;
+                                        let pdt: any = _.find(this.allProducts, { user_id: userId });
                                         let status: string = '';
-                                        switch (parseInt(data)) {
+                                        switch (parseInt(pdt.condition)) {
                                             case 0: status = 'Disponible'; break;
                                             case 1: status = 'Rupture de stock'; break;
                                             case 2: status = 'Obsolete'; break;
                                             case 3: status = 'Commande'; break;
                                             default: status = 'Disponible'; break;
                                         }
-                                        return `<span class="badge ${data == 2 || data == 1 ? 'badge-pink' : 'badge-default'}">${status}</span>`
+                                        return `<span class="badge ${pdt.condition == 2 || pdt.condition == 1 ? 'badge-pink' : 'badge-default'}">${status}</span>`
                                     }
                                 },
                                 {
@@ -216,12 +218,17 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     data: null, render: (data, type, row) => {
                                         let inputValue: number = 0;
                                         const metaSuppliers: any = _.find(this.item.meta_data, { key: "suppliers" });
+                                        const pdt: any = _.find(this.allProducts, { user_id: row.id });
                                         if (_.isObjectLike(metaSuppliers) && !_.isEmpty(metaSuppliers.value)) {
                                             let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: 2, product_id: 0, article_id: 0, price: 0} ...] 
                                             let input: Array<any> = _.map(dataParser, data => {
                                                 return row.id == data.supplier ? parseInt(data.get, 10) : 0;
                                             });
                                             inputValue = _.sum(input);
+                                        }
+
+                                        if (!_.isUndefined(pdt) && parseInt(pdt.total_sales) === 0) {
+                                            inputValue = 0;
                                         }
 
                                         let fzProduct: any = _.find(this.allProducts, { user_id: row.id });

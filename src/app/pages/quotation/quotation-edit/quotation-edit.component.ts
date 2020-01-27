@@ -211,7 +211,7 @@ export class QuotationEditComponent implements OnInit {
                         // au cas ou, il y a une delait de reponse effectuer par les fournisseurs
                         const artItemsQty = _(collectFZProducts).map(fzproduct => fzproduct.total_sales).value();
                         const itemTakes: Array<number> = itemSupplierArticleTakes(item);
-                        if (_.sum(itemTakes) > _.sum(artItemsQty)) {
+                        if (_.sum(itemTakes) > _.sum(artItemsQty) && _.sum(artItemsQty) > 0) {
                            return getNoticeFn(0);
                         }
 
