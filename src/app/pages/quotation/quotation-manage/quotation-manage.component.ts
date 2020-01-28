@@ -10,6 +10,7 @@ import { FzServicesService } from '../../../_services/fz-services.service';
 import { EditArticleComponent } from '../../supplier/articles/edit-article/edit-article.component';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Metadata } from '../../../metadata';
+import { FzProduct } from '../../../supplier';
 declare var $: any;
 
 @Component({
@@ -34,7 +35,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
     private itemId: number = 0;
     private Woocommerce: any;
     private Wordpress: any;
-    private allProducts: Array<any> = [];
+    private allProducts: Array<FzProduct> = [];
 
     public qtSupplierTable: any;
     public qtyIncrement: Array<any>;
@@ -129,7 +130,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 }
                 this.cd.detectChanges();
                 // Récuperer les fournisseurs (utilisateur) qui possède cette article
-                let supplier_ids: Array<number> = _.map(this.allProducts, p => parseInt(p.user_id, 10));
+                let supplier_ids: Array<number> = _.map(this.allProducts, p => p.user_id);
                 this.Wordpress
                     .users()
                     .include(_.join(supplier_ids, ','))
@@ -201,11 +202,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         const userId: any = data;
                                         const pdt: any = _.find(this.allProducts, { user_id: userId });
                                         if (_.isUndefined(pdt)) return 'Introuvable';
-
                                         const price: number = parseInt(pdt.price, 10);
                                         const marge = clientRole === 'fz-company' ? (this.client.company_status === 'dealer' ? pdt.marge_dealer : pdt.marge) : pdt.marge_particular;
                                         let hisPrice = this.services.getBenefit(price, parseInt(marge, 10));
-
                                         return this.services.currencyFormat(hisPrice);
                                     }
                                 }, // price product
@@ -226,16 +225,11 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                             });
                                             inputValue = _.sum(input);
                                         }
-
-                                        if (!_.isUndefined(pdt) && parseInt(pdt.total_sales) === 0) {
-                                            inputValue = 0;
-                                        }
-
+                                        if (!_.isUndefined(pdt) && parseInt(pdt.total_sales) === 0) { inputValue = 0; }
                                         let fzProduct: any = _.find(this.allProducts, { user_id: row.id });
                                         const dateReview = moment(fzProduct.date_review);
                                         // vérifier si l'article est en mode rejetée
                                         let disabled: boolean = _.isEqual(this.quotationPosition, 2) ? false : dateReview < todayAt6;
-
                                         return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
                                                     value="${inputValue}" 
                                                     min="0" 
@@ -282,7 +276,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     };
                                 });
                             }
-                        })
+                        });
                     });
             }, error => {
                 Helpers.setLoading(false);
