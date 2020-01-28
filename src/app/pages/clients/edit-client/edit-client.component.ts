@@ -133,6 +133,7 @@ export class EditClientComponent implements OnInit {
         }
         const role = this.getMetaDataValue('role_office');
         this.roleOffice = _.isNull(role) ? 0 : parseInt(role, 10);
+        // Remplir les deux autres formulaires
         this.billForm.patchValue(this.Customer.billing);
         this.shipForm.patchValue(this.Customer.shipping);
         this.responsible = this.getMetaDataValue('responsible');
@@ -154,16 +155,10 @@ export class EditClientComponent implements OnInit {
         Swal.fire('Avertissement', "Vous n'avez pas encore definie le client en utilisateur final ou en revendeur", 'warning');
         return false;
       }
+      // Mettre a jour les metas
       const itemMeta = ['address', 'phone', 'stat', 'nif', 'rc', 'cif', 'company_status', 'company_name'];
       this.MetaData = _.map(this.Customer.meta_data, (meta) => {
-        if (meta.key === 'address') meta.value = Value.address;
-        if (meta.key === 'phone') meta.value = Value.phone;
-        if (meta.key === 'stat') meta.value = Value.stat;
-        if (meta.key === 'nif') meta.value = Value.nif;
-        if (meta.key === 'rc') meta.value = Value.rc;
-        if (meta.key === 'cif') meta.value = Value.cif;
-        if (meta.key === 'company_status') meta.value = Value.company_status;
-        if (meta.key === 'company_name') meta.value = Value.company_name;
+        meta.value = Value[meta.key];
         return meta;
       });
       // Crée si la meta data n'existe pas
