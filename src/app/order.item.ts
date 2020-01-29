@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 import { Metadata } from "./metadata";
 import { FzProduct } from './supplier';
+import { CONDITION } from './defined';
 
 export class OrderItem {
     id: number;
@@ -151,12 +152,7 @@ export class wpItemOrder {
     }
     // Depends: articles (property)
     get takeMetaSuppliersLines(): Array<any> {
-        const conditions: Array<{ key: number, value: string }> = [
-            { key: 0, value: 'Disponible' },
-            { key: 1, value: 'Rupture' },
-            { key: 2, value: 'Obsolete' },
-            { key: 3, value: 'Commande' }
-        ];
+        const conditions: Array<{ key: number, value: string }> = CONDITION;
         //let currentItemArticlesIds: Array<number> = this.articleIdsFn;
         //let currentItemArticles: Array<FzProduct> = _.filter(this.articles, a => _.includes(currentItemArticlesIds, a.id));
         let metaSuppliers: Array<any> = this.metaSupplierDataFn;
