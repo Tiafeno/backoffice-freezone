@@ -11,6 +11,8 @@ import { FormGroup, FormControl, Validators, FormArray, FormBuilder } from '@ang
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { Helpers } from '../../../helpers';
+import { from } from 'rxjs/observable/from';
+import { FzProduct } from '../../../supplier';
 declare var $: any;
 
 class User {
@@ -51,6 +53,8 @@ export class QuoteAddComponent implements OnInit {
   public formAddUser: FormGroup;
   public formAddQuote: FormGroup;
   public cmpLineItems = _.range(1);
+  public loadingProduct: boolean = false;
+  public loadingUser: boolean = false;
 
   constructor(
     private Http: HttpClient,
@@ -86,6 +90,7 @@ export class QuoteAddComponent implements OnInit {
     this.typeaheadUsers
       .pipe(debounceTime(400), switchMap(term => this.queryUsers(term)))
       .subscribe(items => {
+        this.loadingUser = false;
         this.Users = items;
         this.detector.detectChanges();
       }, (err) => {
@@ -95,8 +100,9 @@ export class QuoteAddComponent implements OnInit {
       });
 
     this.typeaheadProducts
-      .pipe(debounceTime(400), switchMap(term => this.queryProducts(term)))
+      .pipe(debounceTime(400), switchMap(term => this.queryWCProducts(term)))
       .subscribe(items => {
+        this.loadingProduct = false;
         this.Products = items;
         this.detector.detectChanges();
       }, (err) => {
@@ -119,17 +125,28 @@ export class QuoteAddComponent implements OnInit {
   }
 
   private queryUsers(term: string): Observable<any[]> {
+    this.loadingUser = true;
     return this.Http.get<any>(`https://${environment.SITE_URL}/wp-json/wp/v2/users?search=${term}&context=edit&roles=fz-company,fz-particular`).pipe(
       catchError(() => of([])),
       map(rsp => rsp.filter(usr => usr.parent !== 0)),
     );
   }
 
-  private queryProducts(term: string): Observable<any[]> {
-    return this.Http.get<any>(`https://${environment.SITE_URL}/wp-json/wp/v2/product?search=${term}&context=view`).pipe(
-      catchError(() => of([])),
-      map(rsp => rsp.filter(usr => usr.parent !== 0)),
-    );
+  // https://www.learnrxjs.io/learn-rxjs/recipes/http-polling
+  private queryWCProducts(term: string): Observable<any> {
+    this.loadingProduct = true;
+    return from(new Promise(resolve => {
+      this.woocommerce.get(`products?search=${term}`, (er, data, res) => {
+        let products: Array<FzProduct> = JSON.parse(res);
+        // Supprimer dans le resultats le ou les articles deja dans le formulaire de demande
+        let formLineItems = this.lineItems; //FormArray
+        const controls = formLineItems.controls;
+        const prdIds: Array<number> = _(controls).map((ctrl: FormGroup) => {
+          return parseInt(ctrl.get('product_id').value, 10);
+        }).value();
+        resolve(_(products).filter(product => _.indexOf(prdIds, product.id) < 0).value());
+      });
+    }));
   }
 
   /**

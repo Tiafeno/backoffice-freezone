@@ -18,7 +18,7 @@
             </h5>
             <div class="form-group mb-4">
               <ng-select placeholder="Selectionner un client" name="users" bindLabel="email" bindValue="email"
-                [hideSelected]="true" (change)="onSelectClient($event)" [typeahead]="typeaheadUsers" [multiple]="false"
+                [hideSelected]="true" (change)="onSelectClient($event)" [loading]="loadingUser" [typeahead]="typeaheadUsers" [multiple]="false"
                 [items]="Users">
                 <ng-template ng-option-tmp let-item="item">
                   {{item.company_name ? item.company_name + ' - ' : '' }}
@@ -108,11 +108,11 @@
                   <div class="row" [formGroupName]="i">
                     <div class="col-sm-8 form-group mb-2">
 
-                      <ng-select placeholder="Selectionner un produit" name="users" bindLabel="title.rendered" bindValue="id" formControlName="product_id"
-                        [hideSelected]="true" (change)="resetProductList()"  [typeahead]="typeaheadProducts"
+                      <ng-select placeholder="Selectionner un produit" name="users" bindLabel="name" bindValue="id" formControlName="product_id"
+                        [hideSelected]="true" (change)="resetProductList()" [loading]="loadingProduct" [typeahead]="typeaheadProducts"
                         [multiple]="false" [items]="Products">
                         <ng-template ng-option-tmp let-item="item">
-                          {{item.title.rendered}}
+                         <b>{{item.sku}}</b> {{item.name}}
                         </ng-template>
                       </ng-select>
 
