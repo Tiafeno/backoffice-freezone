@@ -10,7 +10,6 @@ import { FzSecurityService } from '../../../_services/fz-security.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { MSG } from '../../../defined';
-import { HtmlParser } from '@angular/compiler';
 declare var $: any;
 
 @Component({
@@ -88,12 +87,16 @@ export class SavComponent implements OnInit {
           }
         },
         {
-          data: 'date_add', render: data => {
-            return moment(data, 'YYYY-MM-DD HH:mm:ss').format('LLL');
+          // Date de reception du materiel
+          data: 'date_receipt', render: data => {
+            let receiptMoment = moment(data);
+            if (!receiptMoment.isValid()) return `<span class="badge badge-pink add-receipt-date">Non definie</span>`;
+            return moment(data).format('LLL');
           }
         },
         {
-          data: 'approximate_time', render: (data, type, row) => {
+          // Date de sortie de l'atelier
+          data: 'date_release', render: (data, type, row) => {
             let dt = '';
             dt = !_.isEmpty(data) ? moment(data).format('LL') : "Non assigné";
             return `<span class="badge badge-default change-approximate-time" style="cursor: pointer">${dt}</span>`;
@@ -101,7 +104,7 @@ export class SavComponent implements OnInit {
         },
         {
           data: 'status_sav', render: (data, type, row) => {
-            let dt = _.isObject(data) ? data.label : 'Diagnostic non réalisé';
+            let dt = _.isObject(data) ? data.label : 'Non definie';
             return `<span class="badge badge-default change-status" style="cursor: pointer">${dt}</span>`;
           }
         },
