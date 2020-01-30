@@ -10,6 +10,7 @@ import { FzSecurityService } from '../../../_services/fz-security.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { MSG } from '../../../defined';
+import RSVP from 'rsvp';
 declare var $: any;
 
 @Component({
@@ -20,14 +21,16 @@ declare var $: any;
 export class SavComponent implements OnInit {
   public Table: any;
   private Wordpress: any;
-  private messages: Array<{status: number, msg: string}> = [
-    {status: 1, msg: "Bonjour,\n Nous vous informons que votre matériel a été bien diagnostique, de ce fait le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
-    {status: 2, msg: "Bonjour,\n Nous vous informons que votre matériel n’a pas pu être diagnostique, de ce fait le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
-    {status: 3, msg: "Bonjour,\n Nous vous informons que votre matériel est déjà en réparation et actuellement en atelier sous nos soins avec les techniciens \n\n Merci\n\n SAV  Freezone " },
-    {status: 4, msg: "" },
-    {status: 5, msg: "Bonjour,\n Nous vous informons que la réparation de votre matériel est terminée, ainsi le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
-    {status: 6, msg: "Bonjour,\n Nous avons bien réceptionné votre matériel et la procédure avant diagnostique est de vous faire parvenir " +
-     "l’inventaire des objets qu’on a réceptionné suivant cette liste :\n\n Merci\n\n SAV  Freezone " },
+  private messages: Array<{ status: number, msg: string }> = [
+    { status: 1, msg: "Bonjour,\n Nous vous informons que votre matériel a été bien diagnostique, de ce fait le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
+    { status: 2, msg: "Bonjour,\n Nous vous informons que votre matériel n’a pas pu être diagnostique, de ce fait le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
+    { status: 3, msg: "Bonjour,\n Nous vous informons que votre matériel est déjà en réparation et actuellement en atelier sous nos soins avec les techniciens \n\n Merci\n\n SAV  Freezone " },
+    { status: 4, msg: "" },
+    { status: 5, msg: "Bonjour,\n Nous vous informons que la réparation de votre matériel est terminée, ainsi le service clientèle vas vous contacter pour la suite \n\n Merci \n\n SAV  Freezone " },
+    {
+      status: 6, msg: "Bonjour,\n Nous avons bien réceptionné votre matériel et la procédure avant diagnostique est de vous faire parvenir " +
+        "l’inventaire des objets qu’on a réceptionné suivant cette liste :\n\n Merci\n\n SAV  Freezone "
+    },
   ];
   constructor(
     private apiWP: ApiWordpressService,
@@ -47,13 +50,18 @@ export class SavComponent implements OnInit {
 
   ngOnInit() {
     moment.locale('fr');
+
     const getElementData = (ev: any): any => {
       let el = $(ev.currentTarget).parents('tr');
       let data = this.Table.row(el).data();
       return data;
     };
-    const savTable = $('#sav-table');
-    this.Table = savTable.DataTable({
+
+    if ($.fn.dataTable.isDataTable('#sav-table')) {
+      this.Table.destroy();
+    }
+
+    this.Table = $('#sav-table').DataTable({
       pageLength: 10,
       page: 1,
       ordering: false, // Activer ou désactiver l'affichage d'ordre
@@ -63,7 +71,7 @@ export class SavComponent implements OnInit {
       processing: true,
       serverSide: true,
       columns: [
-        { data: 'ID', render: (data) => { return `n°${data}` } },
+        { data: 'id', render: (data) => { return `n°${data}` } },
         {
           data: 'auctor', render: (data, type, row) => {
             if (_.isEmpty(data)) return "Non renseigner";
@@ -99,7 +107,7 @@ export class SavComponent implements OnInit {
           data: 'date_release', render: (data, type, row) => {
             let dt = '';
             dt = !_.isEmpty(data) ? moment(data).format('LL') : "Non assigné";
-            return `<span class="badge badge-default change-approximate-time" style="cursor: pointer">${dt}</span>`;
+            return `<span class="badge badge-default change-release-date" style="cursor: pointer">${dt}</span>`;
           }
         },
         {
@@ -125,13 +133,16 @@ export class SavComponent implements OnInit {
         }
       ],
       initComplete: (setting, json) => {
+        $('#sav-table tbody').on('click', '.add-receipt-date', ev => {
+          ev.preventDefault();
+        });
         $('#sav-table tbody').on('click', '.change-status', async ev => {
           ev.preventDefault();
           this.changeStatus(ev);
         });
-        $('#sav-table tbody').on('click', '.change-approximate-time', ev => {
+        $('#sav-table tbody').on('click', '.change-release-date', ev => {
           ev.preventDefault();
-          this.changeApproximateTime(ev);
+          this.changeReleaseDate(ev);
         });
         // Supprimer une service
         $('#sav-table tbody').on('click', '.remove-sav', ev => {
@@ -143,14 +154,14 @@ export class SavComponent implements OnInit {
           ev.preventDefault();
           const el: any = $(ev.currentTarget).parents('tr');
           const data: any = this.Table.row(el).data();
-          this.zone.run(() => { this.router.navigate(['/sav', data.ID, 'edit']) });
+          this.zone.run(() => { this.router.navigate(['/sav', data.id, 'edit']) });
         });
         // Envoyer un email
         $('#sav-table tbody').on('click', '.mail-sav', ev => {
           ev.preventDefault();
           const el: any = $(ev.currentTarget).parents('tr');
           const data: any = this.Table.row(el).data();
-          this.zone.run(() => { this.router.navigate(['/sav', data.ID, 'mail']) });
+          this.zone.run(() => { this.router.navigate(['/sav', data.id, 'mail']) });
         });
 
       },
@@ -170,37 +181,11 @@ export class SavComponent implements OnInit {
         },
         type: 'GET',
       }
-
     });
   }
 
-  private removeSav(ev: MouseEvent) {
-    if (!this.auth.isAdministrator()) {
-      Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
-      return false;
-    }
-    const el: any = $(ev.currentTarget).parents('tr');
-    const data: any = this.Table.row(el).data();
-    Swal.fire({
-      title: 'Confirmation',
-      html: `Voulez vous vraiment supprimer cette post?`,
-      type: 'warning',
-      showCancelButton: true
-    }).then(result => {
-      if (result.value) {
-        Helpers.setLoading(true);
-        this.Wordpress.savs().id(data.ID).delete({ force: true }).then(resp => {
-          Helpers.setLoading(false);
-          this.reload();
-        });
-      }
-    });
-  }
-
-  private async changeApproximateTime(ev: MouseEvent) {
-    if (!this.security.hasAccess('s16', true)) {
-      return false;
-    }
+  private async changeReleaseDate(ev: MouseEvent) {
+    if (!this.security.hasAccess('s16', true)) return false;
     const el: any = $(ev.currentTarget).parents('tr');
     const data: any = this.Table.row(el).data();
     let approximateTime: any = moment(data.approximate_time);
@@ -246,6 +231,30 @@ export class SavComponent implements OnInit {
     }
   }
 
+  private removeSav(ev: MouseEvent) {
+    if (!this.auth.isAdministrator()) {
+      Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
+      return false;
+    }
+    const el: any = $(ev.currentTarget).parents('tr');
+    const data: any = this.Table.row(el).data();
+    Swal.fire({
+      title: 'Confirmation',
+      html: `Voulez vous vraiment supprimer cette post?`,
+      type: 'warning',
+      showCancelButton: true
+    }).then(result => {
+      if (result.value) {
+        Helpers.setLoading(true);
+        this.Wordpress.savs().id(data.ID).delete({ force: true }).then(resp => {
+          Helpers.setLoading(false);
+          this.reload();
+        });
+      }
+    });
+  }
+
+  // Modifier le status du SAV
   private changeStatus(ev: MouseEvent) {
     if (!this.security.hasAccess('s15', true)) {
       return false;
@@ -253,43 +262,21 @@ export class SavComponent implements OnInit {
     const el: any = $(ev.currentTarget).parents('tr');
     const __DATA__: any = this.Table.row(el).data();
     const __STATUS__ = {
-      '1': '1 - Diagnostic réalisé',
-      '2': '2 - Diagnostic non réalisé',
-      '3': '3 - A réparer',
-      '4': '4 - Ne pas réparer',
-      '5': '5 - Terminer',
-      '6': '6 - Inventaire matériel'
+      '0': 'Aucun',
+      '1': '1 - Diagnostique en cours',
+      '2': '2 - Diagnostique fini',
+      '3': '3 - Réparation accordée',
+      '4': '4 - Réparation refusée',
+      '5': '5 - Produit récupéré par le client'
     };
     let statusValue = _.isObjectLike(__DATA__.status_sav) ? __DATA__.status_sav.value : '';
-    statusValue = _.isEqual(statusValue, '') ? '2' : statusValue; // Diagnostic non réalisé par default
-    let mailSubject = null; // Contient l'objet du mail
-    let mailStatus = 1;
+    statusValue = _.isEqual(statusValue, '') ? '0' : statusValue; // Diagnostic non réalisé par default
     Swal.mixin({
       confirmButtonText: 'Suivant &rarr;',
       cancelButtonText: 'Annuler',
       showCancelButton: true,
-      progressSteps: ['1', '2', '3']
+      progressSteps: ['1', '2']
     }).queue([
-      {
-        input: 'text',
-        title: 'Objet de cette changement',
-        text: 'Veuillez ajouter une objet pour cette modification',
-        inputValidator: (value) => {
-          return new Promise((resolve, reject) => {
-            if (_.isEmpty(value)) {
-              resolve('Ce champ est obligatoire');
-            }
-            resolve();
-          });
-        },
-        allowOutsideClick: () => !Swal.isLoading(),
-        preConfirm: (value) => {
-          return new Promise(resolve => {
-            mailSubject = value;
-            resolve(true);
-          })
-        }
-      },
       // Statut
       {
         input: 'select',
@@ -302,22 +289,11 @@ export class SavComponent implements OnInit {
         allowOutsideClick: () => !Swal.isLoading(),
         preConfirm: (value) => {
           return new Promise((resolve, reject) => {
-            if (_.isEqual(value, '')) {
+            if (_.isEqual(value, '') || _.isEqual(value, '0')) {
               Swal.showValidationMessage("Ce champ est requis");
-              resolve(false);
             }
-            mailStatus = parseInt(value, 10);
-            // Envoyer une requete pour modifier la statut
-            this.Wordpress.savs().id(__DATA__.ID).update({
-              status_sav: value
-            }).then(resp => {
-              resolve(true);
-            }).catch(err => {
-              Swal.showValidationMessage(err);
-              resolve(false);
-            });
-            this.cd.detectChanges();
-          })
+            resolve(value);
+          });
         }
       },
       // Message pour l'email
@@ -342,51 +318,49 @@ export class SavComponent implements OnInit {
           return new Promise((resolve, reject) => {
             if (_.isEqual(msg, '')) {
               Swal.showValidationMessage("Ce champ est requis");
-              resolve(false);
             }
-            const dataOnlineUser = this.auth.getCurrentUser().data;
-            const subject = mailSubject;
-            const message = msg;
-            const args: any = {
-              status: 'draft',
-              title: subject,
-              content: message,
-              attach_post: __DATA__.ID,
-              sav_status: mailStatus,
-              sender: dataOnlineUser.ID,
-              response_post: 0
-            };
-            this.Wordpress.mailing().create(args).then(resp => {
-              const Form: FormData = new FormData();
-              Form.append('sender', dataOnlineUser.ID.toString());
-              Form.append('sav_id', __DATA__.ID.toString());
-              Form.append('subject', subject);
-              Form.append('message', message);
-              Form.append('mailing_id', resp.id.toString());
-              // Envoyer le mail
-              this.Http.post<any>(`${config.apiUrl}/mail/sav/${__DATA__.ID}`, Form).subscribe(resp => {
-                resolve(true);
-              }, err => {
-                Swal.showValidationMessage("Une erreur s'est produit pendant l'envoie");
-                resolve(false);
-              });
-              this.cd.detectChanges();
-            }).catch(err => {
-              Swal.showValidationMessage(err);
-              resolve(false);
-            });
+            resolve(msg);
           }) // .end promise
         },
-        inputValue: _.find(this.messages, { status: mailStatus }).msg
+        inputValue: ""
       }
     ]).then((result) => {
       if (result.value) {
-        Swal.fire({
-          title: 'Succès!',
-          html: "Modification apporté avec succès",
-          confirmButtonText: 'OK'
-        }).then(successResp => {
-          this.reload();
+        const Response = result.value;
+        const dataOnlineUser = this.auth.getCurrentUser().data;
+        const subject = '';
+        const message = Response[1];
+        const args: any = {
+          status: 'draft',
+          title: subject,
+          content: message,
+          attach_post: __DATA__.id,
+          sav_status: parseInt(Response[0]),
+          sender: dataOnlineUser.ID,
+          response_post: 0
+        };
+        const updateSav = this.Wordpress.savs().id(__DATA__.id).update({ status_sav: parseInt(Response[0]) });
+        const createPostMail = this.Wordpress.mailing().create(args);
+        RSVP.all([updateSav, createPostMail]).then(rsvpResult => {
+          const mailingId = rsvpResult[1].id;
+          const Form: FormData = new FormData();
+          Form.append('sender', dataOnlineUser.ID.toString());
+          Form.append('sav_id', __DATA__.id.toString());
+          Form.append('subject', subject);
+          Form.append('message', message);
+          Form.append('mailing_id', mailingId.toString());
+          // Envoyer le mail
+          this.Http.post<any>(`${config.apiUrl}/mail/sav/${__DATA__.id}`, Form).subscribe(mailResp => {
+            Swal.fire({
+              title: 'Succès!',
+              html: "Modification apporté avec succès",
+              confirmButtonText: 'OK'
+            }).then(successResp => {
+              this.reload();
+            });
+          }, err => {
+            Swal.fire("", "Une erreur s'est produit pendant l'envoie", 'error');
+          })
         });
       }
     })
