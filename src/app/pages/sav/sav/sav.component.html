@@ -10,7 +10,8 @@
   <div class="ibox-body">
     <div class="row">
       <div class="col-sm-12">
-        <app-sav-datatable [status]="[4, 5]"></app-sav-datatable>
+        <!-- Les SAV non traite ont une statut de valeur NULL ou vide -->
+        <app-sav-datatable [meta_value]="[]" [meta_compare]="'NOT EXISTS'"></app-sav-datatable>
       </div>
     </div>
   </div>

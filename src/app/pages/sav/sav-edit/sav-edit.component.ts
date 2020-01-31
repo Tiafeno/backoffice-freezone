@@ -54,23 +54,25 @@ export class SavEditComponent implements OnInit {
     this.isAdmin = this.auth.isAdministrator();
     this.Wordpress = this.apiWP.getWordpress();
     this.garenteeRange = _.range(1, 13, 1);
+    //TODO: Ajouter une parametre de securite pour sur les champs pour chaque type d'utilisateur
     this.Form = new FormGroup({
       bill: new FormControl(''),
-      client: new FormControl(''),
       date_purchase: new FormControl(''),
       description: new FormControl(''),
-      quotation_ref: new FormControl(''),
       mark: new FormControl(''),
       product: new FormControl(''),
       product_provider: new FormControl(''),
       serial_number: new FormControl(''),
-      status_product: new FormControl('', Validators.required),
-      garentee: new FormControl('')
+      status_sav: new FormControl('', Validators.required),
+      garentee: new FormControl(''),
+      guarentee_product: new FormControl(''),
+      accessorie: new FormControl(),
+      other_accessories_desc: new FormControl('')
     });
   }
 
   get f() { return this.Form.controls; }
-  get statusProduct() { return this.Form.get('status_product'); }
+  get guarenteeProduct() { return this.Form.get('guarentee_product'); }
   get providerProduct() { return this.Form.get('product_provider'); }
 
   ngOnInit() {
@@ -83,7 +85,7 @@ export class SavEditComponent implements OnInit {
           Swal.fire('Désolé', "Une erreur inconnue s'est produit", 'warning');
           return;
         }
-        this.Author = _.clone(resp.auctor);
+        this.Author = _.clone(resp.customer);
         this.reference = resp.reference;
         let args: any = {};
         (<any>Object).keys(this.Form.value).forEach(element => {
@@ -93,8 +95,13 @@ export class SavEditComponent implements OnInit {
             args[element] = momt.isValid() ? momt.format('YYYY-MM-DD') : null;
             return;
           }
+          if (element === 'accessorie') {
+            args[element] = parseInt(val);
+            return;
+          }
           args[element] = _.isObject(val) ? parseInt(val.value, 10) : val;
         });
+        console.log(args);
         this.Form.patchValue(args);
         this.cd.detectChanges();
       });
@@ -111,15 +118,16 @@ export class SavEditComponent implements OnInit {
     Helpers.setLoading(true);
     this.Wordpress.savs().id(this.ID).update({
       bill: Value.bill,
-      client: Value.client,
       description: Value.description,
       mark: Value.mark,
       product: Value.product,
       product_provider: Value.product_provider,
       serial_number: Value.serial_number,
-      status_product: Value.status_product,
-      quotation_ref: Value.quotation_ref,
+      status_sav: Value.status_sav,
       garentee: Value.garentee,
+      guarentee_product: Value.guarentee_product,
+      accessorie: parseInt(Value.accessorie),
+      other_accessories_desc: Value.other_accessories_desc,
       title: Value.product
     }).then(resp => {
       Helpers.setLoading(false);

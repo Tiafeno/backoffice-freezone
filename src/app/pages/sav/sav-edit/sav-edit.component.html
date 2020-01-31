@@ -15,21 +15,11 @@
           </div>
           <div class="row">
             <div class="col-sm-12">
-              <div class="form-group mb-4 row">
-                <label class="col-sm-4 col-form-label">Type de client</label>
-                <div class="col-sm-8 d-flex align-items-center">
-                  <label class="radio radio-grey radio-primary radio-inline">
-                    <input type="radio" formControlName="client" [value]="1" checked="">
-                    <span class="input-span"></span>Particulier</label>
-                  <label class="radio radio-grey radio-primary radio-inline">
-                    <input type="radio" formControlName="client" [value]="2">
-                    <span class="input-span"></span>Entreprise ou société</label>
-                </div>
-              </div>
+
             </div>
           </div>
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-8">
               <div class="form-group mb-4">
                 <label class="font-light">Produit</label>
                 <input class="form-control" autocomplete="off" formControlName="product" type="text" id="product" placeholder="">
@@ -37,7 +27,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <div class="form-group mb-4">
                 <label class="font-light">Marque</label>
                 <input class="form-control" autocomplete="off" formControlName="mark" type="text" id="mark"
@@ -48,19 +38,6 @@
           <div class="row">
             <div class="col-sm-4">
               <div class="form-group mb-4">
-                <label class="font-light">Status du produit</label>
-
-                <select formControlName="status_product" class="form-control">
-                  <option [value]="item.value" *ngFor="let item of savProductStatus">{{item.label}}</option>
-                </select>
-                <div *ngIf="f.status_product.errors && f.status_product.dirty">
-                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-sm-4">
-              <div class="form-group mb-4">
                 <label class="font-light">Fournisseur du produit</label>
                 <select formControlName="product_provider" class="form-control">
                   <option value="">-- Selectionner un le fournisseur --</option>
@@ -69,7 +46,19 @@
                 </select>
               </div>
             </div>
-
+          </div>
+          <div class="row">
+            <div class="col-sm-4">
+              <div class="form-group mb-4">
+                <label class="font-light">Garantie du produit</label>
+                <select formControlName="guarentee_product" class="form-control">
+                  <option [value]="item.value" *ngFor="let item of savProductStatus">{{item.label}}</option>
+                </select>
+                <div *ngIf="f.guarentee_product.errors && f.guarentee_product.dirty">
+                  <label class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
             <div class="col-sm-4">
               <div class="form-group mb-4">
                 <label class="font-light">Délais de garantie</label>
@@ -80,7 +69,7 @@
               </div>
             </div>
           </div>
-          <div class="row" *ngIf="statusProduct.value == 1 && providerProduct.value == 1">
+          <div class="row" *ngIf="guarenteeProduct.value == 1 && providerProduct.value == 1">
             <div class="col-sm-4">
               <div class="form-group mb-4">
                 <label class="font-light">Date d’achat</label>
@@ -113,22 +102,56 @@
               </div>
             </div>
           </div>
+
           <div class="row">
-            <div class="col-md-12">
-              <div class="form-group mb-4">
-                <label class="font-light">Identification de la demande</label>
-                <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="description"
-                   [init]="tinyMCESettings"></editor>
+            <div class="col-sm-12 mb-4">
+              <p class="font-light">Accessoires:</p>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="1"
+                  name="accessorie">
+                <span class="form-check-label" for="inlineCheckbox2">Câble d'alimentation</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="2"
+                  name="accessorie">
+                <span class="form-check-label" for="inlineCheckbox2">Câble USB</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="3"
+                  name="accessorie">
+                <span class="form-check-label" for="inlineCheckbox2">Toner réf</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="4"
+                  name="accessorie">
+                <span class="form-check-label" for="inlineCheckbox2">Cartouche réf</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="5"
+                  name="accessorie">
+                <span class="form-check-label" for="inlineCheckbox2">Adapteur</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="0"
+                  name="accessorie">
+                <span class="form-check-label" for="inlineCheckbox2">Autres accessoires</span>
+              </div>
+            </div>
+            <div class="col-sm-6" *ngIf="Form.get('accessorie').value == 0">
+              <div class="form-group">
+                <label class="font-light">Autres accessoires:</label>
+                <textarea formControlName="other_accessories_desc" [required]="accessorie == 0"
+                  class="form-control"></textarea>
               </div>
             </div>
           </div>
 
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
               <div class="form-group mb-4">
-                <label class="font-light">Devis Réf</label>
-                <input class="form-control" autocomplete="off" formControlName="quotation_ref" type="text" id="quotation_ref" 
-                  placeholder="">
+                <label class="font-light">Probème rencontré ou panne</label>
+                <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="description"
+                   [init]="tinyMCESettings"></editor>
               </div>
             </div>
           </div>
