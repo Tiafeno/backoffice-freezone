@@ -246,9 +246,12 @@ export class SavComponent implements OnInit {
     }).then(result => {
       if (result.value) {
         Helpers.setLoading(true);
-        this.Wordpress.savs().id(data.ID).delete({ force: true }).then(resp => {
+        this.Wordpress.savs().id(data.id).delete({ force: true }).then(resp => {
           Helpers.setLoading(false);
           this.reload();
+        }, err => { 
+          Helpers.setLoading(false);
+          Swal.fire('', err.message, 'error');
         });
       }
     });

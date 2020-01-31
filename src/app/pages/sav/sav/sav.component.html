@@ -8,22 +8,10 @@
     <div class="ibox-title">LES DEMANDES DE SERVICES</div>
   </div>
   <div class="ibox-body">
-    <div class="">
-        <table class="table table-hover" id="sav-table">
-            <thead class="thead-default thead-lg">
-                <tr>
-                    <th class="pl-4">ID</th>
-                    <th>Client</th>
-                    <th>Reference</th>
-                    <th>Produit</th>
-                    <th>Marque</th>
-                    <th>Date de réception</th>
-                    <th>Date de livraison</th>
-                    <th>Statut</th>
-                    <th class="pr-4" style="width:91px;">Action</th>
-                </tr>
-            </thead>
-        </table>
+    <div class="row">
+      <div class="col-sm-12">
+        <app-sav-datatable [status]="[4, 5]"></app-sav-datatable>
+      </div>
     </div>
   </div>
 </div>
