@@ -32,6 +32,7 @@ export class SavComponent implements OnInit {
         "l’inventaire des objets qu’on a réceptionné suivant cette liste :\n\n Merci\n\n SAV  Freezone "
     },
   ];
+  
   constructor(
     private apiWP: ApiWordpressService,
     private zone: NgZone,
@@ -50,7 +51,6 @@ export class SavComponent implements OnInit {
 
   ngOnInit() {
     moment.locale('fr');
-
     const getElementData = (ev: any): any => {
       let el = $(ev.currentTarget).parents('tr');
       let data = this.Table.row(el).data();
@@ -184,24 +184,21 @@ export class SavComponent implements OnInit {
     });
   }
 
+  // Modifier la date de sortie du materiel dnas l'atelier
+  // NB: Noté bien que cette date changeable une seul fois
   private async changeReleaseDate(ev: MouseEvent) {
     if (!this.security.hasAccess('s16', true)) return false;
     const el: any = $(ev.currentTarget).parents('tr');
     const data: any = this.Table.row(el).data();
-    let approximateTime: any = moment(data.approximate_time);
-    let inputDateValue = '';
-    const dateNow: any = moment();
-    if (approximateTime.isValid()) {
-      inputDateValue = approximateTime.format('DD-MM-YYYY');
-      if (dateNow <= approximateTime) {
-        Swal.fire('Désolé', "Vous ne pouvez pas modifier la date avant la date d'expiration", 'warning');
-        return false;
-      }
+    let dateReleaseMoment: moment.Moment = moment(data.date_release);
+    if (dateReleaseMoment.isValid()) { // Si une date est definie et aussi valide
+      Swal.fire('Désolé', "Vous ne pouvez plus modifier cette date", 'warning');
+      return false;
     }
-    const { value: dateApproximate } = await Swal.fire({
+    const { value: dateRelease } = await Swal.fire({
       title: 'Ajouter une date',
       input: 'text',
-      inputValue: inputDateValue,
+      inputValue: dateReleaseMoment.format('DD-MM-YYYY'),
       showCancelButton: true,
       confirmButtonText: 'Enregister',
       cancelButtonText: 'Annuler',
@@ -219,18 +216,19 @@ export class SavComponent implements OnInit {
           }
           const hasMoment = isMoment.format('YYYY-MM-DD');
           this.Wordpress.savs().id(data.ID).update({
-            approximate_time: hasMoment
+            date_release: hasMoment
           }).then(resp => { resolve(); })
             .catch(err => { resolve(err); });
         });
       }
     })
-    if (dateApproximate) {
-      Swal.fire(`Nouvelle date: ${dateApproximate}`);
+    if (dateRelease) {
+      Swal.fire(`Nouvelle date: ${dateRelease}`);
       this.reload();
     }
   }
 
+  // Supprimer une post SAV
   private removeSav(ev: MouseEvent) {
     if (!this.auth.isAdministrator()) {
       Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
@@ -344,6 +342,7 @@ export class SavComponent implements OnInit {
         };
         const updateSav = this.Wordpress.savs().id(__DATA__.id).update({ status_sav: parseInt(Response[0]) });
         const createPostMail = this.Wordpress.mailing().create(args);
+        Helpers.setLoading(true);
         RSVP.all([updateSav, createPostMail]).then(rsvpResult => {
           const mailingId = rsvpResult[1].id;
           const Form: FormData = new FormData();
@@ -354,6 +353,7 @@ export class SavComponent implements OnInit {
           Form.append('mailing_id', mailingId.toString());
           // Envoyer le mail
           this.Http.post<any>(`${config.apiUrl}/mail/sav/${__DATA__.id}`, Form).subscribe(mailResp => {
+            Helpers.setLoading(false);
             Swal.fire({
               title: 'Succès!',
               html: "Modification apporté avec succès",
@@ -362,6 +362,7 @@ export class SavComponent implements OnInit {
               this.reload();
             });
           }, err => {
+            Helpers.setLoading(false);
             Swal.fire("", "Une erreur s'est produit pendant l'envoie", 'error');
           })
         });
