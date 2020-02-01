@@ -13,11 +13,12 @@ import { ApiWoocommerceService } from '../../../_services/api-woocommerce.servic
 import { Helpers } from '../../../helpers';
 import { from } from 'rxjs/observable/from';
 import { FzProduct } from '../../../supplier';
+import RSVP from 'rsvp';
 declare var $: any;
 
 class User {
-  id: number; 
-  name: string; 
+  id: number;
+  name: string;
   company_name?: any;
   email: string;
   last_name: string;
@@ -120,7 +121,7 @@ export class QuoteAddComponent implements OnInit {
     this.lineItems.push(this.formBuilder.group({ product_id: null, quantity: 0 }));
   }
 
-  public onRemoveLine (index: number) {
+  public onRemoveLine(index: number) {
     this.lineItems.removeAt(index);
   }
 
@@ -136,9 +137,25 @@ export class QuoteAddComponent implements OnInit {
   private queryWCProducts(term: string): Observable<any> {
     this.loadingProduct = true;
     return from(new Promise(resolve => {
-      this.woocommerce.get(`products?search=${term}`, (er, data, res) => {
-        let products: Array<FzProduct> = JSON.parse(res);
-        // Supprimer dans le resultats le ou les articles deja dans le formulaire de demande
+      // Recherche par titre et description
+      const bySearch = (): Promise<any> => {
+        return new Promise(RES => { this.woocommerce.get(`products/?search=${term}`, (er, data, res) => {
+            let products: Array<FzProduct> = JSON.parse(res);
+            RES(products);
+          });
+        });
+      }
+      // Recherche par SKU (Match specific content)
+      const bySku = (): Promise<any> => {
+        return new Promise(RES => { this.woocommerce.get(`products/?sku=${term}`, (er, data, res) => {
+            let products: Array<FzProduct> = JSON.parse(res);
+            RES(products);
+          });
+        });
+      }
+      // Compiler les resultats obtenues
+      RSVP.all([bySearch(), bySku()]).then(articlesArray => {
+        let products = _.flatten(articlesArray);
         let formLineItems = this.lineItems; //FormArray
         const controls = formLineItems.controls;
         const prdIds: Array<number> = _(controls).map((ctrl: FormGroup) => {
@@ -146,6 +163,7 @@ export class QuoteAddComponent implements OnInit {
         }).value();
         resolve(_(products).filter(product => _.indexOf(prdIds, product.id) < 0).value());
       });
+
     }));
   }
 
@@ -195,7 +213,7 @@ export class QuoteAddComponent implements OnInit {
         // Envoyer les informations utilisateur par email au client
         let dataForm = new FormData();
         dataForm.append('pwd', clientPassword);
-        this.Http.post<any>(`${config.apiUrl}/mail/user/${newClient.id}`, dataForm).subscribe( (response: WPResponse) => {
+        this.Http.post<any>(`${config.apiUrl}/mail/user/${newClient.id}`, dataForm).subscribe((response: WPResponse) => {
           Helpers.setLoading(false);
           if (response.success) {
             this.formAddUser.reset();
@@ -207,8 +225,8 @@ export class QuoteAddComponent implements OnInit {
 
           this.detector.detectChanges();
         }, error => {
-            Helpers.setLoading(false);
-            Swal.fire("", error.message, "warning");
+          Helpers.setLoading(false);
+          Swal.fire("", error.message, "warning");
         });
       }, err => {
         Helpers.setLoading(false);
@@ -221,7 +239,7 @@ export class QuoteAddComponent implements OnInit {
 
   public submitNewQuote(ev: any): any {
     ev.preventDefault();
-    let {line_items, payment_method} = this.formAddQuote.value;
+    let { line_items, payment_method } = this.formAddQuote.value;
     const customer_id = this.clientSelected.id;
     const address: string = _.isNull(this.clientSelected.address) ? '' : this.clientSelected.address;
     const getClientRole = () => {
