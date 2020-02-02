@@ -10,6 +10,7 @@ import { FzServicesService } from '../../../_services/fz-services.service';
 import { EditArticleComponent } from '../../supplier/articles/edit-article/edit-article.component';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Metadata } from '../../../metadata';
+import { FzProduct } from '../../../supplier';
 declare var $: any;
 
 @Component({
@@ -34,7 +35,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
     private itemId: number = 0;
     private Woocommerce: any;
     private Wordpress: any;
-    private allProducts: Array<any> = [];
+    private allProducts: Array<FzProduct> = [];
 
     public qtSupplierTable: any;
     public qtyIncrement: Array<any>;
@@ -129,7 +130,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                 }
                 this.cd.detectChanges();
                 // Récuperer les fournisseurs (utilisateur) qui possède cette article
-                let supplier_ids: Array<number> = _.map(this.allProducts, p => parseInt(p.user_id, 10));
+                let supplier_ids: Array<number> = _.map(this.allProducts, p => p.user_id);
                 this.Wordpress
                     .users()
                     .include(_.join(supplier_ids, ','))
@@ -159,16 +160,18 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     }
                                 },
                                 { // statut produit, Disponible - 0, Rupture -1, Obsolete - 2, et Commande - 3
-                                    data: 'condition', render: (data, type, row) => {
+                                    data: 'id', render: (data, type, row) => {
+                                        let userId: any = data;
+                                        let pdt: any = _.find(this.allProducts, { user_id: userId });
                                         let status: string = '';
-                                        switch (parseInt(data)) {
+                                        switch (parseInt(pdt.condition)) {
                                             case 0: status = 'Disponible'; break;
                                             case 1: status = 'Rupture de stock'; break;
                                             case 2: status = 'Obsolete'; break;
                                             case 3: status = 'Commande'; break;
                                             default: status = 'Disponible'; break;
                                         }
-                                        return `<span class="badge ${data == 2 ? 'badge-pink' : 'badge-default'}">${status}</span>`
+                                        return `<span class="badge ${pdt.condition == 2 || pdt.condition == 1 ? 'badge-pink' : 'badge-default'}">${status}</span>`
                                     }
                                 },
                                 {
@@ -199,11 +202,9 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                         const userId: any = data;
                                         const pdt: any = _.find(this.allProducts, { user_id: userId });
                                         if (_.isUndefined(pdt)) return 'Introuvable';
-
                                         const price: number = parseInt(pdt.price, 10);
                                         const marge = clientRole === 'fz-company' ? (this.client.company_status === 'dealer' ? pdt.marge_dealer : pdt.marge) : pdt.marge_particular;
                                         let hisPrice = this.services.getBenefit(price, parseInt(marge, 10));
-
                                         return this.services.currencyFormat(hisPrice);
                                     }
                                 }, // price product
@@ -216,6 +217,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     data: null, render: (data, type, row) => {
                                         let inputValue: number = 0;
                                         const metaSuppliers: any = _.find(this.item.meta_data, { key: "suppliers" });
+                                        const pdt: any = _.find(this.allProducts, { user_id: row.id });
                                         if (_.isObjectLike(metaSuppliers) && !_.isEmpty(metaSuppliers.value)) {
                                             let dataParser: Array<any> = JSON.parse(metaSuppliers.value); // [{supplier: 450, get: 2, product_id: 0, article_id: 0, price: 0} ...] 
                                             let input: Array<any> = _.map(dataParser, data => {
@@ -223,12 +225,11 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                             });
                                             inputValue = _.sum(input);
                                         }
-
+                                        if (!_.isUndefined(pdt) && parseInt(pdt.total_sales) === 0) { inputValue = 0; }
                                         let fzProduct: any = _.find(this.allProducts, { user_id: row.id });
                                         const dateReview = moment(fzProduct.date_review);
                                         // vérifier si l'article est en mode rejetée
                                         let disabled: boolean = _.isEqual(this.quotationPosition, 2) ? false : dateReview < todayAt6;
-
                                         return `<input type="number" class="input-increment form-control prd_${fzProduct.id}" 
                                                     value="${inputValue}" 
                                                     min="0" 
@@ -275,7 +276,7 @@ export class QuotationManageComponent implements OnInit, AfterViewInit {
                                     };
                                 });
                             }
-                        })
+                        });
                     });
             }, error => {
                 Helpers.setLoading(false);

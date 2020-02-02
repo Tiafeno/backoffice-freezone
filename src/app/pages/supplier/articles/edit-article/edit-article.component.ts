@@ -94,8 +94,22 @@ export class EditArticleComponent implements OnInit {
     });
   }
 
+  private verifyStatus(value) {
+    if (value === 1 || value === 2) {
+      this.Form.patchValue({ stock: 0 });
+      this.f.stock.disable();
+    } else {
+      this.f.stock.enable();
+    }
+  }
+
   onSelectProduct($event) {
     this.Form.patchValue({ title: $event.title.rendered });
+  }
+
+  onChangeStatus(event) {
+    let value: number = parseInt(event.target.value);
+    this.verifyStatus(value);
   }
 
   onChangeMarge(newValue) {
@@ -195,6 +209,7 @@ export class EditArticleComponent implements OnInit {
       return false;
     }
     const Values = this.Form.value;
+    const stock = Values.stock ? parseInt(Values.stock, 10) : 0;
     Helpers.setLoading(true);
     this.WP.fz_product().id(this.ID).update({
       title: Values.title,
@@ -204,8 +219,8 @@ export class EditArticleComponent implements OnInit {
       marge_dealer: Values.margeDealer,
       marge_particular: Values.margeParticular,
       garentee: Values.garentee,
-      total_sales: parseInt(Values.stock, 10),
-      _quantity: parseInt(Values.stock, 10), // Quantite pour le sauvegarde (Gestion de stock)
+      total_sales: stock,
+      _quantity: stock, // Quantite pour le sauvegarde (Gestion de stock)
       date_review: moment().format('YYYY-MM-DD HH:mm:ss')
     }).then(() => {
       $('#edit-article-supplier-modal').modal('hide');
@@ -252,12 +267,10 @@ export class EditArticleComponent implements OnInit {
         user_id: this._article.user_id,
         stock: this._article.total_sales
       } as any);
-
+      this.verifyStatus(this._article.condition);
       this.Form.controls.user_id.disable();
-
       this.dateReview = moment(this._article.date_review).format('LLL');
       this.dateReviewFromNow = moment(this._article.date_review).fromNow();
-
       this.cd.detectChanges();
     }, () => {
     }, () => {

@@ -2,67 +2,64 @@
   .form-control {
     font-family: inherit;
   }
-  </style>
-  <div class="page-content fade-in-up">
-    <div class="row">
-      <div class="col-lg-12">
-  
-        <div class="ibox ibox-fullheight">
-          <form class="ibox-body" [formGroup]="formEditor" (ngSubmit)="onSave()">
-            <div class="row">
-              <div class="col-12">
-                  <div class="page-heading mb-4">
-                      <h1 class="page-title">Modifier la description</h1>
-                  </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-8">
-                <div class="form-group mb-4">
-                  <label>Designation</label>
-                  <input class="form-control" formControlName="name" type="text" id="name" >
-                </div>
-              </div>
-            </div>
 
-  
-            <div class="row">
-              <div class="col-sm-8">
-                <div class="form-group mb-4">
-                  <label>Description <span style="color: red">*</span></label>
-                  <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="description" [init]="tinyMCESettings"></editor>
-                  <div *ngIf="f.description.errors && f.description.dirty">
-                    <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="form-group mb-4 col-sm-6">
-                <ng-select name="categorie" placeholder="Selectionner des categories" bindLabel="name" bindValue="id"
-                 [searchFn]="customSearchFn"  formControlName="categorie"
-                   [multiple]="true" [items]="Categories">
-                  <ng-template ng-option-tmp let-item="item">
-                    {{item.name}} <br />
-                  </ng-template>
-                </ng-select>
-              </div>
-            </div>
-  
-  
-            <div class="text-center mb-4">
-              <div class="row">
-                <button class="btn btn-primary  col-2" type="submit">METTRE A JOUR</button>
-                <a class="btn btn-secondary ml-3 col-2" [routerLink]="['/articles', 'lists']"
-                  routerLinkActive="active">RETOUR</a>
-              </div>
-  
-            </div>
-          </form>
-        </div>
-  
+</style>
+<div class="page-content fade-in-up">
+  <div class="row">
+    <div class="col-12">
+      <div class="page-heading mb-4">
+        <h1 class="page-title">Modifier la description</h1>
       </div>
     </div>
   </div>
-  
+  <div class="ibox ibox-fullheight">
+    <form class="ibox-body" [formGroup]="formEditor" (ngSubmit)="onSave()">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <label>Designation</label>
+                <input class="form-control" formControlName="name" type="text" id="name">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group mb-4">
+                <label>Description <span style="color: red">*</span></label>
+                <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="description"
+                  [init]="tinyMCESettings"></editor>
+                <div *ngIf="f.description.errors && f.description.dirty">
+                  <label id="name-error" class="help-block error" for="name">Ce champ est obligatoire.</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group mb-4 col-sm-6">
+              <ng-select name="categorie" placeholder="Selectionner des categories" bindLabel="name" bindValue="term_id"
+                groupBy="parent" formControlName="categorie" [multiple]="true" [items]="Categories">
+                <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
+                  {{getParentName(item.parent)}}
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                  {{item.name}}
+                </ng-template>
+              </ng-select>
+            </div>
+          </div>
+          <div class="text-center mb-4">
+            <div class="row">
+              <button class="btn btn-primary  col-2" type="submit">METTRE A JOUR</button>
+              <a class="btn btn-secondary ml-3 col-2" [routerLink]="['/articles', 'lists']"
+                routerLinkActive="active">RETOUR</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -86,9 +86,15 @@
                 </tbody>
                 <tfoot>
                   <tr *ngIf="Billing && (Billing.total_tax != 0 && Billing.total_tax < minCostWithTransport)"
-                    style="background-color: #fcff21;">
-                    <th colspan="4" class="pl-4">Frais de transport</th>
-                    <th>{{costTransport | currency:'MGA':'symbole':'4.2-2':'fr'}}</th>
+                    style="background-color: #FFFCE3;">
+                    <th colspan="4" class="pl-4">
+                      <p style="font-weight: bold">Frais de transport</p>
+                      <div style="margin-top: 15x; font-weight: normal; font-size: 12px;">
+                          - Pour tout achat de moins de 100.000 HT prévoir des frais de transport de l’ordre de 12.600 HT <br>
+                          - Pour les clients basés en province le transport est à leur charge, cependant la livraison chez leur transporteur est gratuit
+                      </div>
+                    </th>
+                    <th style="font-weight: normal">{{costTransport | currency:'MGA':'symbole':'4.2-2':'fr'}}</th>
                   </tr>
                   <tr style="background-color: #ebedee;">
                     <th colspan="4" class="pl-4">

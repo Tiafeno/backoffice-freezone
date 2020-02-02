@@ -105,5 +105,4 @@ export class FzSecurityService {
     }
     return access.access;
   }
-
 }

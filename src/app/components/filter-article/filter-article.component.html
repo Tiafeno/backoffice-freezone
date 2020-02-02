@@ -14,8 +14,14 @@
 
     <div class="form-group mb-4 col-sm-3">
       <ng-select name="category" (change)="onAdd($event)" placeholder="Selectionner une categorie"
-        [(ngModel)]="filterForm.categorie" bindLabel="name" bindValue="id" [searchFn]="customSearchFn"
-        [hideSelected]="true" [multiple]="false" [items]="Categories">
+        [(ngModel)]="filterForm.categorie" bindLabel="name" bindValue="term_id" [searchFn]="customSearchFn"
+        [hideSelected]="true" groupBy="parent" [multiple]="false" [items]="Categories">
+        <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
+          {{getParentName(item.parent)}}
+        </ng-template>
+        <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+          {{item.name}}
+        </ng-template>
       </ng-select>
     </div>
 

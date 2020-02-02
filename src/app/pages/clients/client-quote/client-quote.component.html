@@ -1,4 +1,11 @@
 <div class="ibox-body">
+  <div class="row">
+    <div class="col-sm-4">
+      <form [formGroup]="formDate">
+        <input type="date" formControlName="date_review" (change)="onChangeDate($event)" class="form-control" />
+      </form>
+    </div>
+  </div>
   <table class="table table-condensed">
     <thead>
       <tr>
@@ -14,7 +21,7 @@
         <td [innerHTML]="order.posValue"></td>
         <td>{{order.dateCreate}}</td>
         <td>
-          <a class="btn bt-sm btn-primary" [routerLink]="['/dashboard', 'quotation', order.id, 'edit']" routerLinkActive="router-link-active" >Voir</a>
+          <a class="btn btn-sm btn-primary" [routerLink]="['/dashboard', 'quotation', order.id, 'edit']" routerLinkActive="router-link-active" >Voir</a>
         </td>
       </tr>
       <tr *ngIf="loading">

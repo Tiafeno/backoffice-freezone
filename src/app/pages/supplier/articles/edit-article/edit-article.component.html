@@ -51,7 +51,7 @@
         <div class="col-md-6">
           <div class="form-group mb-4">
             <label>Quantité disponible(s)</label>
-            <input class="form-control" formControlName="stock" min="0" type="number" id="stock" name="stock"
+            <input class="form-control" formControlName="stock" min="0" type="number" id="stock" 
               placeholder="Ajouter la quantité disponible">
             <div *ngIf="f.stock.errors && f.stock.dirty">
               <label id="qty-error" class="help-block error">Ce champ est obligatoire.</label>
@@ -71,7 +71,7 @@
         <div class="col-md-6">
           <div class="form-group mb-4">
             <label>Statut du produit</label>
-            <select formControlName="condition" class="form-control">
+            <select formControlName="condition" class="form-control" (change)="onChangeStatus($event)">
               <option [value]="condition.key" *ngFor="let condition of conditions"> {{condition.value}}</option>
             </select>
           </div>

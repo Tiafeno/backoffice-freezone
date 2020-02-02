@@ -4,6 +4,7 @@ import { Helpers } from '../../helpers';
 import { FzServicesService } from '../../_services/fz-services.service';
 import { AuthorizationService } from '../../_services/authorization.service';
 import { Supplier } from '../../supplier';
+import { Taxonomy } from '../../taxonomy';
 declare var $: any;
 
 @Component({
@@ -12,7 +13,7 @@ declare var $: any;
   styleUrls: ['./filter-article.component.css']
 })
 export class FilterArticleComponent implements OnInit, OnChanges {
-  public Categories: Array<any> = [];
+  public Categories: Array<Taxonomy> = [];
   public Suppliers: Array<Supplier> = [];
   public Status: Array<any> = [
     { label: "Tous", value: '' },
@@ -56,7 +57,7 @@ export class FilterArticleComponent implements OnInit, OnChanges {
     Helpers.setLoading(true);
     const categories = await this.fzServices.getCategories();
     this.Categories = _.isArray(categories) ? categories : [];
-    this.Categories.unshift({id: 0, name: 'Tous'});
+    this.Categories.unshift({term_id: 0, name: 'Tous', parent: 0});
 
     const suppliers = await this.fzServices.getSuppliers();
     this.Suppliers = _.isArray(suppliers) ? _.map(suppliers, sup => {
@@ -70,6 +71,12 @@ export class FilterArticleComponent implements OnInit, OnChanges {
   public onAdd($event) {
     console.log(this.filterForm);
     this.search.emit({ form: this.filterForm });
+  }
+
+  public getParentName(id: number): any {
+    let term = _.find(this.Categories, { term_id: id });
+    if (_.isUndefined(term)) return id;
+    return term.name;
   }
 
   /**
