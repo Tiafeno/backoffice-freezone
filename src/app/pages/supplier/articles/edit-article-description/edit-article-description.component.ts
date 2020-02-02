@@ -7,6 +7,7 @@ import { Helpers } from '../../../../helpers';
 import { ApiWoocommerceService } from '../../../../_services/api-woocommerce.service';
 import Swal from 'sweetalert2';
 import { FzServicesService } from '../../../../_services/fz-services.service';
+import { Taxonomy } from '../../../../taxonomy';
 declare var $: any;
 
 @Component({
@@ -15,10 +16,11 @@ declare var $: any;
   styleUrls: ['./edit-article-description.component.css']
 })
 export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
-  public id: any = 0; // product id
+  public id: number = 0; // product id
   public product: any = {};
+  public productAttributes: any[];
   public formEditor: FormGroup;
-  public Categories: Array<any> = [];
+  public Categories: Array<Taxonomy> = [];
   private Wordpress: any;
   private Woocommerce: any;
   public tinyMCESettings: any = {
@@ -38,9 +40,9 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
     toolbar: ' undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist table numlist outdent indent | image removeformat ',
     plugins: ['lists table image '],
   };
+
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private fzServices: FzServicesService,
     private apiWP: ApiWordpressService,
     private apiWC: ApiWoocommerceService,
@@ -54,20 +56,22 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
       description: new FormControl('', Validators.required)
     });
   }
-
   get f() { return this.formEditor.controls; }
-
   async ngOnInit() {
+    let id = this.route.snapshot.paramMap.get('id');
+    this.id = parseInt(id, 10);
+    // Recuperer tous les categories
     this.Categories = await this.fzServices.getCategories();
   }
 
   ngAfterViewInit() {
     Helpers.setLoading(true);
-    this.id = this.route.snapshot.paramMap.get('id');
     this.Woocommerce.get(`products/${this.id}`, (err, data, response) => {
       Helpers.setLoading(false);
+      if (_.isEmpty(response)) return false;
       const product: any = JSON.parse(response);
       this.product = _.clone(product);
+      this.productAttributes = product.attributes;
       this.formEditor.patchValue({
         name: product.name,
         description: product.description,
@@ -75,16 +79,23 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
       })
       this.cd.detectChanges();
     });
-
   }
 
   onSave() {
     const value: any = this.formEditor.value;
+    const attributeFormValue = this.FormAttribute.form.value;
+    console.log(attributeFormValue);
+    const attributes = _.map(attributeFormValue.attributes, attr => {
+      delete attr.name;
+      attr.visible = true; // rendre l'attribut visible dans FO
+      return attr;
+    });
     if (this.formEditor.valid) {
       const _categories = _.map(value.categorie, (ctg) => { return { id: parseInt(ctg, 10) }; });
       const data = {
         description: value.description,
-        categories: _categories
+        categories: _categories,
+        attributes: attributes,
       };
       Helpers.setLoading(true);
       this.Woocommerce.put(`products/${this.id}`, data, (err, data, res) => {
@@ -94,23 +105,10 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
     }
   }
 
-  /**
-    * Filtrage pour des recherches dans une element "select"
-    * @param term
-    * @param item
-    */
-  customSearchFn(term: string, item: any) {
-    var inTerm = [];
-    term = term.toLocaleLowerCase();
-    var paramTerms = $.trim(term).split(' ');
-    $.each(paramTerms, (index, value) => {
-      if (item.name.toLocaleLowerCase().indexOf($.trim(value).toLowerCase()) > -1) {
-        inTerm.push(true);
-      } else {
-        inTerm.push(false);
-      }
-    });
-    return _.every(inTerm, (boolean) => boolean === true);
+  public getParentName(id: number): any {
+    let term = _.find(this.Categories, {term_id: id});
+    if (_.isUndefined(term)) return id;
+    return term.name;
   }
 
 }

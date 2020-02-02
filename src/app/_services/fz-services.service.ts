@@ -6,6 +6,7 @@ import { Observable } from 'rxjs/Observable';
 import { environment, config } from '../../environments/environment';
 import { of } from 'rxjs/observable/of';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Taxonomy } from '../taxonomy';
 
 @Injectable()
 export class FzServicesService {
@@ -38,15 +39,11 @@ export class FzServicesService {
         return response;
     }
 
-    public getCategories(): Promise<any> {
+    public getCategories(): Promise<Array<Taxonomy>> {
         return new Promise((resolve, reject) => {
-            this.Woocommerce.get('products/categories?per_page=100', (err, data, res) => {
-                const response: any = JSON.parse(res);
-                if (!_.isUndefined(response.code)) {
-                    reject(response.message);
-                }
-                resolve(response);
-            })
+            this.Http.get<Array<Taxonomy>>(`${config.apiUrl}/products/categories?number=0`).subscribe(categories => {
+                resolve(categories);
+            });
         })
     }
 
