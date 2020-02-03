@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, AfterViewInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 import { ApiWordpressService } from '../../../../_services/api-wordpress.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
@@ -8,6 +8,7 @@ import { ApiWoocommerceService } from '../../../../_services/api-woocommerce.ser
 import Swal from 'sweetalert2';
 import { FzServicesService } from '../../../../_services/fz-services.service';
 import { Taxonomy } from '../../../../taxonomy';
+import { AttributesComponent } from '../../../../components/attributes/attributes.component';
 declare var $: any;
 
 @Component({
@@ -41,6 +42,7 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
     plugins: ['lists table image '],
   };
 
+  @ViewChild(AttributesComponent) FormAttribute: AttributesComponent;
   constructor(
     private route: ActivatedRoute,
     private fzServices: FzServicesService,

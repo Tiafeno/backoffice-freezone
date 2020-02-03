@@ -10,3 +10,11 @@ export class Taxonomy {
     count?: 7;
     filter?: string;
 };
+
+export class TermAttribute {
+    id: number;
+    name: string;
+    slug: string;
+    has_archives: boolean;
+    order_by: string;
+}
