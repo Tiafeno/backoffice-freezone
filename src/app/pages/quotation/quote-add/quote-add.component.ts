@@ -11,11 +11,14 @@ import { FormGroup, FormControl, Validators, FormArray, FormBuilder } from '@ang
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { Helpers } from '../../../helpers';
+import { from } from 'rxjs/observable/from';
+import { FzProduct } from '../../../supplier';
+import RSVP from 'rsvp';
 declare var $: any;
 
 class User {
-  id: number; 
-  name: string; 
+  id: number;
+  name: string;
   company_name?: any;
   email: string;
   last_name: string;
@@ -51,6 +54,8 @@ export class QuoteAddComponent implements OnInit {
   public formAddUser: FormGroup;
   public formAddQuote: FormGroup;
   public cmpLineItems = _.range(1);
+  public loadingProduct: boolean = false;
+  public loadingUser: boolean = false;
 
   constructor(
     private Http: HttpClient,
@@ -86,6 +91,7 @@ export class QuoteAddComponent implements OnInit {
     this.typeaheadUsers
       .pipe(debounceTime(400), switchMap(term => this.queryUsers(term)))
       .subscribe(items => {
+        this.loadingUser = false;
         this.Users = items;
         this.detector.detectChanges();
       }, (err) => {
@@ -95,8 +101,9 @@ export class QuoteAddComponent implements OnInit {
       });
 
     this.typeaheadProducts
-      .pipe(debounceTime(400), switchMap(term => this.queryProducts(term)))
+      .pipe(debounceTime(400), switchMap(term => this.queryWCProducts(term)))
       .subscribe(items => {
+        this.loadingProduct = false;
         this.Products = items;
         this.detector.detectChanges();
       }, (err) => {
@@ -114,22 +121,50 @@ export class QuoteAddComponent implements OnInit {
     this.lineItems.push(this.formBuilder.group({ product_id: null, quantity: 0 }));
   }
 
-  public onRemoveLine (index: number) {
+  public onRemoveLine(index: number) {
     this.lineItems.removeAt(index);
   }
 
   private queryUsers(term: string): Observable<any[]> {
+    this.loadingUser = true;
     return this.Http.get<any>(`https://${environment.SITE_URL}/wp-json/wp/v2/users?search=${term}&context=edit&roles=fz-company,fz-particular`).pipe(
       catchError(() => of([])),
       map(rsp => rsp.filter(usr => usr.parent !== 0)),
     );
   }
 
-  private queryProducts(term: string): Observable<any[]> {
-    return this.Http.get<any>(`https://${environment.SITE_URL}/wp-json/wp/v2/product?search=${term}&context=edit`).pipe(
-      catchError(() => of([])),
-      map(rsp => rsp.filter(usr => usr.parent !== 0)),
-    );
+  // https://www.learnrxjs.io/learn-rxjs/recipes/http-polling
+  private queryWCProducts(term: string): Observable<any> {
+    this.loadingProduct = true;
+    return from(new Promise(resolve => {
+      // Recherche par titre et description
+      const bySearch = (): Promise<any> => {
+        return new Promise(RES => { this.woocommerce.get(`products/?search=${term}`, (er, data, res) => {
+            let products: Array<FzProduct> = JSON.parse(res);
+            RES(products);
+          });
+        });
+      }
+      // Recherche par SKU (Match specific content)
+      const bySku = (): Promise<any> => {
+        return new Promise(RES => { this.woocommerce.get(`products/?sku=${term}`, (er, data, res) => {
+            let products: Array<FzProduct> = JSON.parse(res);
+            RES(products);
+          });
+        });
+      }
+      // Compiler les resultats obtenues
+      RSVP.all([bySearch(), bySku()]).then(articlesArray => {
+        let products = _.flatten(articlesArray);
+        let formLineItems = this.lineItems; //FormArray
+        const controls = formLineItems.controls;
+        const prdIds: Array<number> = _(controls).map((ctrl: FormGroup) => {
+          return parseInt(ctrl.get('product_id').value, 10);
+        }).value();
+        resolve(_(products).filter(product => _.indexOf(prdIds, product.id) < 0).value());
+      });
+
+    }));
   }
 
   /**
@@ -178,7 +213,7 @@ export class QuoteAddComponent implements OnInit {
         // Envoyer les informations utilisateur par email au client
         let dataForm = new FormData();
         dataForm.append('pwd', clientPassword);
-        this.Http.post<any>(`${config.apiUrl}/mail/user/${newClient.id}`, dataForm).subscribe( (response: WPResponse) => {
+        this.Http.post<any>(`${config.apiUrl}/mail/user/${newClient.id}`, dataForm).subscribe((response: WPResponse) => {
           Helpers.setLoading(false);
           if (response.success) {
             this.formAddUser.reset();
@@ -190,8 +225,8 @@ export class QuoteAddComponent implements OnInit {
 
           this.detector.detectChanges();
         }, error => {
-            Helpers.setLoading(false);
-            Swal.fire("", error.message, "warning");
+          Helpers.setLoading(false);
+          Swal.fire("", error.message, "warning");
         });
       }, err => {
         Helpers.setLoading(false);
@@ -204,7 +239,7 @@ export class QuoteAddComponent implements OnInit {
 
   public submitNewQuote(ev: any): any {
     ev.preventDefault();
-    let {line_items, payment_method} = this.formAddQuote.value;
+    let { line_items, payment_method } = this.formAddQuote.value;
     const customer_id = this.clientSelected.id;
     const address: string = _.isNull(this.clientSelected.address) ? '' : this.clientSelected.address;
     const getClientRole = () => {

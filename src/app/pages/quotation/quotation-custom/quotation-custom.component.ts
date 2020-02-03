@@ -139,12 +139,10 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
               Helpers.setLoading(false);
               let response: any = JSON.parse(res);
               this.selectQt.emit(response);
-
               this.cd.detectChanges();
             });
           }
         });
-
         $(`#quotation-${this.Balise}-table tbody`).on('click', '.remove-quotation', ev => {
           ev.preventDefault();
           let __quotation = this.getRowElement(ev);

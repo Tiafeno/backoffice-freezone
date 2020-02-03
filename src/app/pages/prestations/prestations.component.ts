@@ -104,8 +104,7 @@ export class PrestationsComponent implements OnInit, AfterViewInit {
                 beforeSend: function (xhr) {
                     let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
                     if (__fzCurrentUser && __fzCurrentUser.token) {
-                        xhr.setRequestHeader("Authorization",
-                            `Bearer ${__fzCurrentUser.token}`);
+                        xhr.setRequestHeader("Authorization", `Bearer ${__fzCurrentUser.token}`);
                     }
                 },
                 error: (jqXHR, textStatus, errorThrow) => {

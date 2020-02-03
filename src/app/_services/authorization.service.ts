@@ -8,63 +8,68 @@ import * as _ from 'lodash';
 @Injectable()
 export class AuthorizationService {
 
-  constructor(
-    private Http: HttpClient
-  ) { }
+    constructor(
+        private Http: HttpClient
+    ) { }
 
-  public login(email: string, pwd: string): any {
-    return this.Http.post<any>(config.jwTokenUrl, { username: email, password: pwd })
-      .pipe(
-        map(user => {
-          if (user && user.token) {
-            // Verifier si l'utilisateur est valide
-            // Seul les utilisateur valide sont les administrateurs et les éditeurs
-            const roles: Array<string> = user.data.roles;
-            if (_.indexOf(roles, 'administrator') > -1 || _.indexOf(roles, 'editor') > -1 ||
-            _.indexOf(roles, 'author') > -1) {
-              localStorage.setItem('__fzCurrentUser', JSON.stringify(user));
-            } else {
-              return false;
-            }
-          }
-          return user;
-        }));
-  }
-
-  // Ajouter une function await pour vérifier la validation de l'autorisation
-  public isLogged(): boolean {
-    let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
-    if (__fzCurrentUser && __fzCurrentUser.token) {
-      return true;
-    } else {
-      return false;
+    public login(email: string, pwd: string): any {
+        return this.Http.post<any>(config.jwTokenUrl, { username: email, password: pwd })
+            .pipe(
+                map(user => {
+                    if (user && user.token) {
+                        // Verifier si l'utilisateur est valide
+                        // Seul les utilisateur valide sont les administrateurs et les éditeurs
+                        const roles: Array<string> = user.data.roles;
+                        if (_.indexOf(roles, 'administrator') > -1 || _.indexOf(roles, 'editor') > -1 ||
+                            _.indexOf(roles, 'author') > -1) {
+                            localStorage.setItem('__fzCurrentUser', JSON.stringify(user));
+                        } else {
+                            return false;
+                        }
+                    }
+                    return user;
+                }));
     }
-  }
 
-  public logout() {
-    let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
-    if (__fzCurrentUser && __fzCurrentUser.token) {
-      localStorage.removeItem('__fzCurrentUser');
-      return true;
-    } else {
-      return false;
+    // Ajouter une function await pour vérifier la validation de l'autorisation
+    public isLogged(): boolean {
+        let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+        if (__fzCurrentUser && __fzCurrentUser.token) {
+            return true;
+        } else {
+            return false;
+        }
     }
-  }
 
-  public getCurrentUser() {
-    let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
-    return __fzCurrentUser;
-  }
+    public logout() {
+        let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+        if (__fzCurrentUser && __fzCurrentUser.token) {
+            localStorage.removeItem('__fzCurrentUser');
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-  public getCurrentUserRole(): string {
-    let User: any = this.getCurrentUser();
-    return User.data.roles[0];
-  }
+    public getCurrentUser() {
+        let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+        return __fzCurrentUser;
+    }
 
-  public isAdministrator(): boolean {
-    const User = this.getCurrentUser();
-    const roles: Array<string> = User.data.roles;
-    return _.indexOf(roles, 'administrator') > -1;
-  }
-  
+    public getCurrentUserId(): number {
+        const User = this.getCurrentUser();
+        return parseInt(User.data.ID);
+    }
+
+    public getCurrentUserRole(): string {
+        let User: any = this.getCurrentUser();
+        return User.data.roles[0];
+    }
+
+    public isAdministrator(): boolean {
+        const User = this.getCurrentUser();
+        const roles: Array<string> = User.data.roles;
+        return _.indexOf(roles, 'administrator') > -1;
+    }
+
 }

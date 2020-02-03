@@ -10,6 +10,7 @@ import { ModuloMailTemplateComponent } from '../../../components/modulo-mail-tem
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import * as RSVP from 'rsvp';
 import { FzProduct } from '../../../supplier';
+import { CONDITION } from '../../../defined';
 declare var $: any;
 
 @Component({
@@ -22,7 +23,7 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    public FormEditor: Array<any> = [];
    public email = 'contact@freezone.click';
    public pendingArticle: Array<FzProduct> = [];
-   @Input() supplier: any = {};
+   public conditions: Array<any>;
    public updateForm: FormGroup;
    public Form: FormGroup;
    public tinyMCESettings: any = {
@@ -43,12 +44,14 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       plugins: ['lists'],
    };
    private Wordpress: any;
+   @Input() supplier: any = {};
    @ViewChild(ModuloMailTemplateComponent) MailTemplate: ModuloMailTemplateComponent;
    constructor(
       private Http: HttpClient,
       private apiWP: ApiWordpressService,
       private cd: ChangeDetectorRef
    ) {
+      this.conditions = CONDITION;
       this.Form = new FormGroup({
          subject: new FormControl('', Validators.required),
          message: new FormControl('', Validators.required),
@@ -90,7 +93,6 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
    }
 
    onAddTemplateMail(predefined: any) {
-      console.log(predefined);
       this.Form.patchValue({
          subject: predefined.subject,
          message: predefined.message
@@ -98,24 +100,31 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
       this.cd.detectChanges();
    }
 
+   // Mise a jour
    onSubmitFx() {
       let updateArticles: Array<any> = [];
       if (this.updateForm.valid) {
          const Value: any = this.updateForm.value;
          const articles: any = Value.articles;
          for (let article of articles) {
+            const qty:number = _.isUndefined(article.qty) ? 0 : parseInt(article.qty);
             updateArticles.push(this.Wordpress.fz_product().id(article.article_id).update({
                price: article.price.toString(),
-               total_sales: article.qty,
-               date_review: moment().format('YYYY-MM-DD HH:mm:ss')
+               total_sales: qty,
+               _quantity: qty,
+               date_review: moment().format('YYYY-MM-DD HH:mm:ss'),
+               condition: _.isUndefined(article.condition) ? 0 : parseInt(article.condition),
             }));
          }
          Helpers.setLoading(true);
          RSVP.all(updateArticles).then(function (posts) {
             // posts contains an array of results for the given promises
             Helpers.setLoading(false);
-            Swal.fire('Succès', "Tous les articles sont à jours. Veuillez actualiser les resultats", 'success');
             $('.modal').modal('hide');
+            Swal.fire('Succès', "Tous les articles sont à jours. Veuillez actualiser les resultats", 'success');
+            setTimeout(() => {
+               location.reload();
+            }, 2000)
          }).catch(function (reason) {
             Helpers.setLoading(false);
             // if any of the promises fails.
@@ -173,22 +182,15 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          // Ajouter les quantité et les prix
          for (let item of data) {
             let dateReview = moment(item.date_review).format('LLL');
-            let condition: string = '';
-            switch (item.condition) {
-               case 0: condition = 'Disponible'; break;
-               case 1: condition = 'Rupture de stock'; break;
-               case 2: condition = 'Obsolete'; break;
-               case 3: condition = 'Commande'; break;
-               default: condition = 'Disponible';  break;
-            }
-            
+            const _disabled: boolean = _.indexOf([1, 2], item.condition) > -1 ? true : false;
+            const _quantity: number = _.indexOf([1, 2], item.condition) > -1 ? 0 : parseInt(item.total_sales, 10);
             this.formArticleArray.push(new FormGroup({
                title: new FormControl(item.title.rendered),
-               price: new FormControl(parseInt(item.price, 10)),
-               qty: new FormControl(parseInt(item.total_sales, 10)),
+               price: new FormControl(parseInt(item.price, 10), Validators.required),
+               qty: new FormControl({ value: _quantity, disabled: _disabled}),
                article_id: new FormControl(item.id, Validators.required),
                date_review: new FormControl(dateReview),
-               condition: new FormControl(condition)
+               condition: new FormControl(item.condition)
             }));
          }
          const reviewArticles: Array<number> = _.map(data, (item) => { return item.id; });
@@ -196,6 +198,19 @@ export class ReviewMailSupplierComponent implements OnInit, OnChanges {
          this.cd.detectChanges();
          $('#send-mail-modal').modal('show');
       });
+   }
+
+   handlerCondition(ev: any, index: number) {
+      const target = ev.target as HTMLInputElement;
+      const value = parseInt(target.value);
+      const controls = this.formArticleArray.controls; // Array of FormGroup return 
+      let currentFormGroup = controls[index];
+      if (_.indexOf([1, 2], value) > -1) {
+         currentFormGroup.get('qty').setValue(0);
+         currentFormGroup.get('qty').disable();
+      } else {
+         currentFormGroup.get('qty').enable();
+      }
    }
 
 }
