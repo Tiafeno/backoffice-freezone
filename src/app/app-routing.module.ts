@@ -88,6 +88,9 @@ import { WpoptionsComponent } from './pages/settings/wpoptions/wpoptions.compone
 import { ClientQuoteComponent } from './pages/clients/client-quote/client-quote.component';
 import { StatusOrderPipe } from './pipes/status-order.pipe';
 import { SavDatatableComponent } from './components/sav-datatable/sav-datatable.component';
+import { AttributesArticleComponent } from './components/attributes/module/attributes-article/attributes-article.component';
+import { AttributesComponent } from './components/attributes/attributes.component';
+import { DataServicesService } from './_services/data-services.service';
 
 const routes: Routes = [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -357,6 +360,8 @@ const routes: Routes = [
         QuoteAddComponent,
         ToExcelComponent,
         WpoptionsComponent,
+        AttributesArticleComponent,
+        AttributesComponent,
         MomentsPipe,
         BenefitPipe,
         StatusOrderPipe,
@@ -379,6 +384,7 @@ const routes: Routes = [
         ApiWordpressService,
         ApiWoocommerceService,
         FzServicesService,
+        DataServicesService,
         AuthGuard,
         LoginGuard,
         ScheduleGuard,

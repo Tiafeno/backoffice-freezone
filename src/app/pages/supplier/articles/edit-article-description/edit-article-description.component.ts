@@ -83,11 +83,19 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
 
   onSave() {
     const value: any = this.formEditor.value;
+    const attributeFormValue = this.FormAttribute.form.value;
+    console.log(attributeFormValue);
+    const attributes = _.map(attributeFormValue.attributes, attr => {
+      delete attr.name;
+      attr.visible = true; // rendre l'attribut visible dans FO
+      return attr;
+    });
     if (this.formEditor.valid) {
       const _categories = _.map(value.categorie, (ctg) => { return { id: parseInt(ctg, 10) }; });
       const data = {
         description: value.description,
-        categories: _categories
+        categories: _categories,
+        attributes: attributes,
       };
       Helpers.setLoading(true);
       this.Woocommerce.put(`products/${this.id}`, data, (err, data, res) => {
