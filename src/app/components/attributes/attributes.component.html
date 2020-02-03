@@ -1,0 +1,42 @@
+<form action="" [formGroup]="form">
+  <div class="row">
+
+    <div class="col-sm-12">
+      <div class="d-flex">
+        <select formControlName="attribute_taxonomy" class="form-control">
+          <option value="">Attribut personnalisé du produit</option>
+          <option [value]="attr.id" *ngFor="let attr of attributeTaxonomies">{{attr.name | uppercase}}</option>
+        </select>
+        <button type="button" class="btn btn-sm btn-primary px-4" (click)="addAttribute($event)">Ajouter</button>
+      </div>
+    </div>
+
+    <div class="col-sm-12">
+      <div class="product_attributes wc-metaboxes " style="position: relative; zoom: 1;">
+        <div data-taxonomy="pa_brands" class="woocommerce_attribute wc-metabox taxonomy  open" rel="0">
+          <div formArrayName="attributes">
+            <div class="row mt-2" *ngFor="let attribute of form.controls.attributes.controls; let i = index">
+
+              <div class="col-4 m-auto">
+                <strong>{{attribute.value.name}}</strong>
+              </div>
+
+              <div class="col-6" [formGroupName]="i">
+                <ng-select bindLabel="name" bindValue="name" formControlName="options" [multiple]="true"
+                  [items]="terms[attribute.value.id] | async">
+                  <ng-template ng-option-tmp let-item="item">
+                    {{item.name}}
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div class="col-2 m-auto">
+                <button class="btn btn-sm btn-danger" (click)="removeAttribute($event, i)">Sup</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
