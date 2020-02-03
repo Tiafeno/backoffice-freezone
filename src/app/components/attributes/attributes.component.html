@@ -1,4 +1,4 @@
-<form action="" [formGroup]="form">
+ <form action="" [formGroup]="formAttribute">
   <div class="row">
 
     <div class="col-sm-12">
@@ -15,7 +15,7 @@
       <div class="product_attributes wc-metaboxes " style="position: relative; zoom: 1;">
         <div data-taxonomy="pa_brands" class="woocommerce_attribute wc-metabox taxonomy  open" rel="0">
           <div formArrayName="attributes">
-            <div class="row mt-2" *ngFor="let attribute of form.controls.attributes.controls; let i = index">
+            <div class="row mt-2" *ngFor="let attribute of attributes.controls; let i = index">
 
               <div class="col-4 m-auto">
                 <strong>{{attribute.value.name}}</strong>

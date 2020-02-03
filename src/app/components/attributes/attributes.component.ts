@@ -30,19 +30,19 @@ export class AttributesComponent implements OnInit {
   }
   @Input('articleId') set attrId(value: number) { this.id = value; }
   get attrId(): number { return this.id; }
-  public form: FormGroup;
+  public formAttribute: FormGroup;
   constructor(private dataServices: DataServicesService) {
-    this.form = new FormGroup({
+    this.formAttribute = new FormGroup({
       attribute_taxonomy: new FormControl(''),
       attributes: new FormArray([])
     });
   }
 
-  get attributes() { return this.form.get('attributes') as FormArray; }
+  get attributes() { return this.formAttribute.get('attributes') as FormArray; }
 
   addAttribute(ev: MouseEvent) {
     ev.preventDefault();
-    const attributeTaxonomy: number = parseInt(this.form.get('attribute_taxonomy').value);
+    const attributeTaxonomy: number = parseInt(this.formAttribute.get('attribute_taxonomy').value);
     let tax = _.find(this.attributeTaxonomies, { id: attributeTaxonomy });
     if (_.isUndefined(tax)) return false;
     // Terms pour une attribue definie dans le parametre
