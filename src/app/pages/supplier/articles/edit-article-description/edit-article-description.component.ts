@@ -85,7 +85,7 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
 
   onSave() {
     const value: any = this.formEditor.value;
-    const attributeFormValue = this.FormAttribute.form.value;
+    const attributeFormValue = _.clone(this.FormAttribute.formAttribute.value);
     console.log(attributeFormValue);
     const attributes = _.map(attributeFormValue.attributes, attr => {
       delete attr.name;
