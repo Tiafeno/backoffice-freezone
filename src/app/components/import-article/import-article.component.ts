@@ -118,9 +118,7 @@ export class ImportArticleComponent implements OnInit {
                     Form.append('categories', column[this.Columns.Categorie]);
                     if (VALUE.isUpdate) {
                         query = this.Http.post<any>(`${config.apiUrl}/import/csv/update`, Form);
-                    } else {
-                        query = this.Http.post<any>(`${config.apiUrl}/import/csv`, Form);
-                    }
+                    } else { query = this.Http.post<any>(`${config.apiUrl}/import/csv`, Form); }
                     query.subscribe(resp => {
                         console.log(resp);
                         parser.resume();
