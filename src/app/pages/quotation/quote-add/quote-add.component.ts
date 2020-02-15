@@ -127,7 +127,7 @@ export class QuoteAddComponent implements OnInit {
 
   private queryUsers(term: string): Observable<any[]> {
     this.loadingUser = true;
-    return this.Http.get<any>(`https://${environment.SITE_URL}/wp-json/wp/v2/users?search=${term}&context=edit&roles=fz-company,fz-particular`).pipe(
+    return this.Http.get<any>(`${config.apiUrl}/typeahead/suppliers?search=${term}`).pipe(
       catchError(() => of([])),
       map(rsp => rsp.filter(usr => usr.parent !== 0)),
     );
