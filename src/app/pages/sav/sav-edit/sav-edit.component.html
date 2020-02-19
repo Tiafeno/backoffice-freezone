@@ -50,6 +50,7 @@
           <div class="row">
             <div class="col-sm-4">
               <div class="form-group mb-4">
+                <!-- Modifiable par les commercial  -->
                 <label class="font-light">Garantie du produit</label>
                 <select formControlName="guarentee_product" class="form-control">
                   <option [value]="item.value" *ngFor="let item of savProductStatus">{{item.label}}</option>
@@ -61,6 +62,7 @@
             </div>
             <div class="col-sm-4">
               <div class="form-group mb-4">
+                <!-- Modifiable par les commercial  -->
                 <label class="font-light">Délais de garantie</label>
                 <select formControlName="garentee" class="form-control">
                   <option value="">-- Aucun --</option>
@@ -72,8 +74,9 @@
           <div class="row" *ngIf="guarenteeProduct.value == 1 && providerProduct.value == 1">
             <div class="col-sm-4">
               <div class="form-group mb-4">
+                <!-- Modifiable par les commercial  -->
                 <label class="font-light">Date d’achat</label>
-                <input class="form-control" autocomplete="off" formControlName="date_purchase" id="date_purchase"
+                <input class="form-control" autocomplete="off" formControlName="date_purchase" id="date_purchase" 
                   name="stdate_purchaseatus" type="date" placeholder="">
                 <div *ngIf="f.date_purchase.errors && f.date_purchase.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
@@ -83,6 +86,7 @@
 
             <div class="col-sm-4">
               <div class="form-group mb-4">
+                <!-- Modifiable par les commercial  -->
                 <label class="font-light">Numéro de la facture</label>
                 <input class="form-control" autocomplete="off" formControlName="bill" id="bill" type="text"
                   placeholder="">
@@ -165,7 +169,8 @@
         </form>
       </div>
     </div>
-    <div class="col-lg-4" *ngIf="isAdmin">
+
+    <div class="col-lg-4" *ngIf="isAdmin || isCommercial">
         <div class="ibox-body">
             <h5 class="font-strong mb-4">INFORMATION GENERAL DU CLIENT</h5>
             <div class="row mb-2">
@@ -176,21 +181,21 @@
                 <div class="col-6 text-muted">Prénom:</div>
                 <div class="col-6">{{Author.last_name}}</div>
             </div>
-            <div class="row mb-2">
+            <div class="row mb-2" *ngIf="!isCommercial">
                 <div class="col-6 text-muted">Téléphone:</div>
                 <div class="col-6">{{Author.phone}}</div>
             </div>
-            <div class="row mb-2">
+            <div class="row mb-2" *ngIf="!isCommercial">
                 <div class="col-6 text-muted">Adresse:</div>
                 <div class="col-6">{{Author.address}}</div>
             </div>
-            <div class="row mb-2">
+            <div class="row mb-2" *ngIf="!isCommercial">
                 <div class="col-6 text-muted">Email:</div>
                 <div class="col-6">{{Author.email}}</div>
             </div>
         </div>
         <div class="ibox-footer">
-          <a class="btn btn-sm btn-primary" [routerLink]="['/sav', ID, 'mail']" routerLinkActive="active" >Envoyer un mail</a>
+          <a class="btn btn-sm btn-primary" [routerLink]="['/sav', ID, 'mail']" routerLinkActive="active" > Voir les mails</a>
         </div>
     </div>
   </div>
