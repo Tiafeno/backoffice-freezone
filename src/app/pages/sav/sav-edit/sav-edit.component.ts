@@ -7,6 +7,7 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 import Swal from 'sweetalert2';
 import { AuthorizationService } from '../../../_services/authorization.service';
+import { SAV } from '../../../sav';
 declare var $: any;
 
 @Component({
@@ -16,6 +17,7 @@ declare var $: any;
 })
 export class SavEditComponent implements OnInit {
   public ID: number = 0;
+  public content: SAV;
   public Author: any = {};
   public isAdmin: boolean = true;
   public isCommercial: boolean = false;
@@ -62,23 +64,23 @@ export class SavEditComponent implements OnInit {
     this.garenteeRange = _.range(1, 13, 1);
 
     this.Form = new FormGroup({
-      bill: new FormControl({ value: '', disabled: false }),// edit commercial
+      bill: new FormControl({ value: '', disabled: false }, Validators.required),// edit commercial
       date_purchase: new FormControl({ value: '', disabled: false }), // edit commercial
       description: new FormControl({ value: '', disabled: false }),
-      mark: new FormControl({ value: '', disabled: false }),
-      product: new FormControl({ value: '', disabled: false }),
+      mark: new FormControl({ value: '', disabled: false }, Validators.required),
+      product: new FormControl({ value: '', disabled: false }, Validators.required),
       product_provider: new FormControl({ value: '', disabled: false }),
-      serial_number: new FormControl({ value: '', disabled: false }),
+      serial_number: new FormControl({ value: '', disabled: false }, Validators.required),
       garentee: new FormControl({ value: '', disabled: false }), // edit commercial
       guarentee_product: new FormControl({ value: '', disabled: false }), // edit commercial
-      accessorie: new FormControl(),
+      accessorie: new FormControl('', Validators.required),
       other_accessories_desc: new FormControl('')
     });
 
     this.FormforEditor = new FormGroup({
-      editor_accessorie: new FormControl(''),
+      editor_accessorie: new FormControl('', Validators.required),
       editor_other_accessorie_desc: new FormControl(''),
-      editor_breakdown: new FormControl('')
+      editor_breakdown: new FormControl('', Validators.required)
     });
   }
 
@@ -110,11 +112,12 @@ export class SavEditComponent implements OnInit {
       Helpers.setLoading(true);
       this.Wordpress.savs().id(this.ID).then(resp => {
         Helpers.setLoading(false);
-        if (!_.isObject(resp)) {
+        if (!_.isObjectLike(resp)) {
           Swal.fire('Désolé', "Une erreur inconnue s'est produit", 'warning');
           return;
         }
         this.Author = _.clone(resp.customer);
+        this.content = _.clone(resp);
         this.reference = resp.reference;
         let args: any = {};
         (<any>Object).keys(this.Form.value).forEach(element => {
@@ -130,9 +133,13 @@ export class SavEditComponent implements OnInit {
           }
           args[element] = _.isObject(val) ? parseInt(val.value, 10) : val;
         });
-
-        console.info("Request response: ", args);
-        this.validateForm()
+        const meta = this.content.meta;
+        this.FormforEditor.patchValue({
+          editor_accessorie: meta.editor_accessorie,
+          editor_other_accessorie_desc: meta.editor_other_accessorie_desc,
+          editor_breakdown: meta.editor_breakdown
+        });
+        this.validateForm();
         this.Form.patchValue(args);
         this.cd.detectChanges();
       });
@@ -140,10 +147,25 @@ export class SavEditComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.Form.invalid) return;
-    const Value: any = this.Form.value;
+    if (this.Form.invalid) return false;
+    if (!this.isAdmin && this.content.meta.has_edit) {
+      Swal.fire("Sorry", "Vous ne pouvez plus modifier l'article", 'warning');
+      return false;
+    }
+    const formValue: any = this.Form.value;
+    const formEditorValue: any = this.FormforEditor.value;
     Helpers.setLoading(true);
-    this.Wordpress.savs().id(this.ID).update(Value).then(resp => {
+    // add edit signature
+    formValue.meta = {};
+    if (!this.isAdmin)
+      formValue.meta.has_edit = true;
+
+    if (this.FormforEditor.dirty) {
+      formValue.meta.editor_accessorie = formEditorValue.editor_accessorie;
+      formValue.meta.editor_other_accessorie_desc = formEditorValue.editor_other_accessorie_desc;
+      formValue.meta.editor_breakdown = formEditorValue.editor_breakdown;
+    }
+    this.Wordpress.savs().id(this.ID).update(formValue).then(resp => {
       Helpers.setLoading(false);
       Swal.fire('Succès', 'Mise à jour effectuer avec succès', 'success');
     }).catch(err => {

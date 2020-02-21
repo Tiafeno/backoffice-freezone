@@ -2,7 +2,7 @@ class Field {
     value: string;
     label: string;
 }
-export class SAV {
+export interface SAV {
     ID: number;
     date_add: string;
     date_purchase: string; // Date d'achat
@@ -25,4 +25,5 @@ export class SAV {
     customer?: any;
     accessorie: string;
     other_accessories_desc: string;
+    meta?: any;
 }

@@ -6,7 +6,7 @@
 </style>
 <div class="page-content fade-in-up">
   <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-6">
       <div class="ibox ibox-fullheight">
         <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
           <p class="lea pb-0 font-bold">Modification</p>
@@ -107,22 +107,19 @@
             </div>
           </div>
 
-          <div class="row">
+          <div class="row mb-4">
             <div class="col-sm-12 mb-4">
               <p class="font-light">Accessoires:</p>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="1"
-                  name="accessorie">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="1">
                 <span class="form-check-label" for="inlineCheckbox2">Câble d'alimentation</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="2"
-                  name="accessorie">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="2">
                 <span class="form-check-label" for="inlineCheckbox2">Câble USB</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="3"
-                  name="accessorie">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="3">
                 <span class="form-check-label" for="inlineCheckbox2">Toner réf</span>
               </div>
               <div class="form-check form-check-inline">
@@ -131,20 +128,17 @@
                 <span class="form-check-label" for="inlineCheckbox2">Cartouche réf</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="5"
-                  name="accessorie">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="5">
                 <span class="form-check-label" for="inlineCheckbox2">Adapteur</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="0"
-                  name="accessorie">
+                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="0">
                 <span class="form-check-label" for="inlineCheckbox2">Autres accessoires</span>
               </div>
             </div>
-            <div class="col-sm-6" *ngIf="Form.get('accessorie').value == 0">
+            <div class="col-sm-12" *ngIf="Form.get('accessorie').value === 0">
               <div class="form-group">
-                <label class="font-light">Autres accessoires:</label>
-                <textarea formControlName="other_accessories_desc" [required]="accessorie == 0"
+                <textarea formControlName="other_accessories_desc"
                   class="form-control"></textarea>
               </div>
             </div>
@@ -170,8 +164,8 @@
       </div>
     </div>
 
-    <div class="col-lg-4" *ngIf="isAdmin || isCommercial">
-        <div class="ibox-body">
+    <div class="col-lg-6" >
+        <div class="ibox-body" *ngIf="isAdmin || isCommercial">
             <h5 class="font-strong mb-4">INFORMATION GENERAL DU CLIENT</h5>
             <div class="row mb-2">
                 <div class="col-6 text-muted">Nom:</div>
@@ -197,6 +191,54 @@
         <div class="ibox-footer">
           <a class="btn btn-sm btn-primary" [routerLink]="['/sav', ID, 'mail']" routerLinkActive="active" > Voir les mails</a>
         </div>
+
+        <form [formGroup]="FormforEditor">
+          <div class="row">
+            <div class="col-sm-12 mt-4">
+              <h4 class="font-light">Accessoires:</h4>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="1">
+                <span class="form-check-label" for="inlineCheckbox2">Câble d'alimentation</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="2">
+                <span class="form-check-label" for="inlineCheckbox2">Câble USB</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="3">
+                <span class="form-check-label" for="inlineCheckbox2">Toner réf</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="4">
+                <span class="form-check-label" for="inlineCheckbox2">Cartouche réf</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="5">
+                <span class="form-check-label" for="inlineCheckbox2">Adapteur</span>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="0">
+                <span class="form-check-label" for="inlineCheckbox2">Autres accessoires</span>
+              </div>
+            </div>
+            <div class="col-sm-6" *ngIf="FormforEditor.get('editor_accessorie').value === 0">
+              <div class="form-group">
+                <textarea formControlName="editor_other_accessorie_desc"
+                  class="form-control"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group mb-4">
+                <h4 class="font-light">Probème rencontré ou panne</h4>
+                <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="editor_breakdown"
+                  [init]="tinyMCESettings"></editor>
+              </div>
+            </div>
+          </div>
+        </form>
     </div>
   </div>
 </div>
