@@ -91,6 +91,8 @@ import { SavDatatableComponent } from './components/sav-datatable/sav-datatable.
 import { AttributesArticleComponent } from './components/attributes/module/attributes-article/attributes-article.component';
 import { AttributesComponent } from './components/attributes/attributes.component';
 import { DataServicesService } from './_services/data-services.service';
+import { AnnonceDatatableComponent } from './annonces/annonce-datatable/annonce-datatable.component';
+import { AnnonceEditComponent } from './annonces/annonce-edit/annonce-edit.component';
 
 const routes: Routes = [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -149,6 +151,20 @@ const routes: Routes = [
                         children: [
                             { path: '', redirectTo: 'edit', pathMatch: 'full' },
                             { path: 'edit', component: FaqClientEditComponent },
+                        ]
+                    }
+                ]
+            },
+            {
+                path: 'annonces',
+                children: [
+                    { path: '', redirectTo: 'datatable', pathMatch: 'full' },
+                    { path: 'datatable', component: AnnonceDatatableComponent },
+                    {
+                        path: ":id",
+                        children: [
+                            { path: '', redirectTo: 'edit', pathMatch: 'full' },
+                            { path: 'edit', component: AnnonceEditComponent },
                         ]
                     }
                 ]
@@ -298,6 +314,8 @@ const routes: Routes = [
 
 @NgModule({
     declarations: [
+        AnnonceDatatableComponent,
+        AnnonceEditComponent,
         Dashboard7Component,
         LoginComponent,
         ForgotPasswordComponent,

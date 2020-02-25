@@ -42,7 +42,7 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
     plugins: ['lists table image '],
   };
 
-  @ViewChild(AttributesComponent) FormAttribute: AttributesComponent;
+  @ViewChild(AttributesComponent) FormAttr: AttributesComponent;
   constructor(
     private route: ActivatedRoute,
     private fzServices: FzServicesService,
@@ -55,7 +55,7 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
     this.formEditor = new FormGroup({
       name: new FormControl({ value: '', disabled: true }),
       categorie: new FormControl(''),
-      description: new FormControl('', Validators.required)
+      description: new FormControl('')
     });
   }
   get f() { return this.formEditor.controls; }
@@ -85,7 +85,7 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
 
   onSave() {
     const value: any = this.formEditor.value;
-    const attributeFormValue = _.clone(this.FormAttribute.formAttribute.value);
+    const attributeFormValue = _.clone(this.FormAttr.formAttribute.value);
     console.log(attributeFormValue);
     const attributes = _.map(attributeFormValue.attributes, attr => {
       delete attr.name;
@@ -103,6 +103,10 @@ export class EditArticleDescriptionComponent implements OnInit, AfterViewInit {
       this.Woocommerce.put(`products/${this.id}`, data, (err, data, res) => {
         Helpers.setLoading(false);
         Swal.fire('Succès', "Article mis à jour avec succès", 'success');
+      });
+    } else {
+      (<any>Object).values(this.formEditor.controls).forEach(element => {
+        element.markAsDirty();
       });
     }
   }

@@ -70,7 +70,7 @@ export class QuotationCustomComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     const quotationTable = $(`#quotation-${this.Balise}-table`);
     this.Table = quotationTable.DataTable({
-      pageLength: 20,
+      pageLength: 10,
       page: 1,
       ordering: false, // Activer ou désactiver l'affichage d'ordre
       fixedHeader: true,

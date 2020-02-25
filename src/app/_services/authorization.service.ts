@@ -4,6 +4,7 @@ import { config } from '../../environments/environment';
 
 import { map } from 'rxjs/operators/map';
 import * as _ from 'lodash';
+import { LoginSchema } from '../schemas/login-schema/login-schema.component';
 
 @Injectable()
 export class AuthorizationService {
@@ -15,7 +16,7 @@ export class AuthorizationService {
     public login(email: string, pwd: string): any {
         return this.Http.post<any>(config.jwTokenUrl, { username: email, password: pwd })
             .pipe(
-                map(user => {
+                map( (user: LoginSchema) => {
                     if (user && user.token) {
                         // Verifier si l'utilisateur est valide
                         // Seul les utilisateur valide sont les administrateurs et les éditeurs
@@ -51,14 +52,14 @@ export class AuthorizationService {
         }
     }
 
-    public getCurrentUser() {
+    public getCurrentUser(): LoginSchema {
         let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
         return __fzCurrentUser;
     }
 
     public getCurrentUserId(): number {
         const User = this.getCurrentUser();
-        return parseInt(User.data.ID);
+        return User.data.ID;
     }
 
     public getCurrentUserRole(): string {
@@ -68,8 +69,20 @@ export class AuthorizationService {
 
     public isAdministrator(): boolean {
         const User = this.getCurrentUser();
-        const roles: Array<string> = User.data.roles;
+        const roles: Array<string> = _.isArray(User.data.roles) ? User.data.roles : [];
         return _.indexOf(roles, 'administrator') > -1;
+    }
+
+    public isCommercial():boolean {
+        const User:any = this.getCurrentUser();
+        const roles: Array<string> = _.isArray(User.data.roles) ? User.data.roles : [];
+        return _.indexOf(roles, 'editor') > -1;
+    }
+
+    public isSav(): boolean {
+        const User: any = this.getCurrentUser();
+        const roles: Array<string> = _.isArray(User.data.roles) ? User.data.roles : [];
+        return _.indexOf(roles, 'author') > -1;
     }
 
 }

@@ -18,6 +18,14 @@
       </div>
     </div>
     <div class="row">
+      <div class="col-md-12">
+        <div class="form-group mb-4">
+          <label class="font-strong">Mettre a jour</label>
+          <input type="checkbox" formControlName="isUpdate" id="isUpdate" />
+        </div>
+      </div>
+    </div>
+    <div class="row">
       <div class="col-sm-12" *ngFor="let input of Inputs; let i = index" style="margin-top: 5px">
         <div class="row">
           <div class="col-6" style="margin: auto">
@@ -25,7 +33,6 @@
           </div>
           <div class="col-6">
             <select class="form-control" (change)="onSelectColumn($event, i)" [attr.name]="'column_' + i">
-              <option value="">Selectionner un colonne</option>
               <option [value]="item.key" *ngFor="let item of loopColumn">{{item.label}}</option>
             </select>
           </div>

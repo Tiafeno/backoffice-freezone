@@ -117,6 +117,18 @@ export class wpItemOrder {
             default: return this.price; // Remise & Aucun
         }
     };
+    // Depends: articles (property)
+    get takeMetaSuppliersLines(): Array<any> {
+        const conditions: Array<{ key: number, value: string }> = CONDITION;
+        //let currentItemArticlesIds: Array<number> = this.articleIdsFn;
+        //let currentItemArticles: Array<FzProduct> = _.filter(this.articles, a => _.includes(currentItemArticlesIds, a.id));
+        let metaSuppliers: Array<any> = this.metaSupplierDataFn;
+        return _(metaSuppliers).map(line => {
+            let hisArticle: FzProduct = _.find(this.articles, { id: parseInt(line.article_id) });
+            line.condition = _.find(conditions, { key: _.isUndefined(hisArticle) ? 0 : hisArticle.condition });
+            return line;
+        }).value();
+    }
     get subTotalNetFn(): number {
         const lines: Array<any> = this.takeMetaSuppliersLines;
         let qty: number = 0;
@@ -150,18 +162,7 @@ export class wpItemOrder {
         const dataParser: Array<any> = JSON.parse(suppliers.value);
         return dataParser;
     }
-    // Depends: articles (property)
-    get takeMetaSuppliersLines(): Array<any> {
-        const conditions: Array<{ key: number, value: string }> = CONDITION;
-        //let currentItemArticlesIds: Array<number> = this.articleIdsFn;
-        //let currentItemArticles: Array<FzProduct> = _.filter(this.articles, a => _.includes(currentItemArticlesIds, a.id));
-        let metaSuppliers: Array<any> = this.metaSupplierDataFn;
-        return  _(metaSuppliers).map(line => {
-            let hisArticle: FzProduct = _.find(this.articles, {id: parseInt(line.article_id)});
-            line.condition = _.find(conditions, { key: _.isUndefined(hisArticle) ? 0 : hisArticle.condition});
-            return line;
-        }).value();
-    }
+    
 
     // Depends: articles (property)
     get qtyUI(): string {

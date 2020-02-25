@@ -78,8 +78,6 @@ export class SavDatatableComponent implements OnInit {
             // type: 'NUMERIC'
         });
         metaQuery['relation'] = 'AND';
-        this.getQuery().headers().then(headers => {
-        });
         const request = this.getQuery().perPage(100).param('filter[meta_query]', Object.assign({}, metaQuery));
         Helpers.setLoading(true);
         request.then(responses => {
