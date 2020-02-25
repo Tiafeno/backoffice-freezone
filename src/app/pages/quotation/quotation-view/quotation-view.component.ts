@@ -144,7 +144,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 // FEATURED: Ajouter une verification avant de voir le devis, 
                 // le quantite ajouter par rapport a la quantite disponible
                 let currentSupplierVals = item.metaSupplierDataFn;
-                if (_.isEmpty(currentSupplierVals)) { 
+                // Ne pas verifier les items non disponible 
+                if (_.isEmpty(currentSupplierVals) && !_.isEqual(item.quantity, 0)) { 
                     this.error = true; 
                     break; 
                 }
@@ -192,15 +193,17 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
         }
         let allTotalHT: Array<number> = _.map(this.QtItems, o => o.priceFn * o.quantity);
         let allTotalNet: Array<number> = _.map(this.QtItems, item => {
-            let total: number = item.subTotalNetFn;
-            // Ajouter le frais de transport, si le total vaut moins de XAr*
-            return (total < this.minCostWithTransport && total !== 0) ? (this.costTransport + total) : total ;
+            return item.subTotalNetFn;
         });
-        this.Billing.totalNet = _.sum(allTotalNet);
+
+        // Ajouter le frais de transport, si le total vaut moins de XAr*
+        const sumTotalNet: number = _.sum(allTotalNet);
+        this.Billing.totalNet = sumTotalNet;
         this.Billing.totalHT = _.sum(allTotalHT);
-        let priceTax: number = (this.Billing.totalNet * this.Tax) / 100;
+        const priceTax: number = (sumTotalNet * this.Tax) / 100;
+        const totalWithTax: number = sumTotalNet + priceTax;
         this.Billing.price_tax = priceTax;
-        this.Billing.total_tax = parseInt(this.Billing.totalNet) + priceTax;
+        this.Billing.total_tax = (sumTotalNet < this.minCostWithTransport && sumTotalNet !== 0) ? (this.costTransport + totalWithTax) : totalWithTax;
         this.cd.detectChanges();
         Helpers.setLoading(false);
     }

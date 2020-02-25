@@ -315,6 +315,7 @@ const routes: Routes = [
 @NgModule({
     declarations: [
         AnnonceDatatableComponent,
+        AnnonceEditComponent,
         Dashboard7Component,
         LoginComponent,
         ForgotPasswordComponent,
