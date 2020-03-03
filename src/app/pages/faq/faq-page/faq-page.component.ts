@@ -29,7 +29,7 @@ export class FaqPageComponent implements OnInit {
     menubar: false,
     content_css: [
       'https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
-      'https://www.tinymce.com/css/codepen.min.css'
+      'https://www.tiny.cloud/css/codepen.min.css'
     ],
     content_style: ".mce-content-body p { margin: 5px 0; }",
     inline: false,

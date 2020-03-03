@@ -165,7 +165,8 @@
           <div class="form-group mb-4">
             <label class="font-light">Categorie(s) <span style="color: red">*</span></label>
             <ng-select name="product_cat" placeholder="Selectionner un categorie" formControlName="product_cat"
-              bindLabel="name" bindValue="id" [hideSelected]="true" [typeahead]="typeaheadCategories" [multiple]="true"
+              bindLabel="name" bindValue="id" [hideSelected]="true" [typeahead]="typeaheadCategories"
+              [loading]="typeaheadCtgLoading" [multiple]="true"
               [items]="Categories" required>
               <ng-template ng-option-tmp let-item="item">
                 {{item.name}}

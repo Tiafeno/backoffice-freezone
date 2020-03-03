@@ -28,7 +28,10 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
     public shippingAddress: any = {}; // adresse de facturation
     public ownerClient: any = {};
     public costTransport: number; // en ariry
-    public minCostWithTransport: number; // en ariry
+    public minCostWithTransport: number; // en ariary
+
+    public hasCommandItem: boolean = false;
+    public hasRuptureItem: boolean = false
 
     private Woocommerce: any;
     private Wordpress: any;
@@ -141,6 +144,8 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                 this.error = dateReview < todayAt6;
             });
             for (const item of <Array<wpItemOrder>>this.Items) {
+                // Ajouter les articles dans l'objet item
+                item.articles = this.Articles;
                 // FEATURED: Ajouter une verification avant de voir le devis, 
                 // le quantite ajouter par rapport a la quantite disponible
                 let currentSupplierVals = item.metaSupplierDataFn;
@@ -149,6 +154,24 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
                     this.error = true; 
                     break; 
                 }
+                /**
+                 * Verifier l'affichage des conditions
+                 */
+                if (_.isEqual(item.quantity, 0)) this.hasRuptureItem = true;
+                const mtSupLines: any[] = item.takeMetaSuppliersLines;
+                mtSupLines.forEach((args, index) => {
+                    let condition: any = args.condition;
+                    if (_.isUndefined(condition.key)) return;
+                    // Rupture et obsolete
+                    if (_.indexOf([1, 2], condition.key) > -1) {
+                        this.hasRuptureItem = true;
+                    }
+
+                    if (_.indexOf([3], condition.key) > -1) {
+                        this.hasCommandItem = true;
+                    }
+                });
+
                 let currentItemArticlesIds: Array<number> = item.articleIdsFn;
                 let currentItemArticles: Array<FzProduct> = _.filter(this.Articles, a => _.includes(currentItemArticlesIds, a.id));
                 const sumQuantity: number = _.sum(_.map(currentItemArticles, j => parseInt(j.total_sales, 10)));
@@ -216,7 +239,7 @@ export class QuotationViewComponent implements OnInit, OnChanges, AfterViewInit 
             const lineItems: Array<OrderItem> = this.Quotation.line_items;
             const lineItemsZero: Array<wpItemOrder> = _<Array<OrderItem>>(this.Quotation.line_items_zero).map(item => new wpItemOrder(item) ).value();
             const lineItemsDefault = _<Array<OrderItem>>(lineItems).map(QlItem => new wpItemOrder(QlItem)).value();
-            this.Items = _.union(lineItemsDefault, lineItemsZero);
+            this.Items = _.union(lineItemsDefault, lineItemsZero); // Array of wpItemOrder object
             this.billingAddress = _.clone(this.Quotation.billing);
             this.shippingAddress = _.clone(this.Quotation.shipping);
             return true;

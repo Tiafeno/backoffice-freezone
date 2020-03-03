@@ -41,7 +41,6 @@ export class ProductListsComponent implements OnInit {
   }
 
   public onSubmitSearch(event: any) {
-    
     if (event.keyCode == 13) { // Touche entrer
       event.preventDefault();
       this.loadDatatbl();

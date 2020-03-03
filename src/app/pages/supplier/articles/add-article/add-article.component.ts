@@ -28,6 +28,7 @@ export class AddArticleComponent implements OnInit {
   public Suppliers: Array<any> = [];
   public Categories: Array<any> = [];
   public typeaheadCategories = new EventEmitter<string>();
+  public typeaheadCtgLoading: boolean = false;
   @Output() refresh = new EventEmitter<any>();
 
   constructor(
@@ -60,13 +61,16 @@ export class AddArticleComponent implements OnInit {
     this.typeaheadCategories
       .pipe(debounceTime(400), switchMap(term => this.loadCategories(term)))
       .subscribe(items => {
-        this.Categories = items;
-        this.detector.markForCheck();
-      }, (err) => {
-        console.log('Error: ', err);
-        this.Categories = [];
-        this.detector.markForCheck();
-      });
+          this.Categories = items;
+          this.typeaheadCtgLoading = false;
+          this.detector.markForCheck();
+        }, (err) => {
+          console.log('Error: ', err);
+          this.Categories = [];
+          this.typeaheadCtgLoading = false;
+          this.detector.markForCheck();
+        }
+      );
   }
 
   get f() { return this.Form.controls; }
@@ -89,9 +93,10 @@ export class AddArticleComponent implements OnInit {
   }
 
   loadCategories(term: string): Observable<any[]> {
+    this.typeaheadCtgLoading = true;
     return this.http.get<any>(`https://${environment.SITE_URL}/wp-json/wp/v2/product_cat?hide_empty=false&search=${term}`).pipe(
       catchError(() => of([])),
-      map(rsp => rsp.filter(ctg => ctg.parent !== 0)),
+      map(rsp => rsp),
     );
   }
 

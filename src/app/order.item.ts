@@ -129,6 +129,16 @@ export class wpItemOrder {
             return line;
         }).value();
     }
+    get articleIdsFn(): Array<number> {
+        const dataParser = this.metaSupplierDataFn;
+        return _(dataParser).map(line => parseInt(line.article_id, 10)).value();
+    }
+    get metaSupplierDataFn(): Array<any> {
+        const suppliers = _.find(this.meta_data, { key: 'suppliers' });
+        if (_.isUndefined(suppliers)) return [];
+        const dataParser: Array<any> = JSON.parse(suppliers.value);
+        return dataParser;
+    }
     get subTotalNetFn(): number {
         const lines: Array<any> = this.takeMetaSuppliersLines;
         let qty: number = 0;
@@ -152,17 +162,6 @@ export class wpItemOrder {
         if (_.isUndefined(stockR)) return false;
         return _.isEqual(parseInt(stockR.value, 10), 0) ? false : true;
     };
-    get articleIdsFn(): Array<number> {
-        const dataParser = this.metaSupplierDataFn;
-        return _(dataParser).map(line => parseInt(line.article_id, 10)).value();
-    }
-    get metaSupplierDataFn(): Array<any> {
-        const suppliers = _.find(this.meta_data, { key: 'suppliers' });
-        if (_.isUndefined(suppliers)) return [];
-        const dataParser: Array<any> = JSON.parse(suppliers.value);
-        return dataParser;
-    }
-    
 
     // Depends: articles (property)
     get qtyUI(): string {
@@ -177,7 +176,7 @@ export class wpItemOrder {
                 default:  break;
             }
         }
-        qty = (0 === qty) ? this.quantity : qty;
-        return `${qty}<span style="color:red">${ui}</span>`;
+        let _qty: any = (0 === qty) ? this.quantity + "*" : qty;
+        return `${_qty}<span style="color:red">${ui}</span>`;
     }
 }
