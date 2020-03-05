@@ -6,6 +6,13 @@ export const MSG = {
     },
 }
 
+export const FAI: Array<any> = [
+    { name: 'Telma', _id: 0 },
+    { name: 'Orange', _id: 1 },
+    { name: 'Airtel', _id: 2 },
+    { name: 'Bip', _id: 3 }
+];
+
 export const CONDITION = [
     { key: 0, value: 'Disponible' },
     { key: 1, value: 'Rupture' },

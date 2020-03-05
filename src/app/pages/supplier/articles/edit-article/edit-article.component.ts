@@ -215,9 +215,9 @@ export class EditArticleComponent implements OnInit {
       title: Values.title,
       condition: Values.condition,
       price: Values.price,
-      marge: Values.marge, // Professional marge
-      marge_dealer: Values.margeDealer,
-      marge_particular: Values.margeParticular,
+      marge: parseFloat(Values.marge), // Professional marge
+      marge_dealer: parseFloat(Values.margeDealer),
+      marge_particular: parseFloat(Values.margeParticular),
       garentee: Values.garentee,
       total_sales: stock,
       _quantity: stock, // Quantite pour le sauvegarde (Gestion de stock)

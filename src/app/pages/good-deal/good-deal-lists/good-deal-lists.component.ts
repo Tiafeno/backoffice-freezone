@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiWoocommerceService } from '../../../_services/api-woocommerce.service';
 import { AuthorizationService } from '../../../_services/authorization.service';
-import * as moment from 'moment';
 import * as _ from "lodash";
 import { config } from '../../../../environments/environment';
+import { MSG } from '../../../defined';
+import { WPGoodDeal } from '../../../annonce';
+import Swal from 'sweetalert2';
+import { Helpers } from '../../../helpers';
+import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 declare var $: any;
 
 @Component({
@@ -17,10 +20,10 @@ export class GoodDealListsComponent implements OnInit {
   public dataTableId: string = "good_deal";
   private Table: any;
   constructor(
-    private apiWP: ApiWoocommerceService,
+    private apiWP: ApiWordpressService,
     private auth: AuthorizationService
   ) {
-    this.wordpress = this.apiWP.getWoocommerce();
+    this.wordpress = this.apiWP.getWordpress();
    }
 
   ngOnInit() {
@@ -32,7 +35,6 @@ export class GoodDealListsComponent implements OnInit {
       this.Table.destroy(); 
     }
     const annonceTable: any = $('#good_deal');
-    console.log(annonceTable);
     this.Table = annonceTable.DataTable({
       pageLength: this.perPage,
       page: 1,
@@ -53,13 +55,40 @@ export class GoodDealListsComponent implements OnInit {
                 <i class="fab-icon-active la la-close"></i>
               </button>
               <ul class="fab-menu">
-                <li><button class="btn btn-primary btn-icon-only btn-circle btn-air edit-sav" data-id="${row.ID}"><i class="la la-edit"></i></button></li>
-                <li><button class="btn btn-danger btn-icon-only btn-circle btn-air remove-sav" data-id="${row.ID}" ><i class="la la-trash"></i></button></li>
+                <li><button class="btn btn-primary btn-icon-only btn-circle btn-air edit-annonce" data-id="${row.ID}"><i class="la la-edit"></i></button></li>
+                <li><button class="btn btn-danger btn-icon-only btn-circle btn-air remove-annonce" data-id="${row.ID}" ><i class="la la-trash"></i></button></li>
               </ul>
             </div>`
         }
       ],
-      initComplete: (setting, json) => { },
+      initComplete: (setting, json) => {
+        $(`#${this.dataTableId} tbody`).on('click', '.remove-annonce', ev => {
+          ev.preventDefault();
+          if (!this.auth.isAdministrator()) {
+            Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
+            return false;
+          }
+          const el: any = $(ev.currentTarget).parents('tr');
+          const data: WPGoodDeal = this.Table.row(el).data();
+          Swal.fire({
+            title: 'Confirmation',
+            html: `Voulez vous vraiment supprimer cette annonce?`,
+            type: 'warning',
+            showCancelButton: true
+          }).then(result => {
+            if (result.value) {
+              Helpers.setLoading(true);
+              this.wordpress.good_deal().id(data.ID).delete({ force: true }).then(resp => {
+                Helpers.setLoading(false);
+                this.ngOnInit();
+              }, err => {
+                Helpers.setLoading(false);
+                Swal.fire('', err.message, 'error');
+              });
+            }
+          });
+        });
+      },
       ajax: {
         url: `${config.apiUrl}/good-deals/`,
         dataType: 'json',

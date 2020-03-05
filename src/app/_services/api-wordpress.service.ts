@@ -40,7 +40,7 @@ export class ApiWordpressService {
     this.wpEndPoint.products = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeProducts, {
       params: ['search', 'filter', 'sku']
     });
-    this.wpEndPoint.good_deal = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeGD, { params: Params });
+    this.wpEndPoint.good_deal = this.wpEndPoint.registerRoute(namespace, routeGD, { params: Params });
     this.wpEndPoint.catalog = this.wpEndPoint.registerRoute(namespace, routeCatalog, { params: Params });
     this.wpEndPoint.orders = this.wpEndPoint.registerRoute(namespaceWoocommerce, routeOrders);
 

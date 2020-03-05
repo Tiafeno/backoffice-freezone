@@ -67,6 +67,12 @@ export class FzServicesService {
         })
     }
 
+    public generateId(long: number = 8): string {
+        return Array(long).fill("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz").map(function (x) {
+            return x[Math.floor(Math.random() * x.length)]
+        }).join('');
+    }
+
     public filterProducts(item: string = ''): Promise<any> {
         return new Promise(resolve => {
             if (_.isEmpty(item)) resolve([]);

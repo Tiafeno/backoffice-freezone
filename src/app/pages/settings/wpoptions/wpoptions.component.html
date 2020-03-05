@@ -6,41 +6,50 @@
   <div class="ibox-body">
     <form action="" [formGroup]="formOptions" (ngSubmit)="saveOptions($event)">
       <div class="row">
-        <div class="col-md-6">
+        <div class="col-sm-6">
           <div class="form-group mb-4">
             <label>NIF</label>
             <input class="form-control" formControlName="nif" type="text" placeholder="">
           </div>
-        </div>
-        <div class="col-md-6">
           <div class="form-group mb-4">
             <label>STAT</label>
             <input class="form-control" formControlName="stat" type="text" placeholder="">
           </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6">
           <div class="form-group mb-4">
             <label>RC</label>
             <input class="form-control" formControlName="rc" type="text" placeholder="">
           </div>
-        </div>
-        <div class="col-md-6">
           <div class="form-group mb-4">
             <label>CIF</label>
             <input class="form-control" formControlName="cif" type="text" placeholder="">
           </div>
+          <div class="form-group mb-4">
+            <label>BMOI</label>
+            <input class="form-control" formControlName="bmoi" type="text" placeholder="">
+          </div>
         </div>
+        <div class="col-sm-6">
+          <div formArrayName="phones">
+            <h3>Numero de telephone:</h3>
+            <div class="form-group mb-2" *ngFor="let phone of fPhone.controls; let i = index">
+              <div class="d-flex" [formGroupName]="i">
+                <select formControlName="fai" (change)="viewChange()">
+                  <option value=''>Aucun</option>
+                  <option *ngFor="let frs of fai" [value]="frs._id">{{frs.name}}</option>
+                </select>
+                <input type="number" placeholder="e.g 03XXXXXXXX" formControlName="number" />
+                <span class="btn btn-sm btn-danger" (click)="removePhoneNumber($event, i)">Del</span>
+              </div>
+            </div>
+          </div>
+          <button class="btn-sm btn btn-secondary" (click)="addPhoneNumber()">Ajouter numero</button>
+        </div>
+
       </div>
-      <div class="form-group mb-4">
-        <label>BMOI</label>
-        <input class="form-control" formControlName="bmoi" type="text" placeholder="">
-      </div>
+
       <div class="ibox-footer">
         <div>
           <div class="btn-group mb-3">
-            
             <button class="btn btn-pink mr-3" [disabled]='loading' type="submit">Enregistrer</button>
           </div>
         </div>
