@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import * as _ from "lodash";
 import { config } from '../../../../environments/environment';
@@ -7,6 +7,7 @@ import { WPGoodDeal } from '../../../annonce';
 import Swal from 'sweetalert2';
 import { Helpers } from '../../../helpers';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
+import { Router } from '@angular/router';
 declare var $: any;
 
 @Component({
@@ -21,7 +22,9 @@ export class GoodDealListsComponent implements OnInit {
   private Table: any;
   constructor(
     private apiWP: ApiWordpressService,
-    private auth: AuthorizationService
+    private auth: AuthorizationService,
+    private zone: NgZone,
+    private router: Router
   ) {
     this.wordpress = this.apiWP.getWordpress();
    }
@@ -46,6 +49,7 @@ export class GoodDealListsComponent implements OnInit {
       serverSide: true,
       columns: [
         { data: 'post_title', render: (data) => { return `${data}` } },
+        { data: 'post_status', render: (data) => { return `<span class="badge badge-primary switch-status">${data}</span>` } },
         {
           data: null,
           render: (data, type, row, meta) => `
@@ -87,6 +91,53 @@ export class GoodDealListsComponent implements OnInit {
               });
             }
           });
+        });
+
+        // Change le status de l'annonce
+        $(`#${this.dataTableId} tbody`).on('click', '.switch-status', async ev => {
+          ev.preventDefault();
+          const el: any = $(ev.currentTarget).parents('tr');
+          const data: WPGoodDeal = this.Table.row(el).data();
+          const { value: result } = await Swal.fire({
+            input: 'select',
+            inputPlaceholder: 'Selectionnez un statut',
+            inputValue: data.post_status,
+            inputOptions: {
+              '': 'Aucun',
+              'publish': 'Publier',
+              'pending': 'En attente',
+              'trash': 'Desactiver',
+            },
+            title: 'Statut de l\'annonce',
+            text: 'Changer le statut',
+            showLoaderOnConfirm: true,
+            allowOutsideClick: () => !Swal.isLoading(),
+            preConfirm: (postStatus) => {
+              return new Promise((resolve, reject) => {
+                if (_.isEqual(postStatus, '')) {
+                  Swal.showValidationMessage("Ce champ est requis");
+                }
+                this.wordpress.good_deal().id(data.ID).update({ status: postStatus}).then(post => {
+                  resolve(post);
+                }, err => {
+                  Swal.showValidationMessage("Une erreur c'est produit pendant la modification. Veuillez reessayer plus tard.")
+                });
+              });
+            }
+          })
+          if (result) {
+            Swal.fire(`Success`, "Post status update succeffuly", 'success');
+            this.ngOnInit();
+            console.log(result);
+          }
+        });
+
+        // Modifier l'annonce
+        $(`#${this.dataTableId} tbody`).on('click', '.edit-annonce', ev => {
+          ev.preventDefault();
+          const el: any = $(ev.currentTarget).parents('tr');
+          const data: WPGoodDeal = this.Table.row(el).data();
+          this.zone.run(() => { this.router.navigate(['annonces', data.ID, 'edit']) })
         });
       },
       ajax: {

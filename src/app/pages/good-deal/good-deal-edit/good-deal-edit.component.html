@@ -1,3 +1,44 @@
-<p>
-  good-deal-edit works!
-</p>
+<div class="page-content fade-in-up">
+  <div class="ibox">
+    <div class="ibox-body">
+      <h5 class="font-strong mb-4">MODIFIER UNE ANNONCE</h5>
+
+      <div class="flexbox mb-4">
+        <div class="flexbox">
+        </div>
+        <div class="flexbox">
+          <!-- header -->
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="ibox ibox-fullheight">
+            <form [formGroup]="formEdit" id="supplier-form" (ngSubmit)="onSubmit()">
+              <p class="lea pb-0 font-bold">Modification</p>
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="form-group mb-4">
+                    <label class="font-light">Service propose</label>
+                    <input class="form-control" autocomplete="off" formControlName="title" type="text" id="title"
+                      placeholder="">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group mb-4">
+                    <label class="font-light">Prix</label>
+                    <input class="form-control" autocomplete="off" formControlName="price" type="number" 
+                      placeholder="">
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
