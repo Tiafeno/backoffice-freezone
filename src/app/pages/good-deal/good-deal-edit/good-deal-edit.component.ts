@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ApiWordpressService } from '../../../_services/api-wordpress.service';
 import { ActivatedRoute } from '@angular/router';
+import { Helpers } from '../../../helpers';
+import { NodeGoodDeal } from '../../../annonce';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-good-deal-edit',
@@ -14,7 +17,8 @@ export class GoodDealEditComponent implements OnInit {
   public formEdit: FormGroup;
   constructor(
     private apiwp: ApiWordpressService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cd: ChangeDetectorRef
   ) {
     this.wordpress = this.apiwp.getWordpress();
     this.formEdit = new FormGroup({
@@ -23,11 +27,22 @@ export class GoodDealEditComponent implements OnInit {
       price: new FormControl(0, Validators.compose([Validators.required, Validators.min(0)])),
       categorie: new FormControl([])
     });
-   }
+  }
 
   ngOnInit() {
     this.route.parent.params.subscribe(params => {
       this.ID = parseInt(params.id, 10);
+      Helpers.setLoading(true);
+      this.wordpress.good_deal().id(this.ID).then(resp => {
+        Helpers.setLoading(false);
+        let annonce: NodeGoodDeal = _.clone(resp);
+        this.formEdit.patchValue({
+          title: annonce.title.rendered,
+          content: annonce.content.rendered,
+          price: annonce.meta.gd_price
+        });
+        this.cd.detectChanges();
+      }, err => {});
     });
   }
 
