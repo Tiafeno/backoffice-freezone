@@ -5,9 +5,11 @@ import { ActivatedRoute } from '@angular/router';
 import { Helpers } from '../../../helpers';
 import { NodeGoodDeal } from '../../../annonce';
 import * as _ from 'lodash';
-import { TinyConfig } from '../../../defined';
+import { TinyConfig, MSG } from '../../../defined';
 import { Taxonomy } from '../../../taxonomy';
 import { FzServicesService } from '../../../_services/fz-services.service';
+import { AuthorizationService } from '../../../_services/authorization.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-good-deal-edit',
@@ -17,12 +19,14 @@ import { FzServicesService } from '../../../_services/fz-services.service';
 export class GoodDealEditComponent implements OnInit {
   private wordpress: any;
   public ID: number = 0;
+  public hasEdit: boolean = false;
   public categories: Taxonomy[];
   public formEdit: FormGroup;
   public tinyMCESettings: any = TinyConfig;
   constructor(
     private apiwp: ApiWordpressService,
     private services: FzServicesService,
+    private auth: AuthorizationService,
     private route: ActivatedRoute,
     private cd: ChangeDetectorRef
   ) {
@@ -33,6 +37,7 @@ export class GoodDealEditComponent implements OnInit {
       price: new FormControl(0, Validators.compose([Validators.required, Validators.min(0)])),
       categorie: new FormControl([])
     });
+    this.hasEdit = this.auth.isAdministrator(); // Seuelement l'administrateur peuvent modifier l'annonce
   }
 
   ngOnInit() {
@@ -58,6 +63,11 @@ export class GoodDealEditComponent implements OnInit {
     if (this.formEdit.dirty && this.formEdit.valid) {
       const values: any = this.formEdit.value;
       const formData = new FormData();
+      if (!this.auth.isAdministrator()) {
+        Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'error');
+        return false;
+      }
+      Helpers.setLoading(true);
       this.wordpress.good_deal().id(this.ID).update({
         title: values.title,
         content: values.content,
@@ -66,8 +76,12 @@ export class GoodDealEditComponent implements OnInit {
           gd_price: values.price
         }
       }).then(
-        resp => {},
-        error => {}
+        resp => {
+          Helpers.setLoading(false);
+        },
+        error => {
+          Helpers.setLoading(false);
+        }
       );
     }
   }

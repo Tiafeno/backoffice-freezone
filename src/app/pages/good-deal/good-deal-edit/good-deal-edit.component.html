@@ -26,8 +26,7 @@
                 </div>
                 <div class="row">
                   <div class="form-group mb-4 col-sm-8">
-                    <ng-select name="category" placeholder="Selectionner une categorie" formControlName="categorie" bindLabel="name" bindValue="term_id"
-                      [searchFn]="customSearchFn" [hideSelected]="true" groupBy="parent" [multiple]="true"
+                    <ng-select name="category" placeholder="Selectionner une categorie" formControlName="categorie" bindLabel="name" bindValue="term_id" [hideSelected]="true" groupBy="parent" [multiple]="true"
                       [items]="categories">
                       <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
                         {{getParentName(item.parent)}}
@@ -59,7 +58,7 @@
 
             <div class="ibox-footer row">
               <div class="col-sm-10">
-                <button class="btn btn-primary mr-2" type="submit">Mettre à jour</button>
+                <button class="btn btn-primary mr-2" [disabled]="hasEdit" type="submit">Mettre à jour</button>
                 <a class="btn btn-secondary" [routerLink]="['/annonces']" routerLinkActive="active">Retour</a>
               </div>
             </div>
