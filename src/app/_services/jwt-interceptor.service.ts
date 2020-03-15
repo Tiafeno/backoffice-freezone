@@ -26,8 +26,6 @@ export class JwtInterceptorService implements HttpInterceptor {
             setTimeout(() => {
               this.logOut();
             }, 1500);
-          } else {
-            Swal.fire('Erreur', err.message, 'error');
           }
         }
         Observable.throw(err); // send data to service which will inform the component of the error and in turn the user

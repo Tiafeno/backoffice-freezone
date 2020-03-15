@@ -4,7 +4,25 @@ export const MSG = {
         DENIED_TTL: "Access refusé",
         DENIED_CTT: "Vous n'avez pas l'autorisation"
     },
-}
+};
+
+export const TinyConfig: any = {
+    language_url: '/assets/js/langs/fr_FR.js',
+    menubar: false,
+    content_css: [
+        'https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
+        'https://www.tiny.cloud/css/codepen.min.css'
+    ],
+    content_style: ".mce-content-body p { margin: 5px 0; }",
+    inline: false,
+    statusbar: true,
+    resize: true,
+    browser_spellcheck: true,
+    min_height: 320,
+    height: 320,
+    toolbar: 'undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',
+    plugins: ['lists'],
+};
 
 export const FAI: Array<any> = [
     { name: 'Telma', _id: 0 },

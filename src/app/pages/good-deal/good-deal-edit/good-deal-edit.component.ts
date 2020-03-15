@@ -5,6 +5,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Helpers } from '../../../helpers';
 import { NodeGoodDeal } from '../../../annonce';
 import * as _ from 'lodash';
+import { TinyConfig } from '../../../defined';
+import { Taxonomy } from '../../../taxonomy';
+import { FzServicesService } from '../../../_services/fz-services.service';
 
 @Component({
   selector: 'app-good-deal-edit',
@@ -14,9 +17,12 @@ import * as _ from 'lodash';
 export class GoodDealEditComponent implements OnInit {
   private wordpress: any;
   public ID: number = 0;
+  public categories: Taxonomy[];
   public formEdit: FormGroup;
+  public tinyMCESettings: any = TinyConfig;
   constructor(
     private apiwp: ApiWordpressService,
+    private services: FzServicesService,
     private route: ActivatedRoute,
     private cd: ChangeDetectorRef
   ) {
@@ -33,13 +39,15 @@ export class GoodDealEditComponent implements OnInit {
     this.route.parent.params.subscribe(params => {
       this.ID = parseInt(params.id, 10);
       Helpers.setLoading(true);
-      this.wordpress.good_deal().id(this.ID).then(resp => {
+      this.wordpress.good_deal().id(this.ID).then( async (resp) =>{
+        this.categories = await this.services.getCategories();
         Helpers.setLoading(false);
         let annonce: NodeGoodDeal = _.clone(resp);
         this.formEdit.patchValue({
           title: annonce.title.rendered,
           content: annonce.content.rendered,
-          price: annonce.meta.gd_price
+          price: annonce.meta.gd_price,
+          categorie: annonce.product_cat
         });
         this.cd.detectChanges();
       }, err => {});
@@ -50,11 +58,24 @@ export class GoodDealEditComponent implements OnInit {
     if (this.formEdit.dirty && this.formEdit.valid) {
       const values: any = this.formEdit.value;
       const formData = new FormData();
-      this.wordpress.good_deal().id(this.ID).update({}).then(
+      this.wordpress.good_deal().id(this.ID).update({
+        title: values.title,
+        content: values.content,
+        product_cat: values.categorie,
+        meta: {
+          gd_price: values.price
+        }
+      }).then(
         resp => {},
         error => {}
       );
     }
+  }
+
+  public getParentName(id: number): any {
+    let term = _.find(this.categories, { term_id: id });
+    if (_.isUndefined(term)) return id;
+    return term.name;
   }
 
 }

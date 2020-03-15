@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import Swal from 'sweetalert2';
 import { AuthorizationService } from '../../../_services/authorization.service';
 import { SAV } from '../../../sav';
+import { TinyConfig } from '../../../defined';
 declare var $: any;
 
 @Component({
@@ -33,23 +34,7 @@ export class SavEditComponent implements OnInit {
   ];
 
   public garenteeRange: Array<number>;
-  public tinyMCESettings: any = {
-    language_url: '/assets/js/langs/fr_FR.js',
-    menubar: false,
-    content_css: [
-      'https://fonts.googleapis.com/css?family=Montserrat:300,300i,400,400i',
-      'https://www.tiny.cloud/css/codepen.min.css'
-    ],
-    content_style: ".mce-content-body p { margin: 5px 0; }",
-    inline: false,
-    statusbar: true,
-    resize: true,
-    browser_spellcheck: true,
-    min_height: 320,
-    height: 320,
-    toolbar: 'undo redo | bold backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat ',
-    plugins: ['lists'],
-  };
+  public tinyMCESettings: any = TinyConfig;
 
   constructor(
     private apiWP: ApiWordpressService,

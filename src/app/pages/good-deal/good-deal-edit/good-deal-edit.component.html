@@ -10,35 +10,62 @@
           <!-- header -->
         </div>
       </div>
-      <div class="row">
-        <div class="col-sm-6">
-          <div class="ibox ibox-fullheight">
-            <form [formGroup]="formEdit" id="supplier-form" (ngSubmit)="onSubmit()">
-              <p class="lea pb-0 font-bold">Modification</p>
-              <div class="row">
-                <div class="col-md-8">
-                  <div class="form-group mb-4">
-                    <label class="font-light">Service propose</label>
-                    <input class="form-control" autocomplete="off" formControlName="title" type="text" id="title"
-                      placeholder="">
+      <div class="">
+        <div class="ibox ibox-fullheight">
+          <form [formGroup]="formEdit" id="supplier-form" (ngSubmit)="onSubmit()">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group mb-4">
+                      <label class="font-light">Service propose</label>
+                      <input class="form-control" autocomplete="off" formControlName="title" type="text" id="title"
+                        placeholder="">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="form-group mb-4 col-sm-8">
+                    <ng-select name="category" placeholder="Selectionner une categorie" formControlName="categorie" bindLabel="name" bindValue="term_id"
+                      [searchFn]="customSearchFn" [hideSelected]="true" groupBy="parent" [multiple]="true"
+                      [items]="categories">
+                      <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
+                        {{getParentName(item.parent)}}
+                      </ng-template>
+                      <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                        {{item.name}}
+                      </ng-template>
+                    </ng-select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group mb-4">
+                      <label class="font-light">Prix</label>
+                      <input class="form-control" autocomplete="off" formControlName="price" type="number"
+                        placeholder="">
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="row">
-                <div class="col-md-4">
-                  <div class="form-group mb-4">
-                    <label class="font-light">Prix</label>
-                    <input class="form-control" autocomplete="off" formControlName="price" type="number" 
-                      placeholder="">
-                  </div>
+              <div class="col-sm-6">
+                <div class="form-group mb-4">
+                  <label class="font-light">Description</label>
+                  <editor apiKey="2grxn9iofnxolcaedqa399sh4ft6c1mg3e1kumgnyq6o0ap1" formControlName="content"
+                    [init]="tinyMCESettings"></editor>
                 </div>
               </div>
-            </form>
-          </div>
+            </div>
+
+            <div class="ibox-footer row">
+              <div class="col-sm-10">
+                <button class="btn btn-primary mr-2" type="submit">Mettre à jour</button>
+                <a class="btn btn-secondary" [routerLink]="['/annonces']" routerLinkActive="active">Retour</a>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
-
-
     </div>
   </div>
 </div>
