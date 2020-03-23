@@ -134,12 +134,14 @@ export class SavEditComponent implements OnInit {
   onSubmit() {
     if (this.Form.invalid) return false;
     if (!this.isAdmin && this.content.meta.has_edit) {
-      Swal.fire("Sorry", "Vous ne pouvez plus modifier l'article", 'warning');
+      Swal.fire("Sorry", "Vous ne pouvez plus modifier cette demande", 'warning');
       return false;
     }
-    const formValue: any = this.Form.value;
+    let formValue: any = this.Form.value;
     const formEditorValue: any = this.FormforEditor.value;
     Helpers.setLoading(true);
+    // Ajouter une date de reception sur la demande de service 
+    formValue.date_receipt = moment().format("YYYY-MM-DD HH:mm:ss")
     // add edit signature
     formValue.meta = {};
     if (!this.isAdmin)

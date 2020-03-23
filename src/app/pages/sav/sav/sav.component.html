@@ -9,9 +9,16 @@
   </div>
   <div class="ibox-body">
     <div class="row">
-      <div class="col-sm-12">
+      <div class="col-sm-12 mb-4">
+        <h3>En cours de traitement</h3>
         <!-- Les SAV non traite ont une statut de valeur NULL ou vide -->
         <app-sav-datatable [meta_value]="[]" [meta_compare]="'NOT EXISTS'"></app-sav-datatable>
+      </div>
+
+      <div class="col-sm-12 mt-4">
+        <h3>Les traités </h3>
+        <!-- Les SAV non traite ont une statut de valeur NULL ou vide -->
+        <app-sav-datatable [meta_value]="[2, 3, 4, 5]" [meta_compare]="'IN'"></app-sav-datatable>
       </div>
     </div>
   </div>

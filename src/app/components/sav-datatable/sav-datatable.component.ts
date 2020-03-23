@@ -100,6 +100,11 @@ export class SavDatatableComponent implements OnInit {
         return this.auth.isAdministrator();
     }
 
+    private getDatatableList(ev: MouseEvent): any {
+        const el: any = $(ev.currentTarget).parents('tr');
+        return this.Table.row(el).data();
+    }
+
     private create(posts: Array<SAV>) {
         if ($.fn.dataTable.isDataTable(`#${this.dataTableId}`)) {
             this.Table.destroy();
@@ -146,7 +151,7 @@ export class SavDatatableComponent implements OnInit {
                     }
                 },
                 {
-                    // Date de sortie de l'atelier
+                    // Date de livraison de l'atelier
                     data: 'date_release', render: (data, type, row) => {
                         let dt = !_.isEmpty(data) || !_.isNull(data) ? moment(data).format('LL') : "Non assigné";
                         return `<span class="badge badge-default change-release-date" style="cursor: pointer">${dt}</span>`;
@@ -154,7 +159,7 @@ export class SavDatatableComponent implements OnInit {
                 },
                 {
                     data: 'status_sav', render: (data, type, row) => {
-                        let dt = _.isObject(data) ? data.label : 'Non definie';
+                        let dt = _.isObjectLike(data) ? data.label : 'Non definie';
                         return `<span class="badge badge-default change-status" style="cursor: pointer">${dt}</span>`;
                     }
                 },
@@ -212,12 +217,11 @@ export class SavDatatableComponent implements OnInit {
         });
     }
 
-    // Modifier la date de sortie du materiel dnas l'atelier
+    // Modifier la date de livraison du materiel dnas l'atelier
     // NB: Noté bien que cette date changeable une seul fois
     private async changeReleaseDate(ev: MouseEvent) {
         if (!this.security.hasAccess('s16', true)) return false;
-        const el: any = $(ev.currentTarget).parents('tr');
-        const data: any = this.Table.row(el).data();
+        const data: any = this.getDatatableList(ev);
         let dateReleaseMoment: moment.Moment = moment(data.date_release);
         if (dateReleaseMoment.isValid()) { // Si une date est definie et aussi valide
             Swal.fire('Désolé', "Vous ne pouvez plus modifier cette date", 'warning');
@@ -262,8 +266,7 @@ export class SavDatatableComponent implements OnInit {
             Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'warning');
             return false;
         }
-        const el: any = $(ev.currentTarget).parents('tr');
-        const data: any = this.Table.row(el).data();
+        const data: any = this.getDatatableList(ev);
         Swal.fire({
             title: 'Confirmation',
             html: `Voulez vous vraiment supprimer cette post?`,
