@@ -195,19 +195,21 @@ export class ClientsComponent implements OnInit {
         // Supprimer un client
         $('#clients-table tbody').on('click', '.delete-customer', e => {
           e.preventDefault();
-          if (this.Security.hasAccess('s12', true)) {
-            const __clt: any = getElementData(e);
-            Swal.fire({
-              title: 'Confirmation',
-              html: `<b>Action non récommandé</b>. Voulez vous vraiment supprimer le client < <b>${__clt.email}</b> >?`,
-              type: 'warning',
-              showCancelButton: true
-            }).then(result => {
-              if (result.value) {
-                this.fnDeleteCustomer(parseInt(__clt.id, 10));
-              }
-            });
-          }
+          Swal.fire("Information", "Cette fonctionnalité est désactiver", "info");
+
+          // if (this.Security.hasAccess('s12', true)) {
+          //   const __clt: any = getElementData(e);
+          //   Swal.fire({
+          //     title: 'Confirmation',
+          //     html: `<b>Action non récommandé</b>. Voulez vous vraiment supprimer le client < <b>${__clt.email}</b> >?`,
+          //     type: 'warning',
+          //     showCancelButton: true
+          //   }).then(result => {
+          //     if (result.value) {
+          //       this.fnDeleteCustomer(parseInt(__clt.id, 10));
+          //     }
+          //   });
+          // }
         });
 
 
