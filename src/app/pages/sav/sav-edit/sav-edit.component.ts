@@ -58,12 +58,12 @@ export class SavEditComponent implements OnInit {
       serial_number: new FormControl({ value: '', disabled: false }, Validators.required),
       garentee: new FormControl({ value: '', disabled: false }), // edit commercial
       guarentee_product: new FormControl({ value: '', disabled: false }), // edit commercial
-      accessorie: new FormControl('', Validators.required),
+      accessorie: new FormControl([0], Validators.required),
       other_accessories_desc: new FormControl('')
     });
 
     this.FormforEditor = new FormGroup({
-      editor_accessorie: new FormControl('', Validators.required),
+      editor_accessorie: new FormControl([0], Validators.required),
       editor_other_accessorie_desc: new FormControl(''),
       editor_breakdown: new FormControl('', Validators.required)
     });
@@ -112,15 +112,15 @@ export class SavEditComponent implements OnInit {
             args[element] = momt.isValid() ? momt.format('YYYY-MM-DD') : null;
             return;
           }
-          if (element === 'accessorie') {
-            args[element] = parseInt(val);
+          if (element === 'accessorie') { // Retour un tableau des nombres
+            args[element] = _.map(val, i => parseInt(i, 10));
             return;
           }
-          args[element] = _.isObject(val) ? parseInt(val.value, 10) : val;
+          args[element] = _.isObjectLike(val) ? parseInt(val.value, 10) : val;
         });
         const meta = this.content.meta;
         this.FormforEditor.patchValue({
-          editor_accessorie: meta.editor_accessorie,
+          editor_accessorie: _.map(meta.editor_accessorie, i => parseInt(i, 10)),
           editor_other_accessorie_desc: meta.editor_other_accessorie_desc,
           editor_breakdown: meta.editor_breakdown
         });

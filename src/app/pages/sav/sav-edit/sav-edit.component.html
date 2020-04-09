@@ -111,32 +111,32 @@
             <div class="col-sm-12 mb-4">
               <p class="font-light">Accessoires:</p>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="1">
+                <input class="form-check-input" type="checkbox" formControlName="accessorie" [value]="1">
                 <span class="form-check-label" for="inlineCheckbox2">Câble d'alimentation</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="2">
+                <input class="form-check-input" type="checkbox" formControlName="accessorie" [value]="2">
                 <span class="form-check-label" for="inlineCheckbox2">Câble USB</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="3">
+                <input class="form-check-input" type="checkbox" formControlName="accessorie" [value]="3">
                 <span class="form-check-label" for="inlineCheckbox2">Toner réf</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="4"
+                <input class="form-check-input" type="checkbox" formControlName="accessorie" [value]="4"
                   name="accessorie">
                 <span class="form-check-label" for="inlineCheckbox2">Cartouche réf</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="5">
+                <input class="form-check-input" type="checkbox" formControlName="accessorie" [value]="5">
                 <span class="form-check-label" for="inlineCheckbox2">Adapteur</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="accessorie" [value]="0">
+                <input class="form-check-input" type="checkbox" formControlName="accessorie" [value]="0">
                 <span class="form-check-label" for="inlineCheckbox2">Autres accessoires</span>
               </div>
             </div>
-            <div class="col-sm-12" *ngIf="Form.get('accessorie').value === 0">
+            <div class="col-sm-12">
               <div class="form-group">
                 <textarea formControlName="other_accessories_desc"
                   class="form-control"></textarea>
@@ -197,31 +197,31 @@
             <div class="col-sm-12 mt-4">
               <h4 class="font-light">Accessoires:</h4>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="1">
+                <input class="form-check-input" type="checkbox" formControlName="editor_accessorie" [value]="1">
                 <span class="form-check-label" for="inlineCheckbox2">Câble d'alimentation</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="2">
+                <input class="form-check-input" type="checkbox" formControlName="editor_accessorie" [value]="2">
                 <span class="form-check-label" for="inlineCheckbox2">Câble USB</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="3">
+                <input class="form-check-input" type="checkbox" formControlName="editor_accessorie" [value]="3">
                 <span class="form-check-label" for="inlineCheckbox2">Toner réf</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="4">
+                <input class="form-check-input" type="checkbox" formControlName="editor_accessorie" [value]="4">
                 <span class="form-check-label" for="inlineCheckbox2">Cartouche réf</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="5">
+                <input class="form-check-input" type="checkbox" formControlName="editor_accessorie" [value]="5">
                 <span class="form-check-label" for="inlineCheckbox2">Adapteur</span>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" formControlName="editor_accessorie" [value]="0">
+                <input class="form-check-input" type="checkbox" formControlName="editor_accessorie" [value]="0">
                 <span class="form-check-label" for="inlineCheckbox2">Autres accessoires</span>
               </div>
             </div>
-            <div class="col-sm-6" *ngIf="FormforEditor.get('editor_accessorie').value === 0">
+            <div class="col-sm-6">
               <div class="form-group">
                 <textarea formControlName="editor_other_accessorie_desc"
                   class="form-control"></textarea>
