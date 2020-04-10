@@ -24,10 +24,10 @@ export class ForgotPasswordComponent implements OnInit, AfterViewInit, OnDestroy
             },
         },
         highlight: function(e) {
-            $(e).closest(".form-group").addClass("has-error")
+            $(e).closest(".form-group").addClass("has-error");
         },
         unhighlight: function(e) {
-            $(e).closest(".form-group").removeClass("has-error")
+            $(e).closest(".form-group").removeClass("has-error");
         },
     });
   }

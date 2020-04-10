@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { AuthorizationService } from './authorization.service';
 import * as WCAPI from 'woocommerce-api';
 import { environment } from '../../environments/environment';
+import { LoginSchema } from '../schemas/login-schema/login-schema.component';
 
 @Injectable()
 export class ApiWoocommerceService {
@@ -10,8 +11,8 @@ export class ApiWoocommerceService {
   constructor( private auth: AuthorizationService) {}
 
   public getWoocommerce(): any {
-    let origin = environment.SITE_URL;
-    let __fzCurrentUser = this.auth.getCurrentUser();
+    const origin: string = environment.SITE_URL;
+    const __fzCurrentUser: LoginSchema = this.auth.getCurrentUser();
     this.WooCommerce = new WCAPI({
       url: `https://${origin}`,
       consumerKey: __fzCurrentUser.wc.ck,

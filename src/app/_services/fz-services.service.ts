@@ -44,7 +44,7 @@ export class FzServicesService {
             this.Http.get<Array<Taxonomy>>(`${config.apiUrl}/products/categories?number=0`).subscribe(categories => {
                 resolve(categories);
             });
-        })
+        });
     }
 
     public getProducts(): Promise<any> {
@@ -52,7 +52,7 @@ export class FzServicesService {
             this.Woocommerce.get(`products?per_page=50`, (err, data, res) => {
                 resolve(JSON.parse(res));
             })
-        })
+        });
     }
 
     public getSuppliers(): Promise<any> {
@@ -64,7 +64,7 @@ export class FzServicesService {
                 }
                 resolve(users);
             })
-        })
+        });
     }
 
     public generateId(long: number = 8): string {

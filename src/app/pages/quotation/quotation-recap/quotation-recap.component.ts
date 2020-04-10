@@ -64,8 +64,8 @@ export class QuotationRecapComponent implements OnInit {
           });
         });
 
-        let rsvpUsers = RSVP.all(userPromises);
-        let rsvpProducts = RSVP.all(productPromises);
+        const rsvpUsers = RSVP.all(userPromises);
+        const rsvpProducts = RSVP.all(productPromises);
 
         RSVP.hash({ suppliers: rsvpUsers, products: rsvpProducts }).then(results => {
           this.products = _.clone(results.products);

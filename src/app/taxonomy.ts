@@ -9,7 +9,7 @@ export class Taxonomy {
     parent: number;
     count?: 7;
     filter?: string;
-};
+}
 
 export class TermAttribute {
     id: number;

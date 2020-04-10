@@ -33,8 +33,8 @@ export class SupplierDatatableComponent implements OnInit, AfterContentInit {
   ngAfterContentInit() {
     moment.locale('fr');
     const getElementData = (ev: any): any => {
-      let el = $(ev.currentTarget).parents('tr');
-      let data = this.Table.row(el).data();
+      const el = $(ev.currentTarget).parents('tr');
+      const data = this.Table.row(el).data();
       return data;
     };
     const supplierTable = $('#supplier-table');
@@ -96,7 +96,7 @@ export class SupplierDatatableComponent implements OnInit, AfterContentInit {
         // Supprimer un fournisseur
         $('#supplier-table tbody').on('click', '.remove-supplier', e => {
           e.preventDefault();
-          let __supplier = getElementData(e);
+          const __supplier = getElementData(e);
           swal.fire({
             title: "Confirmation",
             text: "Voulez vous vraiment supprimer ce fournisseur?",
@@ -117,7 +117,7 @@ export class SupplierDatatableComponent implements OnInit, AfterContentInit {
         // Modifier les informations du fournisseur
         $('#supplier-table tbody').on('click', '.edit-supplier', e => {
           e.preventDefault();
-          let __supplier = getElementData(e);
+          const __supplier = getElementData(e);
           this.router.navigate(['/supplier', __supplier.ID]);
         });
       },
@@ -129,7 +129,7 @@ export class SupplierDatatableComponent implements OnInit, AfterContentInit {
           order: false,
         },
         beforeSend: function (xhr) {
-          let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+          const __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
           if (__fzCurrentUser && __fzCurrentUser.token) {
             xhr.setRequestHeader("Authorization",
               `Bearer ${__fzCurrentUser.token}`);

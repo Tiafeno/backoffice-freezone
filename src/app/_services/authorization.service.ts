@@ -34,7 +34,7 @@ export class AuthorizationService {
 
     // Ajouter une function await pour vérifier la validation de l'autorisation
     public isLogged(): boolean {
-        let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+        const __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
         if (__fzCurrentUser && __fzCurrentUser.token) {
             return true;
         } else {
@@ -43,7 +43,7 @@ export class AuthorizationService {
     }
 
     public logout() {
-        let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+        const __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
         if (__fzCurrentUser && __fzCurrentUser.token) {
             localStorage.removeItem('__fzCurrentUser');
             return true;
@@ -53,7 +53,7 @@ export class AuthorizationService {
     }
 
     public getCurrentUser(): LoginSchema {
-        let __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
+        const __fzCurrentUser = JSON.parse(localStorage.getItem('__fzCurrentUser'));
         return __fzCurrentUser;
     }
 
@@ -63,7 +63,7 @@ export class AuthorizationService {
     }
 
     public getCurrentUserRole(): string {
-        let User: any = this.getCurrentUser();
+        const User: any = this.getCurrentUser();
         return User.data.roles[0];
     }
 
@@ -73,7 +73,7 @@ export class AuthorizationService {
         return _.indexOf(roles, 'administrator') > -1;
     }
 
-    public isCommercial():boolean {
+    public isCommercial(): boolean {
         const User:any = this.getCurrentUser();
         const roles: Array<string> = _.isArray(User.data.roles) ? User.data.roles : [];
         return _.indexOf(roles, 'editor') > -1;

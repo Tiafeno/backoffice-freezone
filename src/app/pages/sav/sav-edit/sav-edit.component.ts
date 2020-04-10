@@ -77,6 +77,7 @@ export class SavEditComponent implements OnInit {
     //Ajouter une parametre de securite pour sur les champs pour chaque type d'utilisateur
     (<any>Object).keys(this.Form.controls).forEach(element => {
       if (this.isCommercial) {
+        // Les champs modifiable par les commercials
         let enableInputs = ['bill', 'date_purchase', 'garentee', 'guarentee_product'];
         if (_.indexOf(enableInputs, element) < 0) {
           this.Form.controls[element].disable();
@@ -120,7 +121,7 @@ export class SavEditComponent implements OnInit {
         });
         const meta = this.content.meta;
         this.FormforEditor.patchValue({
-          editor_accessorie: _.map(meta.editor_accessorie, i => parseInt(i, 10)),
+          editor_accessorie: JSON.parse(meta.editor_accessorie),
           editor_other_accessorie_desc: meta.editor_other_accessorie_desc,
           editor_breakdown: meta.editor_breakdown
         });
@@ -148,7 +149,7 @@ export class SavEditComponent implements OnInit {
       formValue.meta.has_edit = true;
 
     if (this.FormforEditor.dirty) {
-      formValue.meta.editor_accessorie = formEditorValue.editor_accessorie;
+      formValue.meta.editor_accessorie = JSON.stringify(formEditorValue.editor_accessorie);
       formValue.meta.editor_other_accessorie_desc = formEditorValue.editor_other_accessorie_desc;
       formValue.meta.editor_breakdown = formEditorValue.editor_breakdown;
     }

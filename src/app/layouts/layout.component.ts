@@ -8,14 +8,9 @@ import {Helpers} from "../helpers";
 })
 
 export class LayoutComponent implements AfterViewInit {
-
-	constructor() { }
-
+  constructor() { }
   ngAfterViewInit() {
-
     // initialize layout: handlers, menu ...
     Helpers.initLayout();
-
   }
-
 }

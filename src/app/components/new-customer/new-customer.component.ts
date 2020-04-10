@@ -3,7 +3,7 @@ import { Helpers } from '../../helpers';
 import * as _ from 'lodash';
 import { ApiWordpressService } from '../../_services/api-wordpress.service';
 import Swal from 'sweetalert2';
-declare var $:any;
+declare var $: any;
 
 @Component({
   selector: 'app-new-customer',
