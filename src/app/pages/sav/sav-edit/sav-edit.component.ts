@@ -120,8 +120,10 @@ export class SavEditComponent implements OnInit {
           args[element] = _.isObjectLike(val) ? parseInt(val.value, 10) : val;
         });
         const meta = this.content.meta;
+        const metaAccessories: any = JSON.parse(meta.editor_accessorie);
+        const accessoires: any[] = _.isArray(metaAccessories) ? metaAccessories : [];
         this.FormforEditor.patchValue({
-          editor_accessorie: JSON.parse(meta.editor_accessorie),
+          editor_accessorie: _.map(accessoires, i => parseInt(i, 10)),
           editor_other_accessorie_desc: meta.editor_other_accessorie_desc,
           editor_breakdown: meta.editor_breakdown
         });
