@@ -8,7 +8,7 @@
   <div class="row">
     <div class="col-lg-6">
       <div class="ibox ibox-fullheight">
-        <form class="ibox-body" [formGroup]="Form" id="supplier-form" (ngSubmit)="onSubmit()">
+        <form class="ibox-body" [formGroup]="FormMain" id="supplier-form" (ngSubmit)="onSubmit()">
           <p class="lea pb-0 font-bold">Modification</p>
           <div *ngIf="reference" class=" mb-4">
             <span class="badge badge-success font-20">{{reference}}</span>
@@ -22,7 +22,7 @@
             <div class="col-md-8">
               <div class="form-group mb-4">
                 <label class="font-light">Produit</label>
-                <input class="form-control" autocomplete="off" formControlName="product" type="text" id="product" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="product" type="text"  placeholder="">
               </div>
             </div>
           </div>
@@ -30,7 +30,7 @@
             <div class="col-md-4">
               <div class="form-group mb-4">
                 <label class="font-light">Marque</label>
-                <input class="form-control" autocomplete="off" formControlName="mark" type="text" id="mark"
+                <input class="form-control" autocomplete="off" formControlName="mark" type="text" 
                   placeholder="">
               </div>
             </div>
@@ -76,7 +76,7 @@
               <div class="form-group mb-4">
                 <!-- Modifiable par les commercial  -->
                 <label class="font-light">Date d’achat</label>
-                <input class="form-control" autocomplete="off" formControlName="date_purchase" id="date_purchase" 
+                <input class="form-control" autocomplete="off" formControlName="date_purchase"  
                   name="stdate_purchaseatus" type="date" placeholder="">
                 <div *ngIf="f.date_purchase.errors && f.date_purchase.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
@@ -88,7 +88,7 @@
               <div class="form-group mb-4">
                 <!-- Modifiable par les commercial  -->
                 <label class="font-light">Numéro de la facture</label>
-                <input class="form-control" autocomplete="off" formControlName="bill" id="bill" type="text"
+                <input class="form-control" autocomplete="off" formControlName="bill" type="text"
                   placeholder="">
                 <div *ngIf="f.bill.errors && f.bill.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
@@ -99,7 +99,7 @@
             <div class="col-sm-4">
               <div class="form-group mb-4">
                 <label class="font-light">Numéro de série</label>
-                <input class="form-control" autocomplete="off" formControlName="serial_number" id="serial_number" type="text" placeholder="">
+                <input class="form-control" autocomplete="off" formControlName="serial_number" type="text" placeholder="">
                 <div *ngIf="f.serial_number.errors && f.serial_number.dirty">
                   <label class="help-block error" for="name">Ce champ est obligatoire.</label>
                 </div>

@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 import Swal from 'sweetalert2';
 import { AuthorizationService } from '../../../_services/authorization.service';
-import { SAV } from '../../../sav';
+import { SAV, WPSAV } from '../../../sav';
 import { TinyConfig } from '../../../defined';
 declare var $: any;
 
@@ -18,13 +18,13 @@ declare var $: any;
 })
 export class SavEditComponent implements OnInit {
   public ID: number = 0;
-  public content: SAV;
+  public content: WPSAV;
   public Author: any = {};
   public isAdmin: boolean = true;
   public isCommercial: boolean = false;
   public isSav: boolean = false;
   public reference: string = '';
-  public Form: FormGroup;
+  public FormMain: FormGroup;
   public FormforEditor: FormGroup;
   private Wordpress: any;
   public savProductStatus: Array<any> = [
@@ -48,7 +48,7 @@ export class SavEditComponent implements OnInit {
     this.Wordpress = this.apiWP.getWordpress();
     this.garenteeRange = _.range(1, 13, 1);
 
-    this.Form = new FormGroup({
+    this.FormMain = new FormGroup({
       bill: new FormControl({ value: '', disabled: false }, Validators.required),// edit commercial
       date_purchase: new FormControl({ value: '', disabled: false }), // edit commercial
       description: new FormControl({ value: '', disabled: false }),
@@ -69,27 +69,28 @@ export class SavEditComponent implements OnInit {
     });
   }
 
-  get f() { return this.Form.controls; }
-  get guarenteeProduct() { return this.Form.get('guarentee_product'); }
-  get providerProduct() { return this.Form.get('product_provider'); }
+  get f() { return this.FormMain.controls; }
+  get guarenteeProduct() { return this.FormMain.get('guarentee_product'); }
+  get providerProduct() { return this.FormMain.get('product_provider'); }
 
-  private validateForm() {
+  public validateForm() {
     //Ajouter une parametre de securite pour sur les champs pour chaque type d'utilisateur
-    (<any>Object).keys(this.Form.controls).forEach(element => {
+    (<any>Object).keys(this.FormMain.controls).forEach(element => {
       if (this.isCommercial) {
         // Les champs modifiable par les commercials
         let enableInputs = ['bill', 'date_purchase', 'garentee', 'guarentee_product'];
         if (_.indexOf(enableInputs, element) < 0) {
-          this.Form.controls[element].disable();
+          this.FormMain.controls[element].disable();
         }
       }
       if (this.isSav) {
         if (element !== "serial_number") {
-          this.Form.controls[element].disable();
+          this.FormMain.controls[element].disable();
         }
       }
     });
     this.cd.detectChanges();
+    console.log(this.FormMain.value);
   }
 
   ngOnInit() {
@@ -97,50 +98,62 @@ export class SavEditComponent implements OnInit {
       this.ID = parseInt(params.id, 10);
       Helpers.setLoading(true);
       this.Wordpress.savs().id(this.ID).then(resp => {
+        console.log(resp);
         Helpers.setLoading(false);
-        if (!_.isObjectLike(resp)) {
-          Swal.fire('Désolé', "Une erreur inconnue s'est produit", 'warning');
-          return;
-        }
+        // if (!_.isObjectLike(resp)) {
+        //   Swal.fire('Désolé', "Une erreur inconnue s'est produit", 'warning');
+        //   return;
+        // }
         this.Author = _.clone(resp.customer);
         this.content = _.clone(resp);
         this.reference = resp.reference;
-        let args: any = {};
-        (<any>Object).keys(this.Form.value).forEach(element => {
-          let val: any = resp[element];
-          if (element === 'date_purchase') {
-            let momt = moment(resp[element], 'DD-MM-YYYY HH:mm:ss');
-            args[element] = momt.isValid() ? momt.format('YYYY-MM-DD') : null;
-            return;
-          }
-          if (element === 'accessorie') { // Retour un tableau des nombres
-            args[element] = _.map(val, i => parseInt(i, 10));
-            return;
-          }
-          args[element] = _.isObjectLike(val) ? parseInt(val.value, 10) : val;
-        });
-        const meta = this.content.meta;
-        const metaAccessories: any = JSON.parse(meta.editor_accessorie);
-        const accessoires: any[] = _.isArray(metaAccessories) ? metaAccessories : [];
-        this.FormforEditor.patchValue({
-          editor_accessorie: _.map(accessoires, i => parseInt(i, 10)),
-          editor_other_accessorie_desc: meta.editor_other_accessorie_desc,
-          editor_breakdown: meta.editor_breakdown
-        });
+        this.cd.markForCheck();
+        this.setMainForm();
+        this.setEditorForm();
         this.validateForm();
-        this.Form.patchValue(args);
-        this.cd.detectChanges();
       });
     });
   }
 
+  public setMainForm() {
+    let momt = moment(this.content.date_purchase, 'DD-MM-YYYY HH:mm:ss');
+    this.FormMain.patchValue({
+      bill: this.content.bill,// edit commercial
+      date_purchase: momt.isValid() ? momt.format('YYYY-MM-DD') : null, // edit commercial
+      description: this.content.description,
+      mark: this.content.mark,
+      product: this.content.title.rendered,
+      product_provider: _.isObjectLike(this.content.product_provider) ? parseInt(this.content.product_provider.value, 10) : this.content.product_provider,
+      serial_number: this.content.serial_number,
+      garentee: parseInt(this.content.garentee), // edit commercial
+      guarentee_product: _.isObjectLike(this.content.guarentee_product) ? parseInt(this.content.guarentee_product.value, 10) : this.content.guarentee_product, // edit commercial
+      accessorie: _.map(this.content.accessorie, i => parseInt(i, 10)),
+      other_accessories_desc: this.content.other_accessories_desc
+    });
+    this.FormMain.updateValueAndValidity();
+    console.log("Patch for form main succeffuly");
+  }
+
+  public setEditorForm() {
+    const meta = this.content.meta;
+    const metaAccessories: any = _.isEmpty(meta.editor_accessorie) ? [] : JSON.parse(meta.editor_accessorie);
+    const accessoires: any[] = _.isArray(metaAccessories) ? metaAccessories : [];
+    this.FormforEditor.patchValue({
+      editor_accessorie: _.map(accessoires, i => parseInt(i, 10)),
+      editor_other_accessorie_desc: meta.editor_other_accessorie_desc,
+      editor_breakdown: meta.editor_breakdown
+    });
+    this.FormforEditor.updateValueAndValidity();
+    console.log("Form for editor patched");
+  }
+
   onSubmit() {
-    if (this.Form.invalid) return false;
+    if (this.FormMain.invalid) return false;
     if (!this.isAdmin && this.content.meta.has_edit) {
       Swal.fire("Sorry", "Vous ne pouvez plus modifier cette demande", 'warning');
       return false;
     }
-    let formValue: any = this.Form.value;
+    let formValue: any = this.FormMain.value;
     const formEditorValue: any = this.FormforEditor.value;
     Helpers.setLoading(true);
     // Ajouter une date de reception sur la demande de service 
