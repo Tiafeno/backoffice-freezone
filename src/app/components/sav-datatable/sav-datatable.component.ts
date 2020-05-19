@@ -159,7 +159,7 @@ export class SavDatatableComponent implements OnInit {
                 },
                 {
                     data: 'status_sav', render: (data, type, row) => {
-                        let dt = _.isObjectLike(data) ? data.label : 'Non definie';
+                        let dt = _.isObjectLike(data) ? data.label : 'En cours de traitement';
                         return `<span class="badge badge-default change-status" style="cursor: pointer">${dt}</span>`;
                     }
                 },
@@ -294,7 +294,7 @@ export class SavDatatableComponent implements OnInit {
         const el: any = $(ev.currentTarget).parents('tr');
         const __DATA__: any = this.Table.row(el).data();
         const __STATUS__ = {
-            '0': 'Aucun',
+            '0': 'En cours de traitement',
             '1': '1 - Diagnostique en cours',
             '2': '2 - Diagnostique fini',
             '3': '3 - Réparation accordée',
