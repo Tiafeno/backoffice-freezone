@@ -62,7 +62,6 @@ export class GoodDealEditComponent implements OnInit {
   onSubmit() {
     if (this.formEdit.dirty && this.formEdit.valid) {
       const values: any = this.formEdit.value;
-      const formData = new FormData();
       if (!this.auth.isAdministrator()) {
         Swal.fire(MSG.ACCESS.DENIED_TTL, MSG.ACCESS.DENIED_CTT, 'error');
         return false;

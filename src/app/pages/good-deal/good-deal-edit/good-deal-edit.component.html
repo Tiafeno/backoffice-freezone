@@ -26,8 +26,7 @@
                 </div>
                 <div class="row">
                   <div class="form-group mb-4 col-sm-8">
-                    <ng-select name="category" placeholder="Selectionner une categorie" formControlName="categorie" bindLabel="name" bindValue="term_id" [hideSelected]="true" groupBy="parent" [multiple]="true"
-                      [items]="categories">
+                    <ng-select name="category" placeholder="Selectionner une categorie" formControlName="categorie" bindLabel="name" bindValue="term_id" [hideSelected]="true" groupBy="parent" [multiple]="true" [items]="categories" required>
                       <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
                         {{getParentName(item.parent)}}
                       </ng-template>
